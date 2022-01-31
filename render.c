@@ -93,9 +93,9 @@ int sar(int a, int c)
 /** 
  * Преобразование из мировых в оконные координаты
  * 
- * @param c 
+ * @param c спрайт
  */
-void project(sprite_t *c)
+void project_sprite(sprite_t *c)
 {
   scene_t *sc = c->scene;
   vec_t *v = vec_new(c->max.x - sc->origin_x, c->max.y - sc->origin_y, c->max.z - sc->origin_z);
@@ -142,6 +142,7 @@ void project(sprite_t *c)
     exit(1);
   }
   memcpy(&origin, v, sizeof(vec_t));
+  vec_delete(v);
 #ifdef DEBUG
   // 0 -10 40
   printf("origin: (%d %d %d)\n", origin.x, origin.y, origin.z);
@@ -149,12 +150,13 @@ void project(sprite_t *c)
 }
 
 /** 
- * Перемещает текущий холст в списке сцены после всех новых холстов
- * устанавливает флаги в 0
+ * Новый спрайт помещается на новое место в списке отрисовки спрайтов
+ * Идет сортировка по убыванию z координаты, затем по порядку (order),
+ * по убыванию тегов
  * @param sc холст сцены
  * @param sprite текущий холст
  */
-void sprite_move_to_tail(sprite_t *sc, sprite_t *sprite)
+void sort_sprite(sprite_t *sc, sprite_t *sprite)
 {
   sprite_t *prev;
   sprite_t* c = sc;
@@ -169,17 +171,17 @@ void sprite_move_to_tail(sprite_t *sc, sprite_t *sprite)
 #ifdef DEBUG
     printf("spr: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", c->min.x, c->min.y, c->min.z, c->max.x, c->max.y, c->max.z, c->tag, c->state);
 #endif
-    if (c->state < SPRITE_PROJECTED)
+    if (c->state < SPRITE_PROJECTED) // спроецированный спрайт помещается после новых
       continue;
-    if (sprite->min.z < c->min.z)
+    if (sprite->min.z < c->min.z) // сортировка по z с уменьшением z
       continue;
     if (sprite->min.z > c->min.z)
       break;
-    if (sprite->f20 < c->f20)
+    if (sprite->layer < c->layer) // сортировка по слою по убыванию
       continue;
-    if (sprite->f20 > c->f20)
+    if (sprite->layer > c->layer)
       break;
-    if (sprite->tag < c->tag)
+    if (sprite->tag < c->tag) // сортировка по тегам по убыванию
       continue;
     if (sprite->tag > c->tag)
       break;
@@ -192,22 +194,22 @@ void sprite_move_to_tail(sprite_t *sc, sprite_t *sprite)
 }
 
 /** 
- * Проецирование изображения холста.
+ * Обработка нового спрайта: проецирование, сортировка.
  * 
  * @param sc холст сцены
  * @param c текущий холст
  */
-void project_sprite(sprite_t *sc, sprite_t *c)
+void process_sprite(sprite_t *sc, sprite_t *c)
 {
-  project(c);
-  // удаление из списка сцены
+  project_sprite(c);
+  // удаление спрайта из списка сцены
   sc->next_in_scene = c->next_in_scene;
   // устанавливаем левый верхний угол после проецирования
   c->min.x = origin.x;
   c->min.y = origin.y;
   c->min.z = origin.z;
   update_min_max(c);
-  sprite_move_to_tail(sc, c);
+  sort_sprite(sc, c);
 #ifdef DEBUG
    dump_sprites();
 #endif
@@ -240,14 +242,14 @@ void render_scene(scene_t *scene, sprite_t *sprite)
   }
   // draw_region_update = 0
   reset_min_max();
-  project_sprite(sc_sprite, sprite);
+  process_sprite(sc_sprite, sprite);
   sprite = sc_sprite->next_in_scene;
   while (sprite) {
     printf("sprite: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y, sprite->max.z, sprite->tag, sprite->state);    
     // thread offset?
     if (sprite->state != SPRITE_PROJECTED) {
       if (sprite->state < SPRITE_PROJECTED) {
-	project_sprite(sc_sprite, sprite);
+	process_sprite(sc_sprite, sprite);
 	sprite = sc_sprite->next_in_scene;
       } else {
 	printf("render loop not sprite new\n");

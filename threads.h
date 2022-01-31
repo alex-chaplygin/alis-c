@@ -41,11 +41,11 @@ typedef struct thread_s {
   int version;			/**< версия сценария */
   byte frames_to_skip;		/**< число кадров через сколько выполняется сценарий */
   byte cur_frames_to_skip;		/**< текущий отсчет кадров для выполнения */
-  byte running;
-  word flags;
-  int state;
-  int x_flip;
-  int f2b;
+  byte running;			/**< поток запущен */
+  word flags;			/**< флаги потока */
+  int state;			/**< состояние потока */
+  int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
+  int layer;			/**< слой отрисовки для всех новых спрайтов */
   int f2c;
   sprite_t *sprite_list;	/**< список спрайтов потока */
   scene_t *current_scene;		/**< текущая сцена */
