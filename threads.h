@@ -1,0 +1,77 @@
+#ifndef __THREADS__
+#define __THREADS__
+
+#include "types.h"
+#include "memory.h"
+#include "sprite.h"
+
+#define STATE_FLAG0 (1 << 0)
+#define STATE_START3 (1 << 1)	/**< запуск сценария 3 каждый фрейм */
+#define STATE_FLAG7 (1 << 7)
+
+#pragma pack(1)
+
+/// заголовок сценария
+typedef struct {
+  word id;			/**< номер сценария */
+  word entry;			/**< адрес начала сценария */
+  byte control;
+  byte version;			/**< версия сценария */
+  word entry2;
+  byte u1;
+  byte u2;
+  word entry3;
+  byte u4;
+  byte u5;
+  dword resources;		/**< адрес таблицы ресурсов */
+  word stack_size;		/**< размер стека */
+  word data_size;		/**< размер сегмента данных */
+  word param_size;		/**< размер параметров */
+} script_t;
+
+/// структура потока
+typedef struct thread_s {
+  int id;			/**< номер сценария */
+  stack_t *call_stack;		/**< стек вызовов */
+  int *saved_sp;		/**< сохраненный указатель стека */
+  stack_t *param_stack;		/**< стек параметров?? */
+  seg_t *data;			/**< сегмент данных */
+  byte *ip;			/**< текущий указатель команд */
+  byte *script;			/**< образ сценария (содержит код и ресурсы) */
+  int version;			/**< версия сценария */
+  byte frames_to_skip;		/**< число кадров через сколько выполняется сценарий */
+  byte cur_frames_to_skip;		/**< текущий отсчет кадров для выполнения */
+  byte running;
+  word flags;
+  int state;
+  int x_flip;
+  int f2b;
+  int f2c;
+  sprite_t *sprite_list;	/**< список спрайтов потока */
+  scene_t *current_scene;		/**< текущая сцена */
+  script_t *header;		/**< заголовок сценария */
+  struct thread_s *parent;	/**< родительский поток */
+} thread_t;
+
+/// запись таблицы потоков
+typedef struct threads_table_s {
+  thread_t *thread;		/**< структура потока */
+  struct threads_table_s *run_next; /**< следующий поток на запуск */
+  struct threads_table_s *next;	/**< следующий поток в списке в запуске */
+} thread_table_t;
+
+void thread_init();
+void thread_init_table();
+void thread_setup_main(byte *script, int size);
+void thread_setup(thread_table_t *tb, byte *script, int size);
+thread_t *thread_add(byte *script, int size);
+void threads_run();
+
+void thread_no_start3();
+void thread_clear_state0();
+
+extern int max_threads;		/**< максимальное количество потоков */
+extern int num_run_threads;		/**< число рабочих потоков */
+extern thread_t *main_thread;		/**< главный поток */
+
+#endif
