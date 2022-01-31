@@ -21,12 +21,19 @@
 #define TAG_FLAG2 (1 << 2)
 #define TAG_3D (1 << 7)
 
+/// координатное окно
+typedef struct {
+  int min_x;			/**< левый верхний угол */
+  int min_y;
+  int max_x;			/**< правый нижний угол */
+  int max_y;
+} rectangle_t;
+
 byte frame_num;
-int render_min_x;		/**< минимальные оконные координаты */
-int render_min_y;
-int render_max_x;		/**< максимальные оконные координаты */
-int render_max_y;
+rectangle_t sprites_rec;	/**< окно вывода спрайтов */
+rectangle_t clip_rec;	/**< окно отсеченных по сцене спрайтов */
 vec_t origin;			/**< оконные координаты левого верхнего угла объекта */
+int draw_region_updated;
 
 /** 
  * Перемещает начало координат сцены
@@ -52,31 +59,37 @@ void scene_apply_delta(scene_t *scene, sprite_t *c)
 #endif  
 }
 
-/// установка начальных значений минимума и максимума
+/// установка начальных значений минимума и максимума спрайтов
 void reset_min_max()
 {
-  render_min_x = render_min_y = 32000;
-  render_max_x = render_max_y = -32000;
+  sprites_rec.min_x = sprites_rec.min_y = 32000;
+  sprites_rec.max_x = sprites_rec.max_y = -32000;
 }
 
-/// вычисляем минимальные и макисмальные (x, y) координаты
+void print_rec(rectangle_t sprites_rec)
+{
+  printf("min = (%d %d) max = (%d %d)\n", sprites_rec.min_x, sprites_rec.min_y, sprites_rec.max_x, sprites_rec.max_y);
+}
+
+/// обновляем минимальные и макисмальные (x, y) координаты спрайтов
 void update_min_max(sprite_t *c)
 {
   image_t *im = (image_t *)c->image;
   if (c->min.z < 0)
     return;
-  if (c->min.x <= render_min_y)
-    render_min_x = c->min.x;
+  if (c->min.x <= sprites_rec.min_y)
+    sprites_rec.min_x = c->min.x;
   int max_x = c->min.x + im->maxx;
-  if (max_x >= render_max_x)
-    render_max_x = max_x;
-  if (c->min.y <= render_min_y)
-    render_min_y = c->min.y;
+  if (max_x >= sprites_rec.max_x)
+    sprites_rec.max_x = max_x;
+  if (c->min.y <= sprites_rec.min_y)
+    sprites_rec.min_y = c->min.y;
   int max_y = c->min.y + im->maxy;
-  if (max_y >= render_max_y)
-    render_max_y = max_y;
+  if (max_y >= sprites_rec.max_y)
+    sprites_rec.max_y = max_y;
 #ifdef DEBUG
-  printf("render min = (%d %d) max = (%d %d)\n", render_min_x, render_min_y, render_max_x, render_max_y);
+  printf("sprites rec: ");
+  print_rec(sprites_rec);
 #endif
 }
 
@@ -240,6 +253,58 @@ void process_new_sprites(sprite_t *sc_sprite)
 }
 
 /** 
+ * Вычисление области отсечения по экранной области из спрайта сцены
+ * 
+ * @param sc_sprite спрайт сцены
+ * 
+ * @return 0, если спрайты полностью выходят за пределы окна, иначе 1
+ */
+int clip_sprites(sprite_t *sc_sprite)
+{
+  // проверка, что регион отрисовки полностью выходит за пределы
+  // окна вывода
+  if (sprites_rec.min_x > sc_sprite->max.x)
+    return 0;
+  if (sprites_rec.min_y > sc_sprite->max.y)
+    return 0;
+  if (sprites_rec.max_x < sc_sprite->min.x)
+    return 0;
+  if (sprites_rec.max_y < sc_sprite->min.y)
+    return 0;
+  clip_rec.min_x = sprites_rec.min_x & 0xfff0; // округление до 16 в меньшую сторону
+  // отсечение по окну сцены из спрайта сцены
+  if (clip_rec.min_x < sc_sprite->min.x)
+    clip_rec.min_x = sc_sprite->min.x;
+  clip_rec.min_y = sprites_rec.min_y;
+  if (clip_rec.min_y < sc_sprite->min.y)
+    clip_rec.min_y = sc_sprite->min.y;
+  clip_rec.max_x = sprites_rec.max_x | 0xf; // округление до 16 - 1 в большую сторону
+  if (clip_rec.max_x > sc_sprite->max.x)
+    clip_rec.max_x = sc_sprite->max.x;
+  clip_rec.max_y = sprites_rec.max_y;
+  if (clip_rec.max_y > sc_sprite->max.y)
+    clip_rec.max_y = sc_sprite->max.y;
+  return 1;
+}
+
+void render_sprites(scene_t *scene, sprite_t *spr)
+{
+  if (scene->flags & SCENE_HIDDEN)
+    return;
+  if (!draw_region_updated) {
+    printf("draw region updated = 0\n");
+    exit(1);
+  }
+  if (!clip_sprites(spr))
+    return;
+#ifdef DEBUG
+  printf("Clip rec: ");
+  print_rec(clip_rec);
+#endif
+  exit(1);
+}
+
+/** 
  * Рендеринг сцены, обход холстов
  * 
  * @param scene сцена
@@ -264,11 +329,12 @@ void render_scene(scene_t *scene, sprite_t *sprite)
     printf("sprite state not new = %d\n", sprite->state);
     exit(1);
   }
-  // draw_region_update = 0
+  draw_region_updated = 0;
   reset_min_max();
   process_sprite(sc_sprite, sprite);
   process_new_sprites(sc_sprite);
-  // draw region update = 1
+  draw_region_updated = 1;
+  render_sprites(scene, sc_sprite);
 }
 
 /// главный цикл рендеринга по сценам
