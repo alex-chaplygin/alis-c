@@ -171,7 +171,7 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
 #ifdef DEBUG
     printf("spr: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", c->min.x, c->min.y, c->min.z, c->max.x, c->max.y, c->max.z, c->tag, c->state);
 #endif
-    if (c->state < SPRITE_PROJECTED) // спроецированный спрайт помещается после новых
+    if (c->state < SPRITE_PROJECTED) // спрайт помещается после новых
       continue;
     if (sprite->min.z < c->min.z) // сортировка по z с уменьшением z
       continue;
@@ -216,6 +216,30 @@ void process_sprite(sprite_t *sc, sprite_t *c)
 }
 
 /** 
+ * Обработка вновь добавленных спрайтов: проецирование, сортировка
+ * 
+ * @param sc_sprite голова списка спрайтов
+ */
+void process_new_sprites(sprite_t *sc_sprite)
+{
+  sprite_t *sprite = sc_sprite->next_in_scene;
+  while (sprite) {
+    printf("sprite: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y, sprite->max.z, sprite->tag, sprite->state);    
+    // thread offset?
+    if (sprite->state != SPRITE_PROJECTED) {
+      if (sprite->state < SPRITE_PROJECTED) {
+	process_sprite(sc_sprite, sprite);
+	sprite = sc_sprite->next_in_scene;
+      } else {
+	printf("render loop not sprite new\n");
+	exit(1);
+      }
+    } else
+      sprite = sprite->next_in_scene;
+  }
+}
+
+/** 
  * Рендеринг сцены, обход холстов
  * 
  * @param scene сцена
@@ -243,21 +267,8 @@ void render_scene(scene_t *scene, sprite_t *sprite)
   // draw_region_update = 0
   reset_min_max();
   process_sprite(sc_sprite, sprite);
-  sprite = sc_sprite->next_in_scene;
-  while (sprite) {
-    printf("sprite: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y, sprite->max.z, sprite->tag, sprite->state);    
-    // thread offset?
-    if (sprite->state != SPRITE_PROJECTED) {
-      if (sprite->state < SPRITE_PROJECTED) {
-	process_sprite(sc_sprite, sprite);
-	sprite = sc_sprite->next_in_scene;
-      } else {
-	printf("render loop not sprite new\n");
-	exit(1);
-      }
-    } else
-      sprite = sprite->next_in_scene;
-  }
+  process_new_sprites(sc_sprite);
+  // draw region update = 1
 }
 
 /// главный цикл рендеринга по сценам
