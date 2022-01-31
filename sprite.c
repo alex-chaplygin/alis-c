@@ -130,20 +130,25 @@ sprite_t *sprite_find(int tag)
 {
   prev_sprite = 0;
   sprite_t *c = run_thread->sprite_list;
-  while (c) {
-    if (run_thread->current_scene >= c->scene) {
-      if (run_thread->current_scene != c->scene)
-	break;
-      else if (tag >= c->tag) {
-	if (tag != c->tag)
-	  break;
-	else
-	  return c;
-      }
-    }
+  if (!c)
+    return 0;
+  goto start;
+  do {
     prev_sprite = c;
     c = c->next;
-  }
+    if (!c)
+      break;
+  start:
+    if (run_thread->current_scene < c->scene)
+      continue;
+    if (run_thread->current_scene != c->scene)
+	break;
+    if (tag < c->tag)
+      continue;
+    if (tag != c->tag)
+      break;
+    return c;
+  } while (c);
   return 0;
 }
 
