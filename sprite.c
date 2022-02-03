@@ -43,15 +43,15 @@ void sprites_init(int num)
   num_sprites = num + 3;
   sprites = xmalloc(num_sprites * sizeof(sprite_t));
   main_sprite = sprites;
-  main_sprite->min.x = 0;
-  main_sprite->min.y = 0;
+  main_sprite->origin.x = 0;
+  main_sprite->origin.y = 0;
   main_sprite->max.x = 319;
   main_sprite->max.y = 199;
   sprite2 = sprites + 1;
   sprite2->tag = 0;
   cursor_sprite = sprite2 + 1;
-  cursor_sprite->min.x = 0;
-  cursor_sprite->min.y = 0;
+  cursor_sprite->origin.x = 0;
+  cursor_sprite->origin.y = 0;
   cursor_sprite->state = SPRITE_CURSOR; // 11111110
   sprite_flags = 0;
   free_sprite = cursor_sprite + 1;
@@ -105,10 +105,10 @@ void sprites_translate(word *data)
   while (c) {
     if (c->state == SPRITE_PROJECTED)
       c->state = SPRITE_TRANSLATED;
-    vec_add(&c->max, &delta, &c->max);
+    vec_add(&c->center, &delta, &c->center);
     c = c->next;
 #ifdef DEBUG
-    printf("Translate sprite %d (%d %d %d)\n", (int)(c - sprites), c->max.x, c->max.y, c->max.z);
+    printf("Translate sprite %d (%d %d %d)\n", (int)(c - sprites), c->center.x, c->center.y, c->center.z);
 #endif
   }
 }
@@ -158,13 +158,13 @@ void dump_sprites()
   printf("run_thread list:\n");
   sprite_t *c = run_thread->sprite_list;
   while (c) {
-    printf("->max(%d %d %d)tag(%d)", c->max.x, c->max.y, c->max.z, c->tag);
+    printf("->center(%d %d %d)tag(%d)", c->center.x, c->center.y, c->center.z, c->tag);
     c = c->next;
   }
   printf("\ncurrent scene_list:\n");
   c = sprites + run_thread->current_scene->scene_sprite;
   while (c) {
-    printf("->min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", c->min.x, c->min.y, c->min.z, c->max.x, c->max.y, c->max.z, c->tag, c->state);
+    printf("->origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.y, c->center.z, c->tag, c->state);
     c = c->next_in_scene;
   }
 }
@@ -183,7 +183,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
   c->x_flip = x_flip;
   // много полей
   // применение трансформации перемещения
-  vec_add(&translate, coord, &c->max);
+  vec_add(&translate, coord, &c->center);
 #ifdef DEBUG
   printf("insert sprite: (%d %d %d)\n", coord->x, coord->y, coord->z);
   dump_sprites();
@@ -269,7 +269,7 @@ sprite_t *sprite_remove(sprite_t *c)
     sprite_remove_from_scene_list(c);
   }
 #ifdef DEBUG
-  printf("remove sprite: max(%d %d %d)\n", c->max.x, c->max.y, c->max.z);
+  printf("remove sprite: center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
   dump_sprites();
 #endif  
   if (!prev_sprite)

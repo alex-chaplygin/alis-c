@@ -74,16 +74,16 @@ void print_rec(rectangle_t sprites_rec)
 void update_min_max(sprite_t *c)
 {
   image_t *im = (image_t *)c->image;
-  if (c->min.z < 0)
+  if (c->origin.z < 0)
     return;
-  if (c->min.x <= sprites_rec.min_y)
-    sprites_rec.min_x = c->min.x;
-  int max_x = c->min.x + im->maxx;
+  if (c->origin.x <= sprites_rec.min_y)
+    sprites_rec.min_x = c->origin.x;
+  int max_x = c->origin.x + im->maxx;
   if (max_x >= sprites_rec.max_x)
     sprites_rec.max_x = max_x;
-  if (c->min.y <= sprites_rec.min_y)
-    sprites_rec.min_y = c->min.y;
-  int max_y = c->min.y + im->maxy;
+  if (c->origin.y <= sprites_rec.min_y)
+    sprites_rec.min_y = c->origin.y;
+  int max_y = c->origin.y + im->maxy;
   if (max_y >= sprites_rec.max_y)
     sprites_rec.max_y = max_y;
 #ifdef DEBUG
@@ -111,7 +111,7 @@ int sar(int a, int c)
 void project_sprite(sprite_t *c, vec_t *origin)
 {
   scene_t *sc = c->scene;
-  vec_t *v = vec_new(c->max.x - sc->origin_x, c->max.y - sc->origin_y, c->max.z - sc->origin_z);
+  vec_t *v = vec_new(c->center.x - sc->origin_x, c->center.y - sc->origin_y, c->center.z - sc->origin_z);
 #ifdef DEBUG
   printf("projection: vec (%d %d %d)\n", (*v).x, (*v).y, (*v).z);
 #endif
@@ -174,7 +174,7 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
   sprite_t *prev;
   sprite_t* c = sc;
 #ifdef DEBUG
-  printf("sprite to tail: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y, sprite->max.z, sprite->tag, sprite->state);
+  printf("sprite to tail: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);
 #endif
   do {
     prev = c;
@@ -182,13 +182,13 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
     if (!c)
       break;
 #ifdef DEBUG
-    printf("spr: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", c->min.x, c->min.y, c->min.z, c->max.x, c->max.y, c->max.z, c->tag, c->state);
+    printf("spr: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.y, c->center.z, c->tag, c->state);
 #endif
     if (c->state < SPRITE_PROJECTED) // спрайт помещается после новых
       continue;
-    if (sprite->min.z < c->min.z) // сортировка по z с уменьшением z
+    if (sprite->origin.z < c->origin.z) // сортировка по z с уменьшением z
       continue;
-    if (sprite->min.z > c->min.z)
+    if (sprite->origin.z > c->origin.z)
       break;
     if (sprite->layer < c->layer) // сортировка по слою по убыванию
       continue;
@@ -215,7 +215,7 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
 void process_sprite(sprite_t *sc, sprite_t *c)
 {
   // устанавливаем левый верхний угол после проецирования
-  project_sprite(c, &c->min);
+  project_sprite(c, &c->origin);
   // удаление спрайта из списка сцены
   sc->next_in_scene = c->next_in_scene;
   update_min_max(c);
@@ -234,7 +234,7 @@ void process_new_sprites(sprite_t *sc_sprite)
 {
   sprite_t *sprite = sc_sprite->next_in_scene;
   while (sprite) {
-    printf("sprite: min(%d %d %d)max(%d %d %d)tag(%d)state(%d)\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y, sprite->max.z, sprite->tag, sprite->state);    
+    printf("sprite: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);    
     // thread offset?
     if (sprite->state != SPRITE_PROJECTED) {
       if (sprite->state < SPRITE_PROJECTED) {
@@ -260,21 +260,21 @@ int clip_sprites(sprite_t *sc_sprite)
 {
   // проверка, что регион отрисовки полностью выходит за пределы
   // окна вывода
-  if (sprites_rec.min_x > sc_sprite->max.x)
+  if (sprites_rec.min_x > sc_sprite->max.x) // для спрайта сцены center - это max
     return 0;
   if (sprites_rec.min_y > sc_sprite->max.y)
     return 0;
-  if (sprites_rec.max_x < sc_sprite->min.x)
+  if (sprites_rec.max_x < sc_sprite->origin.x)
     return 0;
-  if (sprites_rec.max_y < sc_sprite->min.y)
+  if (sprites_rec.max_y < sc_sprite->origin.y)
     return 0;
   clip_rec.min_x = sprites_rec.min_x & 0xfff0; // округление до 16 в меньшую сторону
   // отсечение по окну сцены из спрайта сцены
-  if (clip_rec.min_x < sc_sprite->min.x)
-    clip_rec.min_x = sc_sprite->min.x;
+  if (clip_rec.min_x < sc_sprite->origin.x)
+    clip_rec.min_x = sc_sprite->origin.x;
   clip_rec.min_y = sprites_rec.min_y;
-  if (clip_rec.min_y < sc_sprite->min.y)
-    clip_rec.min_y = sc_sprite->min.y;
+  if (clip_rec.min_y < sc_sprite->origin.y)
+    clip_rec.min_y = sc_sprite->origin.y;
   clip_rec.max_x = sprites_rec.max_x | 0xf; // округление до 16 - 1 в большую сторону
   if (clip_rec.max_x > sc_sprite->max.x)
     clip_rec.max_x = sc_sprite->max.x;
