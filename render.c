@@ -32,7 +32,6 @@ typedef struct {
 byte frame_num;
 rectangle_t sprites_rec;	/**< окно вывода спрайтов */
 rectangle_t clip_rec;	/**< окно отсеченных по сцене спрайтов */
-vec_t origin;			/**< оконные координаты левого верхнего угла объекта */
 int draw_region_updated;
 
 /** 
@@ -107,8 +106,9 @@ int sar(int a, int c)
  * Преобразование из мировых в оконные координаты
  * 
  * @param c спрайт
+ * @param origin спроецированные координаты левого верхнего угла спрайта
  */
-void project_sprite(sprite_t *c)
+void project_sprite(sprite_t *c, vec_t *origin)
 {
   scene_t *sc = c->scene;
   vec_t *v = vec_new(c->max.x - sc->origin_x, c->max.y - sc->origin_y, c->max.z - sc->origin_z);
@@ -154,11 +154,11 @@ void project_sprite(sprite_t *c)
     printf("vec_zz >= 0 not implemented\n");
     exit(1);
   }
-  memcpy(&origin, v, sizeof(vec_t));
+  memcpy(origin, v, sizeof(vec_t));
   vec_delete(v);
 #ifdef DEBUG
   // 0 -10 40
-  printf("origin: (%d %d %d)\n", origin.x, origin.y, origin.z);
+  printf("origin: (%d %d %d)\n", origin->x, origin->y, origin->z);
 #endif
 }
 
@@ -214,13 +214,10 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
  */
 void process_sprite(sprite_t *sc, sprite_t *c)
 {
-  project_sprite(c);
+  // устанавливаем левый верхний угол после проецирования
+  project_sprite(c, &c->min);
   // удаление спрайта из списка сцены
   sc->next_in_scene = c->next_in_scene;
-  // устанавливаем левый верхний угол после проецирования
-  c->min.x = origin.x;
-  c->min.y = origin.y;
-  c->min.z = origin.z;
   update_min_max(c);
   sort_sprite(sc, c);
 #ifdef DEBUG
