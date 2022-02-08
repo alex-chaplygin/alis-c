@@ -20,7 +20,8 @@
 
 #define TAG_FLAG1 (1 << 1)
 #define TAG_FLAG2 (1 << 2)
-#define TAG_3D (1 << 7)
+#define TAG_MOUSE (1 << 6)	/**< в сцене присутствует курсор мыши */
+#define TAG_3D (1 << 7)		/**< сцена 3d */
 
 byte frame_num;
 rectangle_t sprites_rec;	/**< окно вывода спрайтов */
@@ -161,8 +162,9 @@ void project_sprite(sprite_t *c, vec_t *origin)
  * по убыванию тегов
  * @param sc холст сцены
  * @param sprite текущий холст
+ * @return спрайт перед которым добавляется новый, если новый спрайт в конце списка, то возвращается он
  */
-void sort_sprite(sprite_t *sc, sprite_t *sprite)
+sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
 {
   sprite_t *prev;
   sprite_t* c = sc;
@@ -197,6 +199,13 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
   sprite->next_in_scene = c;
   prev->next_in_scene = sprite;
   sprite->state = SPRITE_SORTED;
+  if (c != sc)
+    return sc;
+  else {
+    printf("sort sprites: insert before scene sprite\n");
+    exit(1);
+    return sprite;
+  }
 }
 
 /** 
@@ -234,7 +243,7 @@ void process_new_sprites(sprite_t *sc_sprite)
 	process_sprite(sc_sprite, sprite);
 	sprite = sc_sprite->next_in_scene;
       } else {
-	printf("render loop not sprite new\n");
+	printf("process_new_sprites: not sprite new\n");
 	exit(1);
       }
     } else
@@ -317,7 +326,7 @@ void render_all_scenes()
   rectangle_t blit_rec;
   while (1) {
 #ifdef DEBUG
-    printf("Scene flags: %x\n", s->flags);
+    printf("Scene %x flags: %x tag: %x\n", (int)(s - scene_list_head), s->flags, s->tag);
 #endif
     if (!(s->flags & SCENE_HIDDEN)) {
       spr = sprites + s->scene_sprite;
@@ -326,7 +335,7 @@ void render_all_scenes()
 	printf("Blit rec: ");
 	print_rec(blit_rec);
 #endif
-	if (s->flags & SCENE_HIDDEN) {
+	if (!(s->tag & TAG_MOUSE)) {
 	  printf("Set mouse flags\n");
 	  exit(1);
 	}
@@ -349,10 +358,6 @@ void render_sprites(scene_t *scene, sprite_t *spr)
 {
   if (scene->flags & SCENE_HIDDEN)
     return;
-  if (!draw_region_updated) {
-    printf("draw region updated = 0\n");
-    exit(1);
-  }
   if (!clip_sprite(spr, &sprites_rec, &clip_rec, 1))
     return;
 #ifdef DEBUG
