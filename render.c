@@ -16,18 +16,11 @@
 #include "memory.h"
 #include "vector.h"
 #include "image.h"
+#include "draw.h"
 
 #define TAG_FLAG1 (1 << 1)
 #define TAG_FLAG2 (1 << 2)
 #define TAG_3D (1 << 7)
-
-/// координатное окно
-typedef struct {
-  int min_x;			/**< левый верхний угол */
-  int min_y;
-  int max_x;			/**< правый нижний угол */
-  int max_y;
-} rectangle_t;
 
 byte frame_num;
 rectangle_t sprites_rec;	/**< окно вывода спрайтов */
@@ -48,7 +41,7 @@ void scene_apply_delta(scene_t *scene, sprite_t *c)
   scene->delta_x = scene->delta_y = scene->delta_z = 0;
   c = c->next_in_scene;
   while (c) {
-    if (c->state == SPRITE_PROJECTED)
+    if (c->state == SPRITE_SORTED)
       c->state = SPRITE_TRANSLATED;
     c = c->next_in_scene;
   }
@@ -174,7 +167,7 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
   sprite_t *prev;
   sprite_t* c = sc;
 #ifdef DEBUG
-  printf("sprite to tail: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);
+  printf("sprite to tail: origin(%d %d %d)center(%d %d %d)tag(%d)layer(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->layer, sprite->state);
 #endif
   do {
     prev = c;
@@ -184,7 +177,7 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
 #ifdef DEBUG
     printf("spr: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.y, c->center.z, c->tag, c->state);
 #endif
-    if (c->state < SPRITE_PROJECTED) // спрайт помещается после новых
+    if (c->state < SPRITE_SORTED) // спрайт помещается после новых
       continue;
     if (sprite->origin.z < c->origin.z) // сортировка по z с уменьшением z
       continue;
@@ -198,12 +191,12 @@ void sort_sprite(sprite_t *sc, sprite_t *sprite)
       continue;
     if (sprite->tag > c->tag)
       break;
-    if (c->state == SPRITE_NEW)
+    if (sprite->state == SPRITE_NEW)
       break;
   } while (c);
   sprite->next_in_scene = c;
   prev->next_in_scene = sprite;
-  sprite->state = SPRITE_PROJECTED;
+  sprite->state = SPRITE_SORTED;
 }
 
 /** 
@@ -236,8 +229,8 @@ void process_new_sprites(sprite_t *sc_sprite)
   while (sprite) {
     printf("sprite: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);    
     // thread offset?
-    if (sprite->state != SPRITE_PROJECTED) {
-      if (sprite->state < SPRITE_PROJECTED) {
+    if (sprite->state != SPRITE_SORTED) {
+      if (sprite->state < SPRITE_SORTED) {
 	process_sprite(sc_sprite, sprite);
 	sprite = sc_sprite->next_in_scene;
       } else {
@@ -250,38 +243,106 @@ void process_new_sprites(sprite_t *sc_sprite)
 }
 
 /** 
- * Вычисление области отсечения по экранной области из спрайта сцены
+ * Определяет, попадает ли спрайт в координатное окно и
+ * вычисляет пересечение спрайта и окна
  * 
- * @param sc_sprite спрайт сцены
- * 
- * @return 0, если спрайты полностью выходят за пределы окна, иначе 1
+ * @param sc_sprite спрайт
+ * @param rec координатное окно, по которому идет отсечение
+ * @param out координатное окно, которое получилось в результате 
+ * пересечения спрайта и окна
+ * @param round если 1, то координаты x выравниваются по сетке 16
+ * @return 0, если спрайт полностью выходят за пределы окна, иначе 1
  */
-int clip_sprites(sprite_t *sc_sprite)
+int clip_sprite(sprite_t *sc_sprite, rectangle_t *rec, rectangle_t *out, int round)
 {
   // проверка, что регион отрисовки полностью выходит за пределы
   // окна вывода
-  if (sprites_rec.min_x > sc_sprite->max.x) // для спрайта сцены center - это max
+  if (rec->min_x > sc_sprite->max.x) // для спрайта сцены center - это max
     return 0;
-  if (sprites_rec.min_y > sc_sprite->max.y)
+  if (rec->min_y > sc_sprite->max.y)
     return 0;
-  if (sprites_rec.max_x < sc_sprite->origin.x)
+  if (rec->max_x < sc_sprite->origin.x)
     return 0;
-  if (sprites_rec.max_y < sc_sprite->origin.y)
+  if (rec->max_y < sc_sprite->origin.y)
     return 0;
-  clip_rec.min_x = sprites_rec.min_x & 0xfff0; // округление до 16 в меньшую сторону
+  if (round)
+    out->min_x = rec->min_x & 0xfff0; // округление до 16 в меньшую сторону
+  else
+    out->min_x = rec->min_x;
   // отсечение по окну сцены из спрайта сцены
-  if (clip_rec.min_x < sc_sprite->origin.x)
-    clip_rec.min_x = sc_sprite->origin.x;
-  clip_rec.min_y = sprites_rec.min_y;
-  if (clip_rec.min_y < sc_sprite->origin.y)
-    clip_rec.min_y = sc_sprite->origin.y;
-  clip_rec.max_x = sprites_rec.max_x | 0xf; // округление до 16 - 1 в большую сторону
-  if (clip_rec.max_x > sc_sprite->max.x)
-    clip_rec.max_x = sc_sprite->max.x;
-  clip_rec.max_y = sprites_rec.max_y;
-  if (clip_rec.max_y > sc_sprite->max.y)
-    clip_rec.max_y = sc_sprite->max.y;
+  if (out->min_x < sc_sprite->origin.x)
+    out->min_x = sc_sprite->origin.x;
+  out->min_y = rec->min_y;
+  if (out->min_y < sc_sprite->origin.y)
+    out->min_y = sc_sprite->origin.y;
+  if (round)
+    out->max_x = rec->max_x | 0xf; // округление до 16 - 1 в большую сторону
+  else
+    out->max_x = rec->max_x;
+  if (out->max_x > sc_sprite->max.x)
+    out->max_x = sc_sprite->max.x;
+  out->max_y = rec->max_y;
+  if (out->max_y > sc_sprite->max.y)
+    out->max_y = sc_sprite->max.y;
   return 1;
+}
+
+void render_sprite(sprite_t *sp, rectangle_t *clip)
+{
+  rectangle_t blit;
+  image_t *im = (image_t *)sp->image;
+#ifdef DEBUG
+  printf("Rendering sprite: origin(%d %d %d)size(%d %d)\n", sp->origin.x, sp->origin.y, sp->origin.z, im->maxx, im->maxy);
+#endif
+  int mx = sp->max.x;
+  int my = sp->max.y;
+  sp->max.x = sp->origin.x + im->maxx;
+  sp->max.y = sp->origin.y + im->maxy;
+  int cl = clip_sprite(sp, clip, &blit, 0);
+#ifdef DEBUG
+  printf("Sprite blit: ");
+  print_rec(blit);
+#endif
+  sp->max.x = mx;
+  sp->max.y = my;
+  if (!cl)
+    return;
+  render_image(&sp->origin, im, sp->x_flip, &blit);
+}
+
+void render_all_scenes()
+{
+  scene_t *s = scene_list_head;
+  sprite_t *spr;
+  rectangle_t blit_rec;
+  while (1) {
+#ifdef DEBUG
+    printf("Scene flags: %x\n", s->flags);
+#endif
+    if (!(s->flags & SCENE_HIDDEN)) {
+      spr = sprites + s->scene_sprite;
+      if (clip_sprite(spr, &clip_rec, &blit_rec, 0)) {
+#ifdef DEBUG
+	printf("Blit rec: ");
+	print_rec(blit_rec);
+#endif
+	if (s->flags & SCENE_HIDDEN) {
+	  printf("Set mouse flags\n");
+	  exit(1);
+	}
+	spr = spr->next_in_scene;
+	while (spr) {
+	  if (spr->state >= SPRITE_SORTED && spr->origin.z >= 0)
+	    render_sprite(spr, &blit_rec);
+	  spr = spr->next_in_scene;
+	}
+      }
+    }
+    if (!s->next)
+      break;
+    s = (scene_t *)(memory + s->next);
+  }
+  exit(0);
 }
 
 void render_sprites(scene_t *scene, sprite_t *spr)
@@ -292,13 +353,13 @@ void render_sprites(scene_t *scene, sprite_t *spr)
     printf("draw region updated = 0\n");
     exit(1);
   }
-  if (!clip_sprites(spr))
+  if (!clip_sprite(spr, &sprites_rec, &clip_rec, 1))
     return;
 #ifdef DEBUG
   printf("Clip rec: ");
   print_rec(clip_rec);
 #endif
-  exit(1);
+  render_all_scenes();
 }
 
 /** 
@@ -340,7 +401,7 @@ void render_update()
   scene_t *s = scene_list_head;
   while (1) {
 #ifdef DEBUG
-    printf("Rendering scene %x flags = %x\n", (int)((byte *)s - memory), s->flags);
+    printf("Rendering scene %x flags = %x tag = %x\n", (int)((byte *)s - memory), s->flags, s->tag);
 #endif
     if (!(s->flags & SCENE_HIDDEN))
       render_scene(s, sprites + s->scene_sprite);
