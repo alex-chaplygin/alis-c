@@ -6,7 +6,7 @@
 
 #define SPRITE_CURSOR -2		/**< спрайт курсора */
 #define SPRITE_NEW -1		/**< новый спрайт */
-#define SPRITE_PROJECTED 0		/**< спрайт после проецирования на экран */
+#define SPRITE_SORTED 0		/**< спрайт после проецирования на экран и сортировки */
 #define SPRITE_REMOVED 1
 #define SPRITE_TRANSLATED 2	/**< спрайт после трансформации перемещения */
 
