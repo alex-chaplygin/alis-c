@@ -12,11 +12,10 @@
 #include "types.h"
 #include "key.h"
 #include "palette.h"
+#include "graphics.h"
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define SCREEN_WIDTH 320	/**< размеры буфера экрана */
-#define SCREEN_HEIGHT 200
 #define FPS 30			/**< число кадров в секунду */
 
 int mouse_x;
