@@ -20,6 +20,7 @@
 
 #define TAG_FLAG1 (1 << 1)
 #define TAG_FLAG2 (1 << 2)
+#define TAG_NOBLIT (1 << 5)	/**< сцена не отправляется в видеопамять после отрисовки */
 #define TAG_MOUSE (1 << 6)	/**< в сцене присутствует курсор мыши */
 #define TAG_3D (1 << 7)		/**< сцена 3d */
 
@@ -351,7 +352,6 @@ void render_all_scenes()
       break;
     s = (scene_t *)(memory + s->next);
   }
-  exit(0);
 }
 
 void render_sprites(scene_t *scene, sprite_t *spr)
@@ -365,11 +365,15 @@ void render_sprites(scene_t *scene, sprite_t *spr)
   print_rec(clip_rec);
 #endif
   render_all_scenes();
+  if (scene->tag & TAG_NOBLIT) {
+    printf("Scene: no blit\n");
+    exit(1);
+  }
 }
 
 /** 
  * Рендеринг сцены, обход холстов
- * 
+ * если нет новых спрайтов, рендеринг не происходит
  * @param scene сцена
  * @param sprite голова списка холстов
  */
@@ -386,18 +390,24 @@ void render_scene(scene_t *scene, sprite_t *sprite)
   }
   sprite_t *sc_sprite = sprite;
   sprite = sprite->next_in_scene;
-  if (!sprite)
-    return;
-  if (sprite->state != SPRITE_NEW) {
-    printf("sprite state not new = %d\n", sprite->state);
-    exit(1);
+  while (sprite) {
+    draw_region_updated = 0;
+    switch (sprite->state) {
+    case SPRITE_SORTED:
+      break;
+    case SPRITE_NEW:
+      reset_min_max();
+      process_sprite(sc_sprite, sprite);
+      process_new_sprites(sc_sprite);
+      draw_region_updated = 1;
+      render_sprites(scene, sc_sprite);
+      break;
+    default: 
+      printf("sprite state = %d\n", sprite->state);
+      exit(1);
+    }
+    sprite = sprite->next_in_scene;
   }
-  draw_region_updated = 0;
-  reset_min_max();
-  process_sprite(sc_sprite, sprite);
-  process_new_sprites(sc_sprite);
-  draw_region_updated = 1;
-  render_sprites(scene, sc_sprite);
 }
 
 /// главный цикл рендеринга по сценам
