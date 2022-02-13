@@ -83,20 +83,21 @@ byte *get_resource(int num)
 void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
 {
   sprite_t *c;
+  int found;
 #ifdef DEBUG
   printf("sub image = %d (%d, %d, %d) xflip = %d num = %d tag = %d\n", is_subimage, origin->x, origin->y, origin->z, x_flip, num, tag); 
 #endif
   // ищем объект
-  c = sprite_find(tag);
+  found = sprite_find(tag, &c);
   // если не найден, то добавляем
-  if (!c)
+  if (!found)
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
   else if (!is_subimage && !image_flag) {
     printf("add_sprite: not subimage\n");
     exit(1);
-    if (c->state < SPRITE_READY) 
-      c->state = SPRITE_UPDATED;
-    sprite_set(c, get_resource(num), x_flip, origin);
+    /*    if (*c->state < SPRITE_READY) 
+      *c->state = SPRITE_UPDATED;
+      sprite_set(*c, get_resource(num), x_flip, origin);*/
   }
   else {
     while(c) {
@@ -118,7 +119,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
   if (!is_subimage) {
     printf("add_sprite: subimage = 0\n");
     exit(1);
-    c = sprite_find(tag);
+    found = sprite_find(tag, &c);
     while (c) {
       c = sprite_next_on_tag(c, tag);
       if (!c)
@@ -130,6 +131,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
 	    c->tag != tag)
 	  break;
     }
+    exit(1);
   }
   image_flag = 0;
 }

@@ -36,7 +36,7 @@ void sprites_init(int num);
 int num_free_sprites();
 void set_translate(word *data);
 void sprites_translate(word *data);
-sprite_t *sprite_find(int tag);
+int sprite_find(int tag, sprite_t **c);
 void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord);
 void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord);
 sprite_t *sprite_next_on_tag(sprite_t *c, int tag);

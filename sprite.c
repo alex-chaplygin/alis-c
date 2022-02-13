@@ -123,32 +123,33 @@ void sprites_translate(word *data)
  * 4. спрайт большей сцены (возвращает 0, prev)
  * 5. список потока закончился, все теги  меньше заданного (возвращает 0, prev)
  * @param tag заданный тег
- * 
- * @return 0, если не найдено, или найденное место
+ * @param c указатель куда будет записан спрайт, перед которым будет
+ * добавлен новый
+ * @return 0, если не найден спрайт с тегом, иначе 1
  */
-sprite_t *sprite_find(int tag)
+int sprite_find(int tag, sprite_t **c)
 {
   prev_sprite = 0;
-  sprite_t *c = run_thread->sprite_list;
-  if (!c)
+  *c = run_thread->sprite_list;
+  if (!*c)
     return 0;
   goto start;
   do {
-    prev_sprite = c;
-    c = c->next;
-    if (!c)
+    prev_sprite = *c;
+    *c = (*c)->next;
+    if (!*c)
       break;
   start:
-    if (run_thread->current_scene < c->scene)
+    if (run_thread->current_scene < (*c)->scene)
       continue;
-    if (run_thread->current_scene != c->scene)
+    if (run_thread->current_scene != (*c)->scene)
 	break;
-    if (tag < c->tag)
+    if (tag < (*c)->tag)
       continue;
-    if (tag != c->tag)
+    if (tag != (*c)->tag)
       break;
-    return c;
-  } while (c);
+    return 1;
+  } while (*c);
   return 0;
 }
 
@@ -307,7 +308,7 @@ void clear_object()
   exit(1);
 #endif
   while (1) {
-    c = sprite_find(tag);
+    // c = sprite_find(tag);
     if (!c) {
       remove_from_scene = 0;
       break;
