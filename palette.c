@@ -125,7 +125,7 @@ void palette_load(byte *pal)
       fade_ticks = palette_parameter = palette_fade_ticks = 0;
       memcpy(palette, load_palette, sizeof(palette));
       need_to_update_palette = -1;
-      graphics_set_palette(palette);
+      //graphics_set_palette(palette);
       return;
     }
   } else {
