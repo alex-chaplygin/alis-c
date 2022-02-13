@@ -1,6 +1,6 @@
 enum resource_e {
   RES_PALETTE = 0xfe,		/**< палитра */
-  RES_IMAGE = 0xff,		/**< составное изображение */
+  RES_OBJECT = 0xff,		/**< составной объект из спрайтов */
 };
 
 /// заголовок изображения
@@ -24,8 +24,8 @@ typedef struct {
   int max_y;
 } rectangle_t;
 
-void show_sprite();
-void show_sprite_flipped();
+void show_object();
+void show_object_flipped();
 byte *get_resource(int num);
 
 extern int load_main_image;	

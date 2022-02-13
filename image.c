@@ -91,17 +91,17 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
   else if (!is_subimage && !image_flag) {
     printf("not subimage\n");
     exit(1);
-    if (!(c->flags & SPRITE_SCENE)) 
-      c->flags = SPRITE_UPDATED;
+    if (c->state < SPRITE_SORTED) 
+      c->state = SPRITE_TRANSLATED;
     sprite_set(c, get_resource(num), x_flip, origin);
   }
   else {
     while(c) {
-      if (!c->flags) {
-	printf("not flags\n");
+      if (c->state == SPRITE_SORTED) {
+	printf("add sprite: SORTED SPRITE\n");
 	exit(1);
 	// обновить спрайт
-	c->flags = SPRITE_UPDATED;
+	c->state = SPRITE_TRANSLATED;
 	sprite_set(c, get_resource(num), x_flip, origin);
 	break;
       }
@@ -120,7 +120,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
       c = sprite_next_on_tag(c, tag);
       if (!c)
 	break;
-      if (!c->flags)
+      if (c->state == SPRITE_SORTED)
 	c = sprite_remove(c);
       if (c)
 	if (run_thread->current_scene != c->scene ||
@@ -132,15 +132,15 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
 }
 
 /** 
- * Загрузка составного спрайта
+ * Загрузка объекта.
  * Состоит из одного или более спрайтов
  *
- * @param img данные составного спрайта
- * @param coord координаты центра спрайта
+ * @param img данные объекта
+ * @param coord координаты центра объекта
  * @param x_flip зеркальное отражение
- * @param tag тег
+ * @param tag тег объекта
  */
-void load_composite_sprite(byte *img, vec_t *coord, int x_flip, int tag)
+void load_object(byte *img, vec_t *coord, int x_flip, int tag)
 {
   vec_t vec;
   int x_fl, num;
@@ -183,8 +183,8 @@ void load_resource(vec_t *coord, int x_flip, int tag)
     printf("loading palette\n");
     exit(1);
     palette_load(img + 1);
-  } else if (*img == RES_IMAGE)
-    load_composite_sprite(img, coord, x_flip, tag);
+  } else if (*img == RES_OBJECT)
+    load_object(img, coord, x_flip, tag);
   else
     add_sprite(current_value, coord, x_flip, 0, tag);
 }
@@ -194,7 +194,7 @@ void load_resource(vec_t *coord, int x_flip, int tag)
  * 
  * @param x_flip - если 1, то зеркальное отражение по вертикали
  */
-void show_sprite_with_flip(int x_flip)
+void show_object_with_flip(int x_flip)
 {
   vec_t coord;
   new_get();
@@ -207,24 +207,24 @@ void show_sprite_with_flip(int x_flip)
   switch_get();
   int tag = prev_value;
 #ifdef DEBUG
-  printf("load resource (%d, %d, %d) xflip = %d num = %d tag = %d\n", coord.x, coord.y, coord.z, x_flip, current_value, tag); 
+  printf("show object (%d, %d, %d) xflip = %d res_num = %d tag = %d\n", coord.x, coord.y, coord.z, x_flip, current_value, tag); 
 #endif
   load_resource(&coord, x_flip, tag);
 }
 
 /// показать изображение по координатам центра.
-void show_sprite()
+void show_object()
 {
   load_main_image = 0;
-  show_sprite_with_flip(run_thread->x_flip);
+  show_object_with_flip(run_thread->x_flip);
 }
 
 /// показать изображение, отраженное по горизонтали
-void show_sprite_flipped()
+void show_object_flipped()
 {
   load_main_image = 0;
 #ifdef DEBUG
-  printf("show image flipped\n");
+  printf("show object flipped\n");
 #endif
-  show_sprite_with_flip(run_thread->x_flip ^ 1);  
+  show_object_with_flip(run_thread->x_flip ^ 1);  
 }

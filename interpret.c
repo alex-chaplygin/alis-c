@@ -114,9 +114,9 @@ func vm_op[] = {
   scene_new, // 46
   scene_set, // 47
   nimp, // 48
-  show_sprite, // 49
+  show_object, // 49
   nimp, // 4a
-  clear_sprites, // 4b
+  clear_object, // 4b
   nimp, // 4c
   nimp, // 4d
   scene_show, // 4e
@@ -208,7 +208,7 @@ func vm_op[] = {
   nimp, // a4
   nimp, // a5
   nimp, // a6
-  show_sprite_flipped, // a7
+  show_object_flipped, // a7
   nimp, // a8
   nimp, // a9
   nimp, // aa

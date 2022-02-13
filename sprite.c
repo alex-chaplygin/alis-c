@@ -5,7 +5,7 @@
  * 
  * @brief  Работа со спрайтами
  * Спрайты организованы в списки: списки потоков и списки сцен.
- * Спрайты добавляются в оба списка, список потоков сортируется по
+ * Спрайты добавляются в оба списка, список потока сортируется по
  * тегам, для последующей возможности удаления по тегу.
  * Список сцены используется для отрисовки
  */
@@ -103,7 +103,7 @@ void sprites_translate(word *data)
   exit(1);
   sprite_t *c = run_thread->sprite_list;
   while (c) {
-    if (c->state == SPRITE_PROJECTED)
+    if (c->state == SPRITE_SORTED)
       c->state = SPRITE_TRANSLATED;
     vec_add(&c->center, &delta, &c->center);
     c = c->next;
@@ -193,7 +193,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
 /** 
  * добавляет новый спрайт в список текущего потока перед заданным
  * спрайтом в общий список потока или создает новый список в потоке
- * также добавляет в голову списка сцены
+ * также добавляет в голову списка отрисовки
  * scene_sprite содержит голову списка
  * @param c спрайт перед которым добавляется новый
  * @param tag тег нового спрайта
@@ -227,7 +227,7 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
 }
 
 /** 
- * Удаляет спрайт из списка сцены, к которой он принадлежит
+ * Удаляет спрайт из списка отрисовки сцены, к которой он принадлежит
  * голова списка сцены находится в scene_sprite
  * @param c удаляемый спрайт
  */
@@ -256,13 +256,13 @@ void sprite_remove_from_scene_list(sprite_t *c)
  */
 sprite_t *sprite_remove(sprite_t *c)
 {
-  if (!remove_from_scene && c->state >= SPRITE_PROJECTED)
+  if (!remove_from_scene && c->state >= SPRITE_SORTED)
     c->state = SPRITE_REMOVED;
   if (!prev_sprite)
     run_thread->sprite_list = c->next;
   else
     prev_sprite->next = c->next;
-  if (remove_from_scene || c->state < SPRITE_PROJECTED) {
+  if (remove_from_scene || c->state < SPRITE_SORTED) {
     // добавление в список свободных спрайтов
     c->next = free_sprite;
     free_sprite = c;
@@ -296,14 +296,14 @@ sprite_t *sprite_next_on_tag(sprite_t *c, int tag)
   return 0;
 }
 
-/// очистка всех спрайтов с заданным тегом
-void clear_sprites()
+/// очистка всех спрайтов объекта с заданным тегом
+void clear_object()
 {
   new_get();
   int tag = (byte)current_value;
   sprite_t *c;
 #ifdef DEBUG
-  printf("clear sprites tag: %d\n", tag);
+  printf("clear object tag: %d\n", tag);
 #endif
   while (1) {
     c = sprite_find(tag);

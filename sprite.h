@@ -26,7 +26,7 @@ typedef struct sprite_s {
   int layer;			/**< слой определяет порядок отрисовки при одинаковой z координате, меньшее рисуется позднее */
   byte *image;			/**< данные изображения */
   struct sprite_s *next;	/**< следующий в списке потока спрайт */
-  struct sprite_s *next_in_scene;	/**< следующий в списке сцены */
+  struct sprite_s *next_in_scene;	/**< следующий в списке отрисовки */
   scene_t *scene;	/**< сцена к которой принадлежит спрайт */
 } sprite_t;
 
@@ -40,7 +40,7 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
 sprite_t *sprite_next_on_tag(sprite_t *c, int tag);
 sprite_t *sprite_remove(sprite_t *c);
 void dump_sprites();
-void clear_sprites();
+void clear_object();
 void scene_translate(scene_t *scene, sprite_t *c);
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
