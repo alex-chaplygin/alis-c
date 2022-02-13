@@ -1,3 +1,11 @@
+/**
+ * @file   draw.c
+ * @author alex <alex@localhost>
+ * @date   Wed Feb  9 17:55:49 2022
+ * 
+ * @brief  Модуль отрисовки изображений в видео буфер
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,27 +33,27 @@ byte *blit_dst;			/**< указатель на видеобуфер */
  * @param origin левый верхний угол спрайта
  * @param im данные изображения (заголовок + данные)
  * @param x_flip если 1 - зеркальное отражение
- * @param blit прямоугольник экранных координат, куда будет выведено
+ * @param blit_rec прямоугольник экранных координат, куда будет выведено
  * @param bit4 1 - если 4 бита на точку
  * изображение
  */
-void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit, int bit4)
+void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, int bit4)
 {
   odd_data = 0;
-  image_add = im->maxx - blit->max_x + blit->min_x;
+  image_add = im->maxx - blit_rec->max_x + blit_rec->min_x;
   if (bit4)
     image_add >>= 1;
-  int video = SCREEN_WIDTH - 1 - blit->max_x + blit->min_x;
+  int video = SCREEN_WIDTH - 1 - blit_rec->max_x + blit_rec->min_x;
   if (x_flip && im->type != IMAGE_FILL)
     video_add = 2 * SCREEN_WIDTH - video;
   else
     video_add = video;
-  num_cols = blit->max_x - blit->min_x + 1;
-  num_rows = blit->max_y - blit->min_y + 1;
-  int pos = blit->min_y - origin->y;
+  num_cols = blit_rec->max_x - blit_rec->min_x + 1;
+  num_rows = blit_rec->max_y - blit_rec->min_y + 1;
+  int pos = blit_rec->min_y - origin->y;
   if (pos > 0)
     pos = pos * (im->maxx + 1);
-  int posx = blit->min_x - origin->x;
+  int posx = blit_rec->min_x - origin->x;
   if (posx > 0) {
     if (bit4 && posx & 1) {
       odd_data = 1;
@@ -61,7 +69,7 @@ void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit, int b
   blit_src = (byte *)(im + 1) + pos;
   if (bit4)
     blit_src -= 2;
-  blit_dst = video_buffer + blit->min_y * SCREEN_WIDTH + blit->min_x;
+  blit_dst = video_buffer + blit_rec->min_y * SCREEN_WIDTH + blit_rec->min_x;
 #ifdef DEBUG
   printf("draw setup: rows = %d cols = %d vid_add = %d im_add = %d x_fl = %d src = %d dst = %d odd = %d type = %x\n", num_rows, num_cols, video_add, image_add, x_flip, (int)(blit_src - (byte *)im), (int)(blit_dst - video_buffer), odd_data, im->type);
 #endif
@@ -84,7 +92,8 @@ void fill_image(byte color)
   }
 }
 
-/** 
+/**
+ * Отрисовка точки с прозрачностью 
  * Если цвет точки непрозрачный то выводит точку
  * 0 - прозрачный
  * @param c цвет точки
@@ -111,6 +120,10 @@ void draw_image_alpha()
   }
 }
 
+/** 
+ * Рисует изображение 4 бит с прозрачностью
+ * 
+ */
 void draw_image4_alpha()
 {
   byte c;
@@ -133,19 +146,27 @@ void draw_image4_alpha()
   }
 }
 
-void render_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit)
+/** 
+ * Отрисовка изображения
+ * 
+ * @param origin координаты левого верхнего угла спрайта
+ * @param im данные изображения
+ * @param x_flip 1 - если зеркальное отражение
+ * @param blit_rec координатное окно, куда выводится целое изображение или часть
+ */
+void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
 {
   switch (im->type) {
   case IMAGE_FILL:
-    draw_setup(origin, im, x_flip, blit, 0);
+    draw_setup(origin, im, x_flip, blit_rec, 0);
     fill_image(im->fill_color);
     break;
   case IMAGE_8_A:
-    draw_setup(origin, im, x_flip, blit, 0);
+    draw_setup(origin, im, x_flip, blit_rec, 0);
     draw_image_alpha();
     break;
   case IMAGE_4_A:
-    draw_setup(origin, im, x_flip, blit, 1);
+    draw_setup(origin, im, x_flip, blit_rec, 1);
     draw_image4_alpha();
     break;
   default:
