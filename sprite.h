@@ -16,7 +16,10 @@ typedef struct sprite_s {
   vec_t center;			/**< координаты центра спрайта */
   vec_t max;			/**< для спрайта сцены координаты правого нижнего угла окна сцены */
   };
-  int tag;			/**< тег спрайта */
+  union {
+    int tag;			/**< тег спрайта */
+    int flags2;			/**< для спрайта сцены - флаги */
+  };
   int x_flip;			/**< 1 - зеркальное отражение спрайта */
   int state;			/**< состояние спрайта*/
   int f24;
@@ -38,6 +41,7 @@ sprite_t *sprite_next_on_tag(sprite_t *c, int tag);
 sprite_t *sprite_remove(sprite_t *c);
 void dump_sprites();
 void clear_sprites();
+void scene_translate(scene_t *scene, sprite_t *c);
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
