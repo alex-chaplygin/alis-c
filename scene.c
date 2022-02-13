@@ -145,8 +145,8 @@ void scene_translate(scene_t *scene, sprite_t *c)
   scene->delta_x = scene->delta_y = scene->delta_z = 0;
   c = c->next_in_scene;
   while (c) {
-    if (c->state == SPRITE_SORTED)
-      c->state = SPRITE_TRANSLATED;
+    if (c->state == SPRITE_READY)
+      c->state = SPRITE_UPDATED;
     c = c->next_in_scene;
   }
   scene->flags &= ~SCENE_NOTTRANSLATED;

@@ -103,8 +103,8 @@ void sprites_translate(word *data)
   exit(1);
   sprite_t *c = run_thread->sprite_list;
   while (c) {
-    if (c->state == SPRITE_SORTED)
-      c->state = SPRITE_TRANSLATED;
+    if (c->state == SPRITE_READY)
+      c->state = SPRITE_UPDATED;
     vec_add(&c->center, &delta, &c->center);
     c = c->next;
 #ifdef DEBUG
@@ -185,7 +185,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
   // применение трансформации перемещения
   vec_add(&translate, coord, &c->center);
 #ifdef DEBUG
-  printf("insert sprite: (%d %d %d)\n", coord->x, coord->y, coord->z);
+  printf("update sprite: (%d %d %d)\n", coord->x, coord->y, coord->z);
   dump_sprites();
 #endif  
 }
@@ -256,13 +256,13 @@ void sprite_remove_from_scene_list(sprite_t *c)
  */
 sprite_t *sprite_remove(sprite_t *c)
 {
-  if (!remove_from_scene && c->state >= SPRITE_SORTED)
+  if (!remove_from_scene && c->state >= SPRITE_READY)
     c->state = SPRITE_REMOVED;
   if (!prev_sprite)
     run_thread->sprite_list = c->next;
   else
     prev_sprite->next = c->next;
-  if (remove_from_scene || c->state < SPRITE_SORTED) {
+  if (remove_from_scene || c->state < SPRITE_READY) {
     // добавление в список свободных спрайтов
     c->next = free_sprite;
     free_sprite = c;
@@ -304,6 +304,7 @@ void clear_object()
   sprite_t *c;
 #ifdef DEBUG
   printf("clear object tag: %d\n", tag);
+  exit(1);
 #endif
   while (1) {
     c = sprite_find(tag);

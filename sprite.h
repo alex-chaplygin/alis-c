@@ -4,11 +4,12 @@
 #include "vector.h"
 #include "scene.h"
 
+/// состояния спрайтов
 #define SPRITE_CURSOR -2		/**< спрайт курсора */
 #define SPRITE_NEW -1		/**< новый спрайт */
-#define SPRITE_SORTED 0		/**< спрайт после проецирования на экран и сортировки */
+#define SPRITE_READY 0		/**< спрайт готов к отрисовке */
 #define SPRITE_REMOVED 1
-#define SPRITE_TRANSLATED 2	/**< спрайт после трансформации перемещения */
+#define SPRITE_UPDATED 2	/**< спрайт после обновления координат или изображения */
 
 typedef struct sprite_s {
   vec_t origin;			/**< координаты левого верхнего угла спрайта */
@@ -24,7 +25,8 @@ typedef struct sprite_s {
   int state;			/**< состояние спрайта*/
   int f24;
   int layer;			/**< слой определяет порядок отрисовки при одинаковой z координате, меньшее рисуется позднее */
-  byte *image;			/**< данные изображения */
+  byte *image;			/**< установленное изображение спрайта */
+  byte *render_image;			/**< изображение которое будет отрисовано */
   struct sprite_s *next;	/**< следующий в списке потока спрайт */
   struct sprite_s *next_in_scene;	/**< следующий в списке отрисовки */
   scene_t *scene;	/**< сцена к которой принадлежит спрайт */

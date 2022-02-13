@@ -45,8 +45,11 @@ byte *get_resource(int num)
     script = main_thread->script;
   script_t *h = (script_t *)script;
   resource_table_t *r = (resource_table_t *)(script + h->resources);
+#ifdef DEBUG
+    printf("get_resource: main %d num %d\n", load_main_image, num);
+#endif
   if (num >= r->image_count) {
-    printf("get_resource: num %d > total %d\n", num, r->image_count);
+    printf("get_resource: main %d num %d > total %d\n", load_main_image, num, r->image_count);
     exit(1);
   }
   byte *pos = (byte *)r + r->image_table + num * sizeof(dword);
@@ -83,32 +86,32 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
 #ifdef DEBUG
   printf("sub image = %d (%d, %d, %d) xflip = %d num = %d tag = %d\n", is_subimage, origin->x, origin->y, origin->z, x_flip, num, tag); 
 #endif
-  // ищем верх слоя
+  // ищем объект
   c = sprite_find(tag);
-  // если не найден, то sprite new insert, установка полей
+  // если не найден, то добавляем
   if (!c)
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
   else if (!is_subimage && !image_flag) {
-    printf("not subimage\n");
+    printf("add_sprite: not subimage\n");
     exit(1);
-    if (c->state < SPRITE_SORTED) 
-      c->state = SPRITE_TRANSLATED;
+    if (c->state < SPRITE_READY) 
+      c->state = SPRITE_UPDATED;
     sprite_set(c, get_resource(num), x_flip, origin);
   }
   else {
     while(c) {
-      if (c->state == SPRITE_SORTED) {
-	printf("add sprite: SORTED SPRITE\n");
-	exit(1);
+      if (c->state == SPRITE_READY) {
+	printf("add sprite: update sprite\n");
 	// обновить спрайт
-	c->state = SPRITE_TRANSLATED;
+	c->state = SPRITE_UPDATED;
 	sprite_set(c, get_resource(num), x_flip, origin);
-	break;
+	goto end;
       }
       c = sprite_next_on_tag(c, tag);
     }
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
   }
+ end:
   // если is_subimage == 0, то
   // ищется верхний спрайт слоя, если нет, то добавляется новый спрайт
   // проверяются флаги, если не 0xff, то флаги присваиваются в 2
@@ -120,7 +123,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
       c = sprite_next_on_tag(c, tag);
       if (!c)
 	break;
-      if (c->state == SPRITE_SORTED)
+      if (c->state == SPRITE_READY)
 	c = sprite_remove(c);
       if (c)
 	if (run_thread->current_scene != c->scene ||
@@ -160,7 +163,7 @@ void load_object(byte *img, vec_t *coord, int x_flip, int tag)
       x_fl ^= 1;
     }
 #ifdef DEBUG
-    printf("offset = (%d %d %d) num = %d flip = %d\n", sub->ofs_x, sub->ofs_y, sub->ofs_z, num, x_fl);
+    printf("offset = (%d %d %d) res_num = %d flip = %d\n", sub->ofs_x, sub->ofs_y, sub->ofs_z, num, x_fl);
 #endif
     add_sprite(num, &vec, x_fl, 1, tag);
     sub++;
