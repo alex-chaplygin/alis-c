@@ -3,13 +3,18 @@
 #pragma pack(1)
 
 #define SCENE_HIDDEN (1 << 6)	/**< сцена не рисуется */
-#define SCENE_NOTUPDATED (1 << 7)
+#define SCENE_NOTTRANSLATED (1 << 7) /**< сцена не была перемещена */
+
+#define SCENE2_FLAG1 (1 << 1)
+#define SCENE2_NOBLIT (1 << 5)	/**< сцена не отправляется в видеопамять после отрисовки */
+#define SCENE2_MOUSE (1 << 6)	/**< в сцене присутствует курсор мыши */
+#define SCENE2_3D (1 << 7)		/**< сцена 3d */
 
 /// сцена графики
 typedef struct scene_s {
   byte flags;			/**< флаги сцены */
-  byte tag;			/**< слой */
-  word scene_sprite;		/**< холст сцены */
+  byte flags2;			
+  word scene_sprite;		/**< спрайт сцены */
   word next;		/**< адрес следующей сцены в списке */
   byte f1;
   byte f2;
@@ -43,7 +48,7 @@ typedef struct scene_s {
   char cy;
   char cz;
   byte f36;
-  word delta_x;
+  word delta_x;			/**< вектор перемещения */
   word delta_y;
   word delta_z;
 } scene_t;

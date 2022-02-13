@@ -50,8 +50,7 @@ void scene_new()
   word adr = fetch_word();
   scene_t *cl = (scene_t *)memory_read(adr);
   cl->flags |= SCENE_HIDDEN;
-  byte tag = fetch_byte();
-  cl->tag = tag;
+  cl->flags2 = fetch_byte();
   memcpy((byte *)cl + 6, current_ip, 32);
   current_ip += 32;
   sprite_t *sprite = free_sprite;
@@ -59,20 +58,20 @@ void scene_new()
   cl->scene_sprite = sprite - sprites; /**< номер спрайта */
   sprite->next_in_scene = 0;
   cl->next = 0;
-  sprite->tag = cl->tag;
-  sprite->min.x = cl->min_x & 0xfff0; /**< выравнивание по 16? */
-  sprite->min.y = cl->min_y;
-  sprite->min.z = 32767;
-  sprite->max.x = (cl->min_x + cl->width) | 15; /**< выравнивание 16 */
-  sprite->max.y =cl->min_y + cl->height;
+  sprite->flags2 = cl->flags2;  
+  sprite->origin.x = cl->origin_x & 0xfff0; /**< выравнивание по 16 */
+  sprite->origin.y = cl->origin_y;
+  sprite->origin.z = 32767;
+  sprite->max.x = (cl->origin_x + cl->width) | 15; /**< выравнивание 16 */
+  sprite->max.y =cl->origin_y + cl->height;
   cl->delta_x = cl->delta_y = cl->delta_z = 0;
   scene_add(cl);
   scene_calc_basis(cl);
 #ifdef DEBUG
-  printf("New scene: %x flags = %x tag = %d\n", adr, cl->flags, cl->tag);
+  printf("New scene: %x flags = %x flags2 = %d\n", adr, cl->flags, cl->flags2);
   printf("scene_sprite = %d\n", cl->scene_sprite);
   printf("width = %d height = %d\n", cl->width, cl->height);
-  printf("min = %d %d %d max = %d %d\n", sprite->min.x, sprite->min.y, sprite->min.z, sprite->max.x, sprite->max.y);
+  printf("origin = %d %d %d max = %d %d\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->max.x, sprite->max.y);
   printf("a = (%d %d %d) b = (%d %d %d) c = (%d %d %d)\n", cl->ax, cl->ay, cl->az, cl->bx, cl->by, cl->bz, cl->cx, cl->cy, cl->cz);
   printf("%d %d %d\n%d %d %d\n%d %d\n", cl->f1, cl->f2, cl->f3, cl->f4, cl->f5, cl->f6, cl->f7, cl->f8);
   ASSERT((byte *)scene_list_head - memory, 0xe)
@@ -113,7 +112,7 @@ void scene_show()
   word w = fetch_word();
   scene_t *sc = (scene_t *)memory_read(w);
   sc->flags &= ~SCENE_HIDDEN;
-  sc->flags |= SCENE_NOTUPDATED;
+  sc->flags |= SCENE_NOTTRANSLATED;
   scene_remove(sc);
   scene_add(sc);
 #ifdef DEBUG
@@ -130,4 +129,28 @@ void scene_set()
 #ifdef DEBUG
   printf("set current scene %x %x\n", w, (int)((byte *)run_thread->current_scene - memory));
 #endif
+}
+
+/** 
+ * Перемещает начало координат сцены
+ * 
+ * @param scene сцена
+ * @param c спрайт сцены
+ */
+void scene_translate(scene_t *scene, sprite_t *c)
+{
+  scene->origin_x += scene->delta_x;
+  scene->origin_y += scene->delta_y;
+  scene->origin_z += scene->delta_z;
+  scene->delta_x = scene->delta_y = scene->delta_z = 0;
+  c = c->next_in_scene;
+  while (c) {
+    if (c->state == SPRITE_SORTED)
+      c->state = SPRITE_TRANSLATED;
+    c = c->next_in_scene;
+  }
+  scene->flags &= ~SCENE_NOTTRANSLATED;
+#ifdef DEBUG
+  printf("scene translate: (%d %d %d) flags = %x\n", scene->origin_x, scene->origin_y, scene->origin_z, scene->flags);
+#endif  
 }
