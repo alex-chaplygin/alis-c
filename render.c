@@ -17,56 +17,27 @@
 #include "vector.h"
 #include "image.h"
 #include "draw.h"
-
-#define TAG_FLAG1 (1 << 1)
-#define TAG_FLAG2 (1 << 2)
-#define TAG_NOBLIT (1 << 5)	/**< сцена не отправляется в видеопамять после отрисовки */
-#define TAG_MOUSE (1 << 6)	/**< в сцене присутствует курсор мыши */
-#define TAG_3D (1 << 7)		/**< сцена 3d */
+#include "project.h"
 
 byte frame_num;
 rectangle_t sprites_rec;	/**< окно вывода спрайтов */
 rectangle_t clip_rec;	/**< окно отсеченных по сцене спрайтов */
-int draw_region_updated;
 
-/** 
- * Перемещает начало координат сцены
- * 
- * @param scene сцена
- * @param c спрайт сцены
- */
-void scene_apply_delta(scene_t *scene, sprite_t *c)
-{
-  scene->origin_x += scene->delta_x;
-  scene->origin_y += scene->delta_y;
-  scene->origin_z += scene->delta_z;
-  scene->delta_x = scene->delta_y = scene->delta_z = 0;
-  c = c->next_in_scene;
-  while (c) {
-    if (c->state == SPRITE_SORTED)
-      c->state = SPRITE_TRANSLATED;
-    c = c->next_in_scene;
-  }
-  scene->flags &= ~SCENE_NOTUPDATED;
-#ifdef DEBUG
-  printf("scene apply delta: (%d %d %d) flags = %x\n", scene->origin_x, scene->origin_y, scene->origin_z, scene->flags);
-#endif  
-}
-
-/// установка начальных значений минимума и максимума спрайтов
-void reset_min_max()
+/// Сброс минимальных и максимальных значений окна спрайтов
+void reset_sprites_rec()
 {
   sprites_rec.min_x = sprites_rec.min_y = 32000;
   sprites_rec.max_x = sprites_rec.max_y = -32000;
 }
 
-void print_rec(rectangle_t sprites_rec)
+/// Отладочная печать окна
+void print_rec(rectangle_t *rec)
 {
-  printf("min = (%d %d) max = (%d %d)\n", sprites_rec.min_x, sprites_rec.min_y, sprites_rec.max_x, sprites_rec.max_y);
+  printf("min = (%d %d) max = (%d %d)\n", rec->min_x, rec->min_y, rec->max_x, rec->max_y);
 }
 
-/// обновляем минимальные и макисмальные (x, y) координаты спрайтов
-void update_min_max(sprite_t *c)
+/// обновляем минимальные и макисмальные (x, y) координаты окна спрайтов
+void update_sprites_rec(sprite_t *c)
 {
   image_t *im = (image_t *)c->image;
   if (c->origin.z < 0)
@@ -83,77 +54,7 @@ void update_min_max(sprite_t *c)
     sprites_rec.max_y = max_y;
 #ifdef DEBUG
   printf("sprites rec: ");
-  print_rec(sprites_rec);
-#endif
-}
-
-/// арифметический сдвиг вправо
-int sar(int a, int c)
-{
-  int sign = a & (1 << 31);
-  int res = a;
-  for (int i = 0; i < c; i++)
-    res = (res >> 1) | sign;
-  return res;
-}
-
-/** 
- * Преобразование из мировых в оконные координаты
- * 
- * @param c спрайт
- * @param origin спроецированные координаты левого верхнего угла спрайта
- */
-void project_sprite(sprite_t *c, vec_t *origin)
-{
-  scene_t *sc = c->scene;
-  vec_t *v = vec_new(c->center.x - sc->origin_x, c->center.y - sc->origin_y, c->center.z - sc->origin_z);
-#ifdef DEBUG
-  printf("projection: vec (%d %d %d)\n", (*v).x, (*v).y, (*v).z);
-#endif
-  if (sc->tag & TAG_3D) {
-    printf("TAG 3D\n");
-    exit(1);
-  }
-  int y = (*v).y;
-  // оси y и z меняются местами, z направлена снизу вверх
-  (*v).y = sc->ay * (*v).y - (*v).z;
-  (*v).z = y;
-#ifdef DEBUG
-  //  printf("after matrix: (%d %d %d)\n", (*v).x, (*v).y, (*v).z);
-#endif
-  int vec_z = 0;
-  int vec_zz = sc->f24;
-  if (vec_zz < 0) {
-    // перемещение через матрицу проекции
-    (*v).x = sar((*v).x, sc->f23) + sc->f5;
-    (*v).y = sar((*v).y, sc->f23) + sc->f7;
-#ifdef DEBUG
-    //  printf("sar: f23 = %d f5 = %d f7 = %d (%d %d %d)\n", sc->f23, sc->f5, sc->f7, (*v).x, (*v).y, (*v).z);
-#endif
-    image_t *im = (image_t *)c->image;
-    // проверка типа изображения
-    // если тип не 3
-    if (im->type == 3) {
-      printf("image type 3\n");
-      exit(1);
-    }
-    // проверка c->f24 == 0
-    if (c->f24 != 0) {
-      printf("c->f24 != 0 %x\n", c->f24);
-      exit(1);
-    }
-    // был задан центр изображения
-    (*v).x -= im->maxx / 2; 
-    (*v).y -= im->maxy / 2; 
-  } else {
-    printf("vec_zz >= 0 not implemented\n");
-    exit(1);
-  }
-  memcpy(origin, v, sizeof(vec_t));
-  vec_delete(v);
-#ifdef DEBUG
-  // 0 -10 40
-  printf("origin: (%d %d %d)\n", origin->x, origin->y, origin->z);
+  print_rec(&sprites_rec);
 #endif
 }
 
@@ -221,7 +122,7 @@ void process_sprite(sprite_t *sc, sprite_t *c)
   project_sprite(c, &c->origin);
   // удаление спрайта из списка сцены
   sc->next_in_scene = c->next_in_scene;
-  update_min_max(c);
+  update_sprites_rec(c);
   sort_sprite(sc, c);
 #ifdef DEBUG
    dump_sprites();
@@ -311,13 +212,13 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   int cl = clip_sprite(sp, clip, &blit, 0);
 #ifdef DEBUG
   printf("Sprite blit: ");
-  print_rec(blit);
+  print_rec(&blit);
 #endif
   sp->max.x = mx;
   sp->max.y = my;
   if (!cl)
     return;
-  render_image(&sp->origin, im, sp->x_flip, &blit);
+  draw_image(&sp->origin, im, sp->x_flip, &blit);
 }
 
 void render_all_scenes()
@@ -327,16 +228,16 @@ void render_all_scenes()
   rectangle_t blit_rec;
   while (1) {
 #ifdef DEBUG
-    printf("Scene %x flags: %x tag: %x\n", (int)(s - scene_list_head), s->flags, s->tag);
+    printf("Scene %x flags: %x flags2: %x\n", (int)(s - scene_list_head), s->flags, s->flags2);
 #endif
     if (!(s->flags & SCENE_HIDDEN)) {
       spr = sprites + s->scene_sprite;
       if (clip_sprite(spr, &clip_rec, &blit_rec, 0)) {
 #ifdef DEBUG
 	printf("Blit rec: ");
-	print_rec(blit_rec);
+	print_rec(&blit_rec);
 #endif
-	if (!(s->tag & TAG_MOUSE)) {
+	if (!(s->flags2 & SCENE2_MOUSE)) {
 	  printf("Set mouse flags\n");
 	  exit(1);
 	}
@@ -362,44 +263,40 @@ void render_sprites(scene_t *scene, sprite_t *spr)
     return;
 #ifdef DEBUG
   printf("Clip rec: ");
-  print_rec(clip_rec);
+  print_rec(&clip_rec);
 #endif
   render_all_scenes();
-  if (scene->tag & TAG_NOBLIT) {
+  if (scene->flags2 & SCENE2_NOBLIT) {
     printf("Scene: no blit\n");
     exit(1);
   }
 }
 
 /** 
- * Рендеринг сцены, обход холстов
+ * Рендеринг сцены
  * если нет новых спрайтов, рендеринг не происходит
+ * если появились новые спрайты, то сцена перерисовывается
  * @param scene сцена
  * @param sprite голова списка холстов
  */
 void render_scene(scene_t *scene, sprite_t *sprite)
 {
-  int tag_flag2;
-  if (scene->flags & SCENE_NOTUPDATED)
-    scene_apply_delta(scene, sprite);
-  if (scene->tag & TAG_FLAG2)
-    tag_flag2 = 1;
-  if (scene->tag & TAG_FLAG1) {
-    printf("layer flag1\n");
+  if (scene->flags & SCENE_NOTTRANSLATED)
+    scene_translate(scene, sprite);
+  if (scene->flags2 & SCENE2_FLAG1) {
+    printf("scene2 flag1\n");
     exit(1);
   }
   sprite_t *sc_sprite = sprite;
   sprite = sprite->next_in_scene;
   while (sprite) {
-    draw_region_updated = 0;
     switch (sprite->state) {
     case SPRITE_SORTED:
       break;
     case SPRITE_NEW:
-      reset_min_max();
+      reset_sprites_rec();
       process_sprite(sc_sprite, sprite);
       process_new_sprites(sc_sprite);
-      draw_region_updated = 1;
       render_sprites(scene, sc_sprite);
       break;
     default: 
@@ -416,7 +313,7 @@ void render_update()
   scene_t *s = scene_list_head;
   while (1) {
 #ifdef DEBUG
-    printf("Rendering scene %x flags = %x tag = %x\n", (int)((byte *)s - memory), s->flags, s->tag);
+    printf("Rendering scene %x flags = %x flags2 = %x\n", (int)((byte *)s - memory), s->flags, s->flags2);
 #endif
     if (!(s->flags & SCENE_HIDDEN))
       render_scene(s, sprites + s->scene_sprite);
