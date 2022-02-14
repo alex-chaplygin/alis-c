@@ -33,6 +33,14 @@ int skip_palette = 0;
 byte palette[768];		/**< текущая палитра */
 byte load_palette[768];		/**< загружаемая палитра */
 
+void dump_palette()
+{
+  printf("palette: ");
+  for (int i = 0; i < 768; i++)
+    printf("%02x ", palette[i]);
+  printf("\n");
+}
+
 /** 
  * Появление / угасание палитры
  * шаг изменения текущей палитры к палитре назначения
@@ -63,9 +71,12 @@ void palette_fade_step()
  */
 void palette_update()
 {
-  if (need_to_update_palette != 0)
+  if (!need_to_update_palette)
     return;
-  //graphics_set_palette(palette);
+#ifdef DEBUG
+  printf("update palette\n");
+#endif
+  graphics_set_palette(palette);
   fade_ticks--;
   if (fade_ticks >= 0)
     return;
@@ -90,6 +101,9 @@ void palette_init_fade(int fade)
     printf("failed\n");
     exit(1);
   }
+#ifdef DEBUG
+  printf("fade = %d fade offset: %d param: %d\n", fade, fade_offset, palette_parameter);
+#endif
 }
 
 /** 
@@ -102,10 +116,6 @@ void palette_init_fade(int fade)
 void palette_load(byte *pal)
 {
   byte a;
-  /*if (skip_palette) {
-    skip_palette = 1;
-    return;
-    }*/
   palette_init_fade(prev_value);
   current_value = prev_value;
   palette_t *p = (palette_t *)pal;
@@ -125,7 +135,7 @@ void palette_load(byte *pal)
       fade_ticks = palette_parameter = palette_fade_ticks = 0;
       memcpy(palette, load_palette, sizeof(palette));
       need_to_update_palette = -1;
-      //graphics_set_palette(palette);
+      graphics_set_palette(palette);
       return;
     }
   } else {
@@ -146,6 +156,10 @@ void palette_load(byte *pal)
     } while (--p->count);
   }
   palette_fade_step();
+#ifdef DEBUG
+  dump_palette();
+#endif
+  //  exit(1);
   need_to_update_palette = 1;
 }
 
@@ -182,15 +196,12 @@ void palette_load_from_res()
 #ifdef DEBUG
   printf("palette load from res: fade = %d  res num= %d\n", prev_value, current_value);
 #endif
-  if (!skip_palette) {
-    if (current_value > 0) {
-      byte *pal = get_resource(current_value);
-      if (*pal == RES_PALETTE)
-	palette_load(pal);
-    } else {
-      printf("load new palette num = %d\n", current_value);
-      exit(1);
-    }
+  if (current_value < 0) {
+    printf("load palette res num < 0\n");
+    exit(1);
   }
+  byte *pal = get_resource(current_value);
+  if (*pal == RES_PALETTE)
+    palette_load(pal + 1);
   skip_palette = 0;
 }
