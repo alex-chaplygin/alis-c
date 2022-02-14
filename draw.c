@@ -14,10 +14,13 @@
 #include "image.h"
 #include "graphics.h"
 
-#define IMAGE_4_A 0		/**< 4 бита с прозрачностью */
-#define IMAGE_FILL 1		/**< заполнение постоянным цветом */
-#define IMAGE_8_A 0x14		/**< 8 бит с прозрачностью */
-
+enum image_type_e {		/**< типы изображений */
+  IMAGE_4_A = 0,		/**< 4 бита с прозрачностью */
+  IMAGE_FILL = 1,		/**< заполнение постоянным цветом */
+  IMAGE_4_A_PAL = 0x10,		/**< 4 бита с прозрачностью и смещением палитры */
+  IMAGE_8_A = 0x14,		/**< 8 бит с прозрачностью */
+};
+  
 int image_add;			/**< смещение на следующую строчку изображения */
 int video_add;			/**< семещение на следующую строчку для видео буфера */
 int num_cols;			/**< число столбцов */
@@ -67,16 +70,10 @@ void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, i
   if (!x_flip)
     pos += im->maxx + 1 - num_cols;
   blit_src = (byte *)(im + 1) + pos;
-  if (bit4)
-    blit_src -= 2;
   blit_dst = video_buffer + blit_rec->min_y * SCREEN_WIDTH + blit_rec->min_x;
 #ifdef DEBUG
   printf("draw setup: rows = %d cols = %d vid_add = %d im_add = %d x_fl = %d src = %d dst = %d odd = %d type = %x\n", num_rows, num_cols, video_add, image_add, x_flip, (int)(blit_src - (byte *)im), (int)(blit_dst - video_buffer), odd_data, im->type);
 #endif
-  if (x_flip) {
-    printf("xflip: test\n");
-    exit(1);
-  }
 }
 
 /** 
@@ -97,24 +94,36 @@ void fill_image(byte color)
  * Если цвет точки непрозрачный то выводит точку
  * 0 - прозрачный
  * @param c цвет точки
+ * @param x_flip зеркальное отражение
  */
-void draw_alpha_pixel(byte c)
+void draw_alpha_pixel(byte c, int x_flip)
 {
-  if (c)
-    *blit_dst++ = c;
-  else
-    ++blit_dst;
+  if (!x_flip) {
+    if (c)
+      *blit_dst++ = c;
+    else
+      ++blit_dst;
+  } else { // рисуем точки справо - налево
+    if (c)
+      *(blit_dst - 1) = c;
+    --blit_dst;
+  }
 }
 
 /** 
  * Рисует изображение 8 бит с прозрачностью.
  * 0 - прозрачный цвет
+ * @param x_flip зеркальное отражение
  */
-void draw_image_alpha()
+void draw_image_alpha(int x_flip)
 {
+  if (x_flip) {
+    printf("8 bit alpha x_flip\n");
+    exit(1);
+  }
   for (int y = 0; y < num_rows; y++) {
     for (int x = 0; x < num_cols; x++)
-      draw_alpha_pixel(*blit_src++);
+      draw_alpha_pixel(*blit_src++, x_flip);
     blit_src += image_add;
     blit_dst += video_add;
   }
@@ -123,23 +132,24 @@ void draw_image_alpha()
 /** 
  * Рисует изображение 4 бит с прозрачностью
  * 
+ * @param x_flip зеркальное отражение
+ * @param pal_ofs смещение в палитре
  */
-void draw_image4_alpha()
+void draw_image4_alpha(int x_flip, int pal_ofs)
 {
   byte c;
   byte c2;
-  int l = 0;
   int h = odd_data;
   for (int y = 0; y < num_rows; y++) {
     if (h) {
       c = *blit_src++;
-      draw_alpha_pixel((c & 0xf) + l);
+      draw_alpha_pixel((c & 0xf) + pal_ofs, x_flip);
     }
     for (int x = 0; x < num_cols; x++) {
       c = *blit_src++;
-      draw_alpha_pixel((c >> 4) + l);
+      draw_alpha_pixel((c >> 4) + pal_ofs, x_flip);
       ++x;
-      draw_alpha_pixel((c & 0xf) + l);
+      draw_alpha_pixel((c & 0xf) + pal_ofs, x_flip);
     }      
     blit_src += image_add;
     blit_dst += video_add;
@@ -163,11 +173,16 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
     break;
   case IMAGE_8_A:
     draw_setup(origin, im, x_flip, blit_rec, 0);
-    draw_image_alpha();
+    draw_image_alpha(x_flip);
     break;
   case IMAGE_4_A:
     draw_setup(origin, im, x_flip, blit_rec, 1);
-    draw_image4_alpha();
+    blit_src -= 2;
+    draw_image4_alpha(x_flip, 0);
+    break;
+  case IMAGE_4_A_PAL:
+    draw_setup(origin, im, x_flip, blit_rec, 1);
+    draw_image4_alpha(x_flip, im->palette_offset & 0xff);
     break;
   default:
     printf("Unknown image type: %x\n", im->type);
