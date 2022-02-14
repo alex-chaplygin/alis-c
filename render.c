@@ -135,6 +135,19 @@ void process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
 }
 
 /** 
+ * Удаление спрайта из списка сцены
+ * Возвращение спрайта в список свободных спрайтов
+ * @param prev предыдущий спрайт
+ * @param c удаляемый спрайт
+ */
+void delete_sprite(sprite_t *prev, sprite_t *c)
+{
+  prev->next_in_scene = c->next_in_scene;
+  c->next = free_sprite;
+  free_sprite = c;
+}
+
+/** 
  * Обработка вновь добавленных спрайтов: проецирование, сортировка
  * 
  * @param sc_sprite голова списка спрайтов
@@ -159,11 +172,14 @@ void process_new_sprites(sprite_t *sc_sprite)
       continue;
     else if (sprite->state < SPRITE_READY) {
       process_sprite(sc_sprite, prev, sprite);
-      sprite = prev;
+    } else if (sprite->state == SPRITE_UPDATED) {
+      update_sprites_rec(sprite);
+      process_sprite(sc_sprite, prev, sprite);
     } else {
-	printf("process_new_sprites: delete sprite\n");
-	exit(1);
+      update_sprites_rec(sprite);
+      delete_sprite(prev, sprite);
     }
+    sprite = prev;
   } while (1);
 }
 
