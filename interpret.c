@@ -229,9 +229,9 @@ func vm_op[] = {
   nimp, // b9
   nimp, // ba
   nimp, // bb
-  palette_fade_out, // bc
+  palette_clear_fade, // bc
   nimp, // bd
-  palette_load_from_res, //be
+  palette_set_fade, //be
 };
 
 /// Пустая команда

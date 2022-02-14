@@ -1,4 +1,4 @@
 void palette_load(byte *pal);
-void palette_fade_out();
+void palette_clear_fade();
 void palette_update();
-void palette_load_from_res();
+void palette_set_fade();

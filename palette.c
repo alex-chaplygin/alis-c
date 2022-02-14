@@ -31,8 +31,9 @@ int fade_offset = 0;		/**< шаг яркости в палитре для поя
 int palette_parameter;
 int skip_palette = 0;
 byte palette[768];		/**< текущая палитра */
-byte load_palette[768];		/**< загружаемая палитра */
+byte load_palette[768];		/**< палитра, к которой стремится текущая при появлении / увядании */
 
+/// печать текущей палитры
 void dump_palette()
 {
   printf("palette: ");
@@ -98,7 +99,7 @@ void palette_init_fade(int fade)
     palette_parameter = fade;
     fade_ticks = palette_fade_ticks = 1;
   } else {
-    printf("failed\n");
+    printf("palette_init_fade: failed\n");
     exit(1);
   }
 #ifdef DEBUG
@@ -163,8 +164,10 @@ void palette_load(byte *pal)
   need_to_update_palette = 1;
 }
 
-/// начало угасания палитры
-void palette_fade_out()
+/** 
+ * Очищает палитру и устанавливает скорость увядания
+ */
+void palette_clear_fade()
 {
   int fade;
   switch_get();
@@ -175,7 +178,7 @@ void palette_fade_out()
   need_to_update_palette = 1;
   skip_palette = 0;
 #ifdef DEBUG
-  printf("palette set fade = %d ticks = %d fade_offset = %d param = %d\n", prev_value, palette_fade_ticks, fade_offset, palette_parameter);
+  printf("palette clear: fade = %d ticks = %d fade_offset = %d param = %d\n", prev_value, palette_fade_ticks, fade_offset, palette_parameter);
   if (prev_value == 0xa) {
     ASSERT(fade_offset, 7)
       ASSERT(palette_parameter, 10)
@@ -187,17 +190,20 @@ void palette_fade_out()
 #endif
 }
 
-/// загрузка палитры по номеру ресурса
-void palette_load_from_res()
+/** 
+ * Загружает новую палитру из ресурса
+ * Устанавливает скорость появления
+ */
+void palette_set_fade()
 {
   load_main_image = 0;
   new_get();
   switch_get();
 #ifdef DEBUG
-  printf("palette load from res: fade = %d  res num= %d\n", prev_value, current_value);
+  printf("palette set: fade = %d  res num= %d\n", prev_value, current_value);
 #endif
   if (current_value < 0) {
-    printf("load palette res num < 0\n");
+    printf("palette_set  res_num < 0\n");
     exit(1);
   }
   byte *pal = get_resource(current_value);
