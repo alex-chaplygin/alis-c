@@ -99,8 +99,8 @@ int graphics_update()
     SDL_Delay(now - current_time);
   else
     current_time = now;
+  palette_update();
   // sound update
-  //palette_update();
   //printf("tick %i\n", now);
   SDL_UnlockSurface(screen);  
   SDL_RenderClear(renderer);
@@ -137,5 +137,8 @@ void graphics_set_palette(byte *palette)
       colors[i].g = *dst++;
       colors[i].b = *dst++;
   }
-  SDL_SetPaletteColors(screen->format->palette, colors, 0, 256);
+  if (SDL_SetPaletteColors(screen->format->palette, colors, 0, 256)) {
+    printf("palette error\n");
+    exit(1);
+  }
 }
