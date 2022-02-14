@@ -65,7 +65,7 @@ void palette_update()
 {
   if (need_to_update_palette != 0)
     return;
-  graphics_set_palette(palette);
+  //graphics_set_palette(palette);
   fade_ticks--;
   if (fade_ticks >= 0)
     return;
