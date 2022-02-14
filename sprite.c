@@ -250,28 +250,26 @@ void sprite_remove_from_scene_list(sprite_t *c)
 }
 
 /** 
- * Удаляет спрайт из списка потока. Если есть флаг сцены, или установлен
- * глобальный флаг удаления, то удаляется из списка сцены.
+ * Удаляет спрайт из списка потока.
+ * Для спрайта устанавливается состояние - удален, он будет
+ * удален из списка отрисовки при отрисовке
  * @param c спрайт
  * @return спрайт после удаленного
  */
 sprite_t *sprite_remove(sprite_t *c)
 {
-  if (!remove_from_scene && c->state >= SPRITE_READY)
+  if (remove_from_scene) {
+    printf("sprite remove: remove from scene\n");
+    exit(1);
+  }
+  if (c->state >= SPRITE_READY)
     c->state = SPRITE_REMOVED;
   if (!prev_sprite)
     run_thread->sprite_list = c->next;
   else
     prev_sprite->next = c->next;
-  if (remove_from_scene || c->state < SPRITE_READY) {
-    // добавление в список свободных спрайтов
-    c->next = free_sprite;
-    free_sprite = c;
-    sprite_remove_from_scene_list(c);
-  }
 #ifdef DEBUG
   printf("remove sprite: center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
-  dump_sprites();
 #endif  
   if (!prev_sprite)
     return run_thread->sprite_list;
@@ -297,19 +295,22 @@ sprite_t *sprite_next_on_tag(sprite_t *c, int tag)
   return 0;
 }
 
-/// очистка всех спрайтов объекта с заданным тегом
+/** 
+ * Удаление объекта с заданным тегом
+ * Все спрайты объекта удаляются
+ */
 void clear_object()
 {
   new_get();
   int tag = (byte)current_value;
+  int found;
   sprite_t *c;
 #ifdef DEBUG
   printf("clear object tag: %d\n", tag);
-  exit(1);
 #endif
   while (1) {
-    // c = sprite_find(tag);
-    if (!c) {
+    found = sprite_find(tag, &c);
+    if (!found) {
       remove_from_scene = 0;
       break;
     }
