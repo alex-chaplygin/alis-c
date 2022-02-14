@@ -56,49 +56,47 @@ byte *get_resource(int num)
   return pos + *(dword *)pos;
 }
 
+void delete_sprites(int tag)
+{
+  sprite_t *c;
+  int found = sprite_find(tag, &c);
+  if (found)
+    while (c) {
+      if (c->state == SPRITE_READY) {
+	printf("sprite ready to delete\n");
+	exit(1);
+      }
+      c = sprite_next_on_tag(c, tag);
+    }
+}
+
 /** 
- * Добавление нового изображения в список спрайтов текущей сцены
- * 1. is_subimage= 1 (для частей составного изображения)
- * 1.1. поиск места для добавления нового изображения по слою
- * 1.2 если точного совпадения слоя нет, добавляется новое изображение
- * поверх больших слоев или сцен
- * 1.2.1 если есть изображение с таким же слоем, тогда цикл пока есть
- * изображения с тем же слоем 
- * если найдется изображение с пустыми флагами, цикл прерывается
- * флаги устанавливаются в UPDATED и изображение заменяется на новое
- * если цикл завершен, и нет удаленных изображений, то новое 
- * изображение добавляется после всех на этом слое
- * 2. is_subimage = 0
- * 2.1 поиск места для добавления нового изображения по слою
- * 2.2 если точного совпадения слоя нет, добавляется новое изображение
- * поверх больших слоев или сцен
- * 2.2.1 если есть, то найденное изображение перезаписывается с флагом 
- * UPDATED
- * 2.3 цикл по слою, все изображения с флагом 0 удаляются из списка
+ * Добавление нового спрайта в список спрайтов текущей сцены
+ * Новый спрайт группируется по тегу с другими спрайтами одного объекта.
+ * Если объект с заданным тегом уже был, то он меняется на новую позицию
+ * или у него меняется изображение (в этом случае ставится состояние - 
+ * обновленный)
  * @param num номер изображения
- * @param origin координаты
+ * @param origin координаты центра спрайта
  * @param x_flip отражение по горизонтали
- * @param is_subimage 1 - для части составного изображения
+ * @param is_object 1 - для объекта, 0 - спрайт
  */
-void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
+void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
 {
   sprite_t *c;
   int found;
 #ifdef DEBUG
-  printf("sub image = %d (%d, %d, %d) xflip = %d num = %d tag = %d\n", is_subimage, origin->x, origin->y, origin->z, x_flip, num, tag); 
+  printf("add sprite %d (%d, %d, %d) xflip = %d num = %d tag = %d\n", is_object, origin->x, origin->y, origin->z, x_flip, num, tag); 
 #endif
+  if (image_flag) {
+    printf("image flag = 1\n");
+    exit(1);
+  }
   // ищем объект
   found = sprite_find(tag, &c);
   // если не найден, то добавляем
   if (!found)
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
-  else if (!is_subimage && !image_flag) {
-    printf("add_sprite: not subimage\n");
-    exit(1);
-    /*    if (*c->state < SPRITE_READY) 
-      *c->state = SPRITE_UPDATED;
-      sprite_set(*c, get_resource(num), x_flip, origin);*/
-  }
   else {
     while(c) {
       if (c->state == SPRITE_READY) {
@@ -113,26 +111,8 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_subimage, int tag)
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
   }
  end:
-  // если is_subimage == 0, то
-  // ищется верхний спрайт слоя, если нет, то добавляется новый спрайт
-  // проверяются флаги, если не 0xff, то флаги присваиваются в 2
-  if (!is_subimage) {
-    printf("add_sprite: subimage = 0\n");
-    exit(1);
-    found = sprite_find(tag, &c);
-    while (c) {
-      c = sprite_next_on_tag(c, tag);
-      if (!c)
-	break;
-      if (c->state == SPRITE_READY)
-	c = sprite_remove(c);
-      if (c)
-	if (run_thread->current_scene != c->scene ||
-	    c->tag != tag)
-	  break;
-    }
-    exit(1);
-  }
+  if (!is_object)
+    delete_sprites(tag);
   image_flag = 0;
 }
 
@@ -170,6 +150,7 @@ void load_object(byte *img, vec_t *coord, int x_flip, int tag)
     add_sprite(num, &vec, x_fl, 1, tag);
     sub++;
   }
+  delete_sprites(tag);
   image_flag = 0;
 }
 
@@ -190,7 +171,7 @@ void load_resource(vec_t *coord, int x_flip, int tag)
     palette_load(img + 1);
   } else if (*img == RES_OBJECT)
     load_object(img, coord, x_flip, tag);
-  else
+  else 
     add_sprite(current_value, coord, x_flip, 0, tag);
 }
 
