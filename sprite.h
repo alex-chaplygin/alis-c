@@ -5,12 +5,14 @@
 #include "scene.h"
 
 /// состояния спрайтов
-#define SPRITE_CURSOR -2		/**< спрайт курсора */
-#define SPRITE_NEW -1		/**< новый спрайт */
-#define SPRITE_READY 0		/**< спрайт готов к отрисовке */
-#define SPRITE_REMOVED 1
-#define SPRITE_UPDATED 2	/**< спрайт после обновления координат или изображения */
-
+enum sprite_state_e {
+  SPRITE_CURSOR = -2,		/**< спрайт курсора */
+  SPRITE_NEW = -1,		/**< новый спрайт */
+  SPRITE_READY = 0,		/**< спрайт готов к отрисовке */
+  SPRITE_REMOVED = 1,
+  SPRITE_UPDATED = 2,	/**< спрайт после обновления координат или изображения */
+};
+  
 typedef struct sprite_s {
   vec_t origin;			/**< координаты левого верхнего угла спрайта */
   union {

@@ -13,7 +13,7 @@ typedef struct {
   };
   word maxx;			/**< ширина - 1*/
   word maxy;			/**< высота - 1 */
-  word brightness;
+  word palette_offset;		/**< смещение палитры для некоторых типов */
 } image_t;
 
 /// координатное окно
