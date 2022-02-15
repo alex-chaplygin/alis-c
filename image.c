@@ -56,6 +56,12 @@ byte *get_resource(int num)
   return pos + *(dword *)pos;
 }
 
+/** 
+ * Удаляет спрайты с заданным тегом, если у них состояние - готов
+ * Используется для изменения отдельных спрайтов (не объектов)
+ * когда новый спрайт добавляется в список, а старый - удаляется
+ * @param tag 
+ */
 void delete_sprites(int tag)
 {
   sprite_t *c;
@@ -63,10 +69,15 @@ void delete_sprites(int tag)
   if (found)
     while (c) {
       if (c->state == SPRITE_READY) {
-	printf("sprite ready to delete\n");
-	exit(1);
-      }
-      c = sprite_next_on_tag(c, tag);
+	c = sprite_remove(c);
+	if (!c)
+	  break;
+	if (run_thread->current_scene != c->scene)
+	  break;
+	if (tag != c->tag)
+	  break;
+      } else
+	c = sprite_next_on_tag(c, tag);
     }
 }
 
