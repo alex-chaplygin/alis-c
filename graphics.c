@@ -16,7 +16,7 @@
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define FPS 30			/**< число кадров в секунду */
+#define FPS 20			/**< число кадров в секунду */
 
 int mouse_x;
 int mouse_y;
@@ -133,9 +133,9 @@ void graphics_set_palette(byte *palette)
   SDL_Color colors[256];
   byte *dst = palette;
   for(int i = 0; i < 256; i++) {
-      colors[i].r = *dst++;
-      colors[i].g = *dst++;
-      colors[i].b = *dst++;
+    colors[i].r = *dst++ << 2;
+    colors[i].g = *dst++ << 2;
+    colors[i].b = *dst++ << 2;
   }
   if (SDL_SetPaletteColors(screen->format->palette, colors, 0, 256)) {
     printf("palette error\n");
