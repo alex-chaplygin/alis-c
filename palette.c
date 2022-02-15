@@ -34,12 +34,13 @@ byte palette[768];		/**< текущая палитра */
 byte load_palette[768];		/**< палитра, к которой стремится текущая при появлении / увядании */
 
 /// печать текущей палитры
-void dump_palette()
+void dump_palette(byte *palette)
 {
-  printf("palette: ");
-  for (int i = 0; i < 768; i++)
-    printf("%02x ", palette[i]);
-  printf("\n");
+  for (int i = 0; i < 768 / 16; i++) {
+    for (int j = 0; j < 16; j++)
+      printf("%02x ", palette[i * 16 + j]);
+    printf("\n");
+  }
 }
 
 /** 
@@ -76,6 +77,10 @@ void palette_update()
     return;
 #ifdef DEBUG
   printf("update palette\n");
+  printf("load palette:\n");
+  dump_palette(load_palette);
+  printf("palette:\n");
+  dump_palette(palette);
 #endif
   graphics_set_palette(palette);
   fade_ticks--;
@@ -126,41 +131,20 @@ void palette_load(byte *pal)
   int ofs = p->color_index * 3;
   byte *src = (byte *)(p + 1);
   byte *dst = load_palette + ofs;
-  if (p->count) {
-    for (int i = 0; i < p->count; i++)
-      for (int j = 0; j < 3; j++)
-	*dst++ = *src++ >> 2;
-  // если медленная скорость то fade_ticks = 0 param = 0 current = 0
-    if (!current_value) {
-      // без появления / увядания
-      fade_ticks = palette_parameter = palette_fade_ticks = 0;
-      memcpy(palette, load_palette, sizeof(palette));
-      need_to_update_palette = -1;
-      graphics_set_palette(palette);
-      return;
-    }
-  } else {
-    src -= 2;
-    do {
-      a = *src++ << 3;
-      if (a)
-	a |= 7;
-      *dst++ = a;
-      a = *src & 0xf0 >> 1;
-      if (a)
-	a |= 7;
-      *dst++ = a;
-      a = *src++ & 0xf << 3;
-      if (a)
-	a |= 7;
-      *dst++ = a;
-    } while (--p->count);
+  if (p->count == 1) {
+    printf("palette load: count = 1\n");
+    exit(1);
   }
+  for (int i = 0; i < p->count + 1; i++)
+    for (int j = 0; j < 3; j++)
+      *dst++ = *src++ >> 2;
   palette_fade_step();
 #ifdef DEBUG
-  dump_palette();
+  printf("load palette:\n");
+  dump_palette(load_palette);
+  printf("palette:\n");
+  dump_palette(palette);
 #endif
-  //  exit(1);
   need_to_update_palette = 1;
 }
 
@@ -202,6 +186,10 @@ void palette_set_fade()
 #ifdef DEBUG
   printf("palette set: fade = %d  res num= %d\n", prev_value, current_value);
 #endif
+  if (skip_palette) {
+    printf("palette set: skip palette = 1\n");
+    exit(1);
+  }
   if (current_value < 0) {
     printf("palette_set  res_num < 0\n");
     exit(1);
