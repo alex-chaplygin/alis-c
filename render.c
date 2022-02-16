@@ -241,7 +241,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   rectangle_t blit;
   image_t *im = (image_t *)sp->render_image;
 #ifdef DEBUG
-  printf("Rendering sprite: origin(%d %d %d)size(%d %d)\n", sp->origin.x, sp->origin.y, sp->origin.z, im->maxx, im->maxy);
+  printf("Rendering sprite: origin(%d %d %d)size(%d %d)type(%x)\n", sp->origin.x, sp->origin.y, sp->origin.z, im->maxx, im->maxy, im->type);
 #endif
   int mx = sp->max.x;
   int my = sp->max.y;
