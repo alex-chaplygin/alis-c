@@ -141,4 +141,13 @@ void graphics_set_palette(byte *palette)
     printf("palette error\n");
     exit(1);
   }
+#ifdef DEBUG
+  /*dst = video_buffer;
+  for (int i = 0; i < 16; i++) 
+    for (int k = 0; k < 8; k++) {
+      for (int j = 0; j < 16 * 16; j++)
+	*dst++ = i * 16 + j / 16;
+      dst += SCREEN_WIDTH - 16 * 16;
+      }*/
+#endif
 }
