@@ -65,9 +65,13 @@ byte *get_resource(int num)
 void delete_sprites(int tag)
 {
   sprite_t *c;
+  sprite_t *c2;
   int found = sprite_find(tag, &c);
   if (found)
     while (c) {
+#ifdef DEBUG
+      printf("delete_sprites: check sprite center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
+#endif
       if (c->state == SPRITE_READY) {
 	c = sprite_remove(c);
 	if (!c)
@@ -76,8 +80,12 @@ void delete_sprites(int tag)
 	  break;
 	if (tag != c->tag)
 	  break;
-      } else
-	c = sprite_next_on_tag(c, tag);
+      } else {
+	found = sprite_next_on_tag(c, tag, &c2);
+	c = c2;
+	if (!found)
+	  break;
+      }
     }
 }
 
@@ -95,6 +103,7 @@ void delete_sprites(int tag)
 void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
 {
   sprite_t *c;
+  sprite_t *c2;
   int found;
 #ifdef DEBUG
   printf("add sprite %d (%d, %d, %d) xflip = %d num = %d tag = %d\n", is_object, origin->x, origin->y, origin->z, x_flip, num, tag); 
@@ -117,7 +126,10 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
 	sprite_set(c, get_resource(num), x_flip, origin);
 	goto end;
       }
-      c = sprite_next_on_tag(c, tag);
+      found = sprite_next_on_tag(c, tag, &c2);
+      c = c2;
+      if (!found)
+	break;
     }
     sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
   }

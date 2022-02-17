@@ -278,20 +278,21 @@ sprite_t *sprite_remove(sprite_t *c)
 }
 
 /** 
- * Перемещается на следующий спрайт по одному слою
+ * Ищет следующий спрайт по заданному тегу
  * 
  * @param c текущий спрайт
  * @param tag слой
- * 
- * @return следующий спрайт или 0, если слой закончился или сцена закончилась или список закончился
+ * @param c2 указатель куда будет записан спрайт, следующий за найденным или
+ * спрайт, где останавливается поиск
+ * @return 0 - если поиск остановлен, иначе 1
  */
-sprite_t *sprite_next_on_tag(sprite_t *c, int tag)
+int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2)
 {
   prev_sprite = c;
-  sprite_t *c2 = c->next;
-  if (c2 && run_thread->current_scene == c2->scene)
-    if (c2->tag == tag)
-      return c2;
+  *c2 = c->next;
+  if (*c2 && run_thread->current_scene == (*c2)->scene)
+    if ((*c2)->tag == tag)
+      return 1;
   return 0;
 }
 

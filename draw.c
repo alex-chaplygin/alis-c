@@ -94,18 +94,20 @@ void fill_image(byte color)
  * Если цвет точки непрозрачный то выводит точку
  * 0 - прозрачный
  * @param c цвет точки
+ * @param pal_ofs смещение в палитре
  * @param x_flip зеркальное отражение
  */
-void draw_alpha_pixel(byte c, int x_flip)
+void draw_alpha_pixel(byte c, int pal_ofs, int x_flip)
 {
+  printf("%02X ", c);
   if (!x_flip) {
     if (c)
-      *blit_dst++ = c;
+      *blit_dst++ = c + pal_ofs;
     else
       ++blit_dst;
   } else { // рисуем точки справо - налево
     if (c)
-      *(blit_dst - 1) = c;
+      *(blit_dst - 1) = c + pal_ofs;
     --blit_dst;
   }
 }
@@ -123,7 +125,7 @@ void draw_image_alpha(int x_flip)
   }
   for (int y = 0; y < num_rows; y++) {
     for (int x = 0; x < num_cols; x++)
-      draw_alpha_pixel(*blit_src++, x_flip);
+      draw_alpha_pixel(*blit_src++, 0, x_flip);
     blit_src += image_add;
     blit_dst += video_add;
   }
@@ -143,13 +145,13 @@ void draw_image4_alpha(int x_flip, int pal_ofs)
   for (int y = 0; y < num_rows; y++) {
     if (h) {
       c = *blit_src++;
-      draw_alpha_pixel((c & 0xf) + pal_ofs, x_flip);
-    }
+      draw_alpha_pixel((c & 0xf), pal_ofs, x_flip);
+      }
     for (int x = 0; x < num_cols; x++) {
       c = *blit_src++;
-      draw_alpha_pixel((c >> 4) + pal_ofs, x_flip);
+      draw_alpha_pixel((c >> 4), pal_ofs, x_flip);
       ++x;
-      draw_alpha_pixel((c & 0xf) + pal_ofs, x_flip);
+      draw_alpha_pixel((c & 0xf), pal_ofs, x_flip);
     }      
     blit_src += image_add;
     blit_dst += video_add;
@@ -182,7 +184,7 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
     break;
   case IMAGE_4_A_PAL:
     draw_setup(origin, im, x_flip, blit_rec, 1);
-    draw_image4_alpha(x_flip, im->palette_offset & 0xff);
+    draw_image4_alpha(x_flip, im->palette_offset);
     break;
   default:
     printf("Unknown image type: %x\n", im->type);
