@@ -43,6 +43,7 @@ byte *blit_dst;			/**< указатель на видеобуфер */
 void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, int bit4)
 {
   odd_data = 0;
+  // сколько по горизонтали не рисуется точек изображения
   image_add = im->maxx - blit_rec->max_x + blit_rec->min_x;
   if (bit4)
     image_add >>= 1;
@@ -54,20 +55,33 @@ void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, i
   num_cols = blit_rec->max_x - blit_rec->min_x + 1;
   num_rows = blit_rec->max_y - blit_rec->min_y + 1;
   int pos = blit_rec->min_y - origin->y;
-  if (pos > 0)
+  if (pos > 0) {
     pos = pos * (im->maxx + 1);
+    if (bit4) {
+      printf("bit 4 pos > 0 pos = %d\n", pos);
+      exit(1);
+    }
+  }
   int posx = blit_rec->min_x - origin->x;
   if (posx > 0) {
-    if (bit4 && posx & 1) {
+    if (bit4 && (posx & 1)) {
       odd_data = 1;
       if (!(num_cols & 1))
 	--image_add;
-    }
+	}
     if (bit4)
       posx >>= 1;
     pos += (x_flip) ? -posx : posx;
   }
-  if (!x_flip)
+  if (x_flip & bit4) {
+    int t = im->maxx + origin->x - blit_rec->max_x;
+    if (t > 0 && t & 1) {
+      odd_data = 1;
+      if (!(num_cols & 1))
+	pos--;
+    }
+    pos += (im->maxx + 1 - num_cols) >> 1;
+  } else if (x_flip)
     pos += im->maxx + 1 - num_cols;
   blit_src = (byte *)(im + 1) + pos;
   blit_dst = video_buffer + blit_rec->min_y * SCREEN_WIDTH + blit_rec->min_x;
@@ -99,7 +113,6 @@ void fill_image(byte color)
  */
 void draw_alpha_pixel(byte c, int pal_ofs, int x_flip)
 {
-  printf("%02X ", c);
   if (!x_flip) {
     if (c)
       *blit_dst++ = c + pal_ofs;
@@ -142,16 +155,23 @@ void draw_image4_alpha(int x_flip, int pal_ofs)
   byte c;
   byte c2;
   int h = odd_data;
+  if (h)
+    num_cols--;
   for (int y = 0; y < num_rows; y++) {
     if (h) {
       c = *blit_src++;
-      draw_alpha_pixel((c & 0xf), pal_ofs, x_flip);
-      }
+      draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
+      //      draw_alpha_pixel(0xff, 0, x_flip);
+    }
     for (int x = 0; x < num_cols; x++) {
       c = *blit_src++;
-      draw_alpha_pixel((c >> 4), pal_ofs, x_flip);
+      draw_alpha_pixel(c >> 4, pal_ofs, x_flip);
+      //draw_alpha_pixel(0xff, 0, x_flip);
       ++x;
-      draw_alpha_pixel((c & 0xf), pal_ofs, x_flip);
+      if (x == num_cols)
+	break;
+      draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
+      //draw_alpha_pixel(0xff, 0, x_flip);
     }      
     blit_src += image_add;
     blit_dst += video_add;
