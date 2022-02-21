@@ -73,7 +73,7 @@ void delete_sprites(int tag)
       printf("delete_sprites: check sprite center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
 #endif
       if (c->state == SPRITE_READY) {
-	c = sprite_remove(c);
+	c = sprite_remove(c, 0);
 	if (!c)
 	  break;
 	if (run_thread->current_scene != c->scene)
