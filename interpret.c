@@ -22,6 +22,7 @@
 #include "palette.h"
 #include "append.h"
 #include "image.h"
+#include "sound.h"
 
 byte *current_ip;		/**< указатель команд */
 thread_t *run_thread;		/**< текущий выполняемый поток */
@@ -138,7 +139,7 @@ func vm_op[] = {
   nimp, // 5e
   nimp, // 5f
   nimp, // 60  
-  nimp, // 61
+  thread_send_message, // 61
   thread_clear_state0, // 62
   nimp, // 63
   thread_no_start3, // 64
@@ -150,7 +151,7 @@ func vm_op[] = {
   set_frame_num, // 6a
   nimp, // 6b
   nimp, // 6c
-  nimp, // 6d
+  play_sound, // 6d
   nimp, // 6e
   nimp, // 6f
   nimp, // 70
