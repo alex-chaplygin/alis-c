@@ -27,7 +27,6 @@ sprite_t *sprite2;
 sprite_t *cursor_sprite;	/**< спрайт курсора мыши */
 sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
 sprite_t *prev_sprite;		/**< предыдущий спрайт в списке текущего потока */
-int remove_from_scene = 0;		/**< если 1 - то спрайты удаляются из сцены */
 int sprite_flags;
 vec_t translate;			/**< вектор перемещения для всех спрайтов */
 int reg4;
@@ -254,14 +253,12 @@ void sprite_remove_from_scene_list(sprite_t *c)
  * Для спрайта устанавливается состояние - удален, он будет
  * удален из списка отрисовки при отрисовке
  * @param c спрайт
+ * @param remove_from_scene если 1 - то спрайт будет удален из списка
+ * сцены и возвращен в список свободных спрайтов
  * @return спрайт после удаленного
  */
-sprite_t *sprite_remove(sprite_t *c)
+sprite_t *sprite_remove(sprite_t *c, int remove_from_scene)
 {
-  if (remove_from_scene) {
-    printf("sprite remove: remove from scene\n");
-    exit(1);
-  }
   if (c->state >= SPRITE_READY)
     c->state = SPRITE_REMOVED;
   if (!prev_sprite)
@@ -271,6 +268,11 @@ sprite_t *sprite_remove(sprite_t *c)
 #ifdef DEBUG
   printf("remove sprite: center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
 #endif  
+  if (remove_from_scene) {
+    c->next = free_sprite;
+    free_sprite = c;
+    sprite_remove_from_scene_list(c);
+  }
   if (!prev_sprite)
     return run_thread->sprite_list;
   else
@@ -312,11 +314,29 @@ void clear_object()
   while (1) {
     found = sprite_find(tag, &c);
     if (!found) {
-      remove_from_scene = 0;
       break;
     }
-    c = sprite_remove(c);
+    c = sprite_remove(c, 0);
   };
+#ifdef DEBUG
+  dump_sprites();
+#endif
+}
+
+/** 
+ * Удаляет все спрайты из списка потока
+ * 
+ * @param sp первый спрайт списка
+ * @param remove если 1 - то полное удаление из всех списков
+ */
+void remove_all_sprites(sprite_t *sp, int remove)
+{
+#ifdef DEBUG
+  printf("remove all sprites\n");
+#endif
+  prev_sprite = 0;
+  while (sp)
+    sp = sprite_remove(sp, remove);
 #ifdef DEBUG
   dump_sprites();
 #endif
