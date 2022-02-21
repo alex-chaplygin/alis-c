@@ -15,6 +15,7 @@
 #include "script.h"
 #include "interpret.h"
 #include "render.h"
+#include "get.h"
 
 thread_table_t *threads_table; /**< таблица потоков */
 int max_threads;		/**< максимальное количество потоков */
@@ -75,11 +76,11 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   memset(t, 0, sizeof(thread_t));
   tb->thread = t;
 #ifdef DEBUG
-  printf("Setup thread: id = %x, size = %d, stack = %d, data = %d, param = %d\n",
-	 h->id, size, h->stack_size, h->data_size, h->param_size);
+  printf("Setup thread: id = %x, size = %d, stack = %d, data = %d, msg = %d\n",
+	 h->id, size, h->stack_size, h->data_size, h->msg_size);
 #endif
   t->call_stack = stack_new(h->stack_size);
-  t->param_stack = stack_new(h->param_size);
+  t->msg_stack = stack_new(h->msg_size);
   t->data = memory_alloc(h->data_size);
   t->ip = script + h->entry + 2;
   t->script = script;
@@ -160,7 +161,7 @@ void threads_run()
     printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x\n", t->id, (int)t->ip, t->frames_to_skip, t->cur_frames_to_skip, t->running);
 #endif
     no_saved_return = 0;
-    if (t->state & STATE_FLAG7) // bit 7
+    if (t->state & STATE_MSG) // bit 7
       if (t->state & STATE_START3) // bit 1
 	if (t->header->entry3) {
 	  t->saved_sp = t->call_stack->sp;
@@ -210,5 +211,35 @@ void thread_clear_state0()
   run_thread->state &= ~STATE_FLAG0;
 #ifdef DEBUG
   printf("clear state 0: %x\n", run_thread->state);
+#endif
+}
+
+/** 
+ * Передает сообщение потоку через стек сообщений.
+ * Сообщение - это определенное количество данных,
+ * которые заносятся в стек.
+ */
+void thread_send_message()
+{
+  int count = fetch_byte() + 1;
+  new_get();
+  if (current_value == -1) {
+    printf("thread_state thread == -1\n");
+    exit(1);
+  }
+#ifdef DEBUG
+  printf("send message thread: %d count: %d\n", current_value, count);
+#endif
+  thread_t *t = threads_table[current_value / 6].thread;
+  while (count--) {
+    new_get();
+#ifdef DEBUG
+    printf("param = %x; %d\n", current_value, current_value);
+#endif
+    stack_push(t->msg_stack, current_value);
+  }
+  t->state |= STATE_MSG;
+#ifdef DEBUG
+    printf("state = %x\n", t->state);
 #endif
 }

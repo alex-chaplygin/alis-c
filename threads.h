@@ -7,7 +7,7 @@
 
 #define STATE_FLAG0 (1 << 0)
 #define STATE_START3 (1 << 1)	/**< запуск сценария 3 каждый фрейм */
-#define STATE_FLAG7 (1 << 7)
+#define STATE_MSG (1 << 7) /**< есть сообщения для потока */
 
 #pragma pack(1)
 
@@ -24,9 +24,9 @@ typedef struct {
   byte u4;
   byte u5;
   dword resources;		/**< адрес таблицы ресурсов */
-  word stack_size;		/**< размер стека */
+  word stack_size;		/**< размер стека вызовов */
   word data_size;		/**< размер сегмента данных */
-  word param_size;		/**< размер параметров */
+  word msg_size;		/**< размер стека сообщений */
 } script_t;
 
 /// структура потока
@@ -34,7 +34,7 @@ typedef struct thread_s {
   int id;			/**< номер сценария */
   stack_t *call_stack;		/**< стек вызовов */
   int *saved_sp;		/**< сохраненный указатель стека */
-  stack_t *param_stack;		/**< стек параметров?? */
+  stack_t *msg_stack;		/**< стек сообщений потоку */
   seg_t *data;			/**< сегмент данных */
   byte *ip;			/**< текущий указатель команд */
   byte *script;			/**< образ сценария (содержит код и ресурсы) */
@@ -69,6 +69,7 @@ void threads_run();
 
 void thread_no_start3();
 void thread_clear_state0();
+void thread_send_message();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
