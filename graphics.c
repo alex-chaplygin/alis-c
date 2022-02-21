@@ -16,7 +16,7 @@
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define FPS 20			/**< число кадров в секунду */
+#define FPS 10			/**< число кадров в секунду */
 
 int mouse_x;
 int mouse_y;
