@@ -161,3 +161,17 @@ byte *memory_read(int pos)
   }
   return memory + pos;
 }
+
+/// освобождение памяти для стека
+void stack_free(stack_t *s)
+{
+  free(s->data);
+  free(s);
+}
+
+/// освобождение памяти сегмента
+void memory_free(seg_t *s)
+{
+  free(s->data);
+  free(s);
+}

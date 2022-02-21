@@ -24,6 +24,8 @@ byte *seg_read(seg_t * s, word adr);
 void seg_write_byte(seg_t* s, word adr, byte b);
 void seg_write_word(seg_t* s, word adr, word w);
 byte *memory_read(int pos);
+void stack_free(stack_t *s);
+void memory_free(seg_t *s);
 
 extern byte *memory;		/**< главная общая память данных потоков */
 
