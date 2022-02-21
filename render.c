@@ -40,17 +40,21 @@ void print_rec(rectangle_t *rec)
 void update_sprites_rec(sprite_t *c)
 {
   image_t *im = (image_t *)c->render_image;
+#ifdef DEBUG
+  printf("prev sprites rec: ");
+  print_rec(&sprites_rec);
+#endif
   if (c->origin.z < 0)
     return;
-  if (c->origin.x <= sprites_rec.min_y)
+  if (c->origin.x < sprites_rec.min_x)
     sprites_rec.min_x = c->origin.x;
   int max_x = c->origin.x + im->maxx;
-  if (max_x >= sprites_rec.max_x)
+  if (max_x > sprites_rec.max_x)
     sprites_rec.max_x = max_x;
-  if (c->origin.y <= sprites_rec.min_y)
+  if (c->origin.y < sprites_rec.min_y)
     sprites_rec.min_y = c->origin.y;
   int max_y = c->origin.y + im->maxy;
-  if (max_y >= sprites_rec.max_y)
+  if (max_y > sprites_rec.max_y)
     sprites_rec.max_y = max_y;
 #ifdef DEBUG
   printf("image rec: %d %d\n", im->maxx, im->maxy);
@@ -64,8 +68,8 @@ void update_sprites_rec(sprite_t *c)
  * Идет сортировка по убыванию z координаты, затем по порядку (order),
  * по убыванию тегов. Состояние спрайта становится - READY - готов к 
  * отрисовке
- * @param sc холст сцены
- * @param sprite текущий холст
+ * @param sc спрайт сцены
+ * @param sprite текущий спрайт
  * @return спрайт перед которым добавляется новый, если новый спрайт в конце списка, то возвращается он
  */
 sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
@@ -103,13 +107,10 @@ sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
   sprite->next_in_scene = c;
   prev->next_in_scene = sprite;
   sprite->state = SPRITE_READY;
-  if (c != sc)
+  if (prev != sc)
     return sc;
-  else {
-    printf("sort sprites: insert before scene sprite\n");
-    exit(1);
+  else 
     return sprite;
-  }
 }
 
 /** 
@@ -119,7 +120,7 @@ sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
  * @param prev предыдущий спрайт
  * @param c текущий спрайт
  */
-void process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
+sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
 {
   // устанавливаем левый верхний угол после проецирования
   project_sprite(c, &c->origin);
@@ -128,20 +129,23 @@ void process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
   // устанавливаем изображение отрисовки
   c->render_image = c->image;
   update_sprites_rec(c);
-  sort_sprite(sc, c);
+  sprite_t *s = sort_sprite(sc, c);
 #ifdef DEBUG
    dump_sprites();
 #endif
+   return prev;
 }
 
 /** 
  * Удаление спрайта из списка сцены
+ * Место, где был спрайт добавляется в прямоугольник перерисовки
  * Возвращение спрайта в список свободных спрайтов
  * @param prev предыдущий спрайт
  * @param c удаляемый спрайт
  */
 void delete_sprite(sprite_t *prev, sprite_t *c)
 {
+  update_sprites_rec(c);
   prev->next_in_scene = c->next_in_scene;
   c->next = free_sprite;
   free_sprite = c;
@@ -175,10 +179,8 @@ void process_new_sprites(sprite_t *sc_sprite)
     } else if (sprite->state == SPRITE_UPDATED) {
       update_sprites_rec(sprite);
       process_sprite(sc_sprite, prev, sprite);
-    } else {
-      update_sprites_rec(sprite);
+    } else 
       delete_sprite(prev, sprite);
-    }
     sprite = prev;
   } while (1);
 }
@@ -254,7 +256,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
 #endif
   sp->max.x = mx;
   sp->max.y = my;
-  if (!cl)
+  if (!cl) 
     return;
   draw_image(&sp->origin, im, sp->x_flip, &blit);
 }
@@ -276,7 +278,11 @@ void render_all_scenes()
 #endif
     if (!(s->flags & SCENE_HIDDEN)) {
       spr = sprites + s->scene_sprite;
-      if (clip_sprite(spr, &clip_rec, &blit_rec, 0)) {
+      /*clip_rec.min_x = 0;
+      clip_rec.min_y = 0;
+      clip_rec.max_x = 319;
+      clip_rec.max_y = 199;*/
+      if (clip_sprite(spr, &clip_rec, &blit_rec, 1)) {
 #ifdef DEBUG
 	printf("Blit rec: ");
 	print_rec(&blit_rec);
@@ -312,12 +318,13 @@ void render_sprites(scene_t *scene, sprite_t *spr)
 {
   if (scene->flags & SCENE_HIDDEN)
     return;
-  if (!clip_sprite(spr, &sprites_rec, &clip_rec, 1))
-    return;
+  int clip = clip_sprite(spr, &sprites_rec, &clip_rec, 1);
 #ifdef DEBUG
   printf("Clip rec: ");
   print_rec(&clip_rec);
 #endif
+  if (!clip)
+    return;
   render_all_scenes();
   if (scene->flags2 & SCENE2_NOBLIT) {
     printf("Scene: no blit\n");
@@ -344,21 +351,20 @@ void render_scene(scene_t *scene, sprite_t *sprite)
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
   sprite = sprite->next_in_scene;
+  reset_sprites_rec();
   while (sprite) {
     switch (sprite->state) {
     case SPRITE_READY:
       break;
     case SPRITE_NEW:
-      reset_sprites_rec();
-      process_sprite(sc_sprite, prev, sprite);
-      process_new_sprites(sc_sprite);
+      sprite = process_sprite(sc_sprite, prev, sprite);
+      process_new_sprites(sprite);
       render_sprites(scene, sc_sprite);
       break;
     case SPRITE_UPDATED:
-      reset_sprites_rec();
       update_sprites_rec(sprite);// прямоугольник рассчитан на предыдущую позицию объекта
-      process_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
-      process_new_sprites(sc_sprite);
+      sprite = process_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
+      process_new_sprites(sprite);
       render_sprites(scene, sc_sprite);
       break;
     default: 
