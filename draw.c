@@ -57,10 +57,8 @@ void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, i
   int pos = blit_rec->min_y - origin->y;
   if (pos > 0) {
     pos = pos * (im->maxx + 1);
-    if (bit4) {
-      printf("bit 4 pos > 0 pos = %d\n", pos);
-      exit(1);
-    }
+    if (bit4)
+      pos >>= 1;
   }
   int posx = blit_rec->min_x - origin->x;
   if (posx > 0) {
@@ -161,17 +159,14 @@ void draw_image4_alpha(int x_flip, int pal_ofs)
     if (h) {
       c = *blit_src++;
       draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
-      //      draw_alpha_pixel(0xff, 0, x_flip);
     }
     for (int x = 0; x < num_cols; x++) {
       c = *blit_src++;
       draw_alpha_pixel(c >> 4, pal_ofs, x_flip);
-      //draw_alpha_pixel(0xff, 0, x_flip);
       ++x;
       if (x == num_cols)
 	break;
       draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
-      //draw_alpha_pixel(0xff, 0, x_flip);
     }      
     blit_src += image_add;
     blit_dst += video_add;
