@@ -233,6 +233,38 @@ func vm_op[] = {
   palette_clear_fade, // bc
   nimp, // bd
   palette_set_fade, //be
+  nimp, // bf
+  nimp, // c0
+  nimp, // c1
+  nimp, // c2
+  nimp, // c3
+  nimp, // c4
+  nimp, // c5
+  nimp, // c6
+  nimp, // c7
+  null_op, // c8
+  null_op, // c9
+  nimp, // ca
+  nimp, // cb
+  nimp, // cc
+  nimp, // cd
+  nimp, // ce
+  nimp, // cf
+  nimp, // d0
+  nimp, // d1
+  nimp, // d2
+  null_op, // d3
+  null_op, // d4
+  nimp, // d5
+  nimp, // d6
+  nimp, // d7
+  nimp, // d8
+  nimp, // d9
+  nimp, // da
+  nimp, // db
+  nimp, // dc
+  nimp, // dd
+  op_thread_kill_remove_all, // de
 };
 
 /// Пустая команда

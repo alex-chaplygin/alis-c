@@ -243,3 +243,69 @@ void thread_send_message()
     printf("state = %x\n", t->state);
 #endif
 }
+
+/** 
+ * Удаление потока
+ * 
+ * @param num номер потока * 6
+ * @param remove если 1, то полное удаление спрайтов
+ */
+void thread_kill(int num, int remove)
+{
+  if (num < 0)
+    return;
+  thread_t *t = threads_table[current_value / 6].thread;
+  if (!t)
+    return;
+  thread_t *rt = run_thread;
+#ifdef DEBUG
+  printf("kill thread %x\n", *t->script);
+#endif
+  run_thread = t;
+  remove_all_sprites(t->sprite_list, remove);
+  run_thread = rt;
+  // освобождение ресурсов
+  stack_free(t->call_stack);
+  stack_free(t->msg_stack);
+  memory_free(t->data);
+  thread_table_t *tab = threads_table;
+  thread_table_t *cur;
+  for (int i = 0; i < num_run_threads; i++, tab++)
+    if (tab->next->thread == t)
+      break;
+  num_run_threads--;
+  cur = tab->next;
+  tab->next = cur->next;
+  cur->next = free_thread;
+  free_thread = cur;
+  if (run_thread == t) {
+    printf("kill thread run_thread == t\n");
+    exit(1);
+    run_thread = tab->thread;
+  }
+}
+
+/** 
+ * Удаление потока, номер - параметр
+ * 
+ * @param remove если 1, то полное удаление спрайтов
+ */
+void op_thread_kill(int remove)
+{
+  save_get();
+  if (current_value <= 0) {
+    printf(" thread <= 0\n");
+    exit(1);
+    return;
+  }
+  thread_kill(current_value, remove);
+}
+
+/// удаление потока с очисткой всех изображений
+void op_thread_kill_remove_all()
+{
+#ifdef DEBUG
+  printf("thread kill remove all\n");
+#endif
+  op_thread_kill(1);
+}

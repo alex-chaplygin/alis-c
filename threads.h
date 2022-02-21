@@ -70,6 +70,7 @@ void threads_run();
 void thread_no_start3();
 void thread_clear_state0();
 void thread_send_message();
+void op_thread_kill_remove_all();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
