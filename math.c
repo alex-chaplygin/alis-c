@@ -200,7 +200,7 @@ void op_random()
   random_seed = (random_seed * 31415 & 0xffff) + 63617;
   current_value = random_seed * current_value >> 16;
 #ifdef DEBUG
-  printf("random: %d\n", current_value);
+  printf("seed = %x random: %d\n", random_seed, current_value);
 #endif
 }
 
@@ -230,7 +230,7 @@ void set_random_seed()
   byte op = fetch_byte();
   get(op);
   if (!current_value)
-    random_seed = (word)current_time;
+    random_seed = 0x352e;//(word)current_time;
   else
     random_seed = current_value;
 #ifdef DEBUG
