@@ -18,20 +18,20 @@
 
 /// таблица ресурсов
 typedef struct {
-  dword image_table;		/**< таблица изображений */
+  dword image_table;		/**< смещение таблицы изображений */
   word image_count;		/**< число изображений */
   dword anim_table;
   word anim_count;
-  dword sound_table;		/**< таблица звуков */
+  dword sound_table;		/**< смещение таблицы звуков */
   word sound_count;		/**< число звуков */
 } resource_table_t;
 
-/// составное изображение
+/// спрайт в составе объекта
 typedef struct {
-  word num;			/**< номер изображения */
-  short ofs_x;			/**< смещения части */
-  short ofs_y;
-  short ofs_z;
+  word num;			/**< номер спрайта */
+  short ofs_x;			/**< смещение спрайта по x*/
+  short ofs_y;			/**< y */
+  short ofs_z;			/**< z */
 } subimage_t;
 
 int load_main_image = 0;	/**< флаг загрузки изображения из главного потока */
