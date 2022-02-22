@@ -175,3 +175,11 @@ void memory_free(seg_t *s)
   free(s->data);
   free(s);
 }
+
+/** 
+ * Возвращает 1, если стек пуст
+ */
+int stack_empty(stack_t *s)
+{
+  return s->sp == s->data + s->size;
+}
