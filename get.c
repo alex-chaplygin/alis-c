@@ -79,7 +79,7 @@ func get_op[] = {
   null_op, //6c
   get_joy, //6e 
   nimp,//stack_random, //70
-  nimp,//get_param, //72
+  get_message, //72
   get_keyboard_flags, //74
   get_free, //76
   get_video_port, //78

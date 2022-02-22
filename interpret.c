@@ -108,7 +108,7 @@ func vm_op[] = {
   nimp, // 3f
   run_script, // 40
   nimp, // 41
-  yield, // 42 next_thread
+  yield, // 42
   nimp, // 43
   nimp, // 44
   op_script_load, // 45
@@ -140,9 +140,9 @@ func vm_op[] = {
   nimp, // 5f
   nimp, // 60  
   thread_send_message, // 61
-  thread_clear_state0, // 62
+  thread_clear_flags0, // 62
   nimp, // 63
-  thread_no_start3, // 64
+  thread_receive_msg, // 64
   nimp, // 65
   nimp, // 66
   nimp, // 67

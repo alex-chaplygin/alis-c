@@ -88,8 +88,8 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   t->version = h->version;
   t->frames_to_skip = t->cur_frames_to_skip = 1;
   t->running = 0xff;
-  t->flags = 0xffff;
-  t->state = STATE_START3; // bit 1
+  t->flags2 = 0xffff;
+  t->flags = THREAD_NOSTART3; // bit 1
   t->header = h;
   t->f2c = 0;
 }
@@ -158,12 +158,15 @@ void threads_run()
   for (current_thread = threads_table; current_thread; ) {
     t = current_thread->thread;
 #ifdef DEBUG
-    printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x\n", t->id, (int)t->ip, t->frames_to_skip, t->cur_frames_to_skip, t->running);
+    printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)t->ip, t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
     no_saved_return = 0;
-    if (t->state & STATE_MSG) // bit 7
-      if (t->state & STATE_START3) // bit 1
+    if (t->flags & THREAD_MSG) // bit 7
+      if (!(t->flags & THREAD_NOSTART3)) // bit 1
 	if (t->header->entry3) {
+#ifdef DEBUG
+	  printf("starting handle message: %x\n", t->header->entry3 + 0xa);
+#endif
 	  t->saved_sp = t->call_stack->sp;
 	  set_translate((word *)t->data->data);
 	  interpret(t, t->script + t->header->entry3 + 0xa);
@@ -196,21 +199,21 @@ void threads_run()
   render_update();
 }
 
-/// команда - запрет на запуск сценария 3 в потоке
-void thread_no_start3()
+/// команда - разрешение обработки сообщений
+void thread_receive_msg()
 {
-  run_thread->state &= ~STATE_START3;
+  run_thread->flags &= ~THREAD_NOSTART3;
 #ifdef DEBUG
-  printf("thread no start3: %x\n", run_thread->state);
+  printf("thread receive msg flags: %x\n", run_thread->flags);
 #endif
 }
 
 /// очистка флага 0 в состоянии текущего потока
-void thread_clear_state0()
+void thread_clear_flags0()
 {
-  run_thread->state &= ~STATE_FLAG0;
+  run_thread->flags &= ~THREAD_FLAG0;
 #ifdef DEBUG
-  printf("clear state 0: %x\n", run_thread->state);
+  printf("clear flags 0: %x\n", run_thread->flags);
 #endif
 }
 
@@ -238,9 +241,9 @@ void thread_send_message()
 #endif
     stack_push(t->msg_stack, current_value);
   }
-  t->state |= STATE_MSG;
+  t->flags |= THREAD_MSG;
 #ifdef DEBUG
-    printf("state = %x\n", t->state);
+    printf("flags = %x\n", t->flags);
 #endif
 }
 
@@ -308,4 +311,24 @@ void op_thread_kill_remove_all()
   printf("thread kill remove all\n");
 #endif
   op_thread_kill(1);
+}
+
+/** 
+ * Читает сообщение для текущего потока
+ * Сбрасывает флаг, если больше нет сообщений
+ */
+void get_message()
+{
+  stack_t *s = run_thread->msg_stack;
+  if (stack_empty(run_thread->msg_stack))
+    current_value = -1;
+  else {
+    current_value = stack_pop(run_thread->msg_stack);
+    if (stack_empty(run_thread->msg_stack))
+      run_thread->flags &= ~THREAD_MSG;
+  }
+  #ifdef DEBUG
+  printf("get_message: %x; %d\n", current_value, current_value);
+  printf("flags = %x\n", run_thread->flags);
+  #endif
 }
