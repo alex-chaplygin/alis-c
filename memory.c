@@ -183,3 +183,9 @@ int stack_empty(stack_t *s)
 {
   return s->sp == s->data + s->size;
 }
+
+/// Очистка стека
+void stack_clear(stack_t *s)
+{
+  s->sp = s->data + s->size;
+}
