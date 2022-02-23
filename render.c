@@ -142,13 +142,15 @@ sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
  * Возвращение спрайта в список свободных спрайтов
  * @param prev предыдущий спрайт
  * @param c удаляемый спрайт
+ * @return спрайт перед удаленным
  */
-void delete_sprite(sprite_t *prev, sprite_t *c)
+sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
 {
   update_sprites_rec(c);
   prev->next_in_scene = c->next_in_scene;
   c->next = free_sprite;
   free_sprite = c;
+  return prev;
 }
 
 /** 
@@ -348,6 +350,9 @@ void render_scene(scene_t *scene, sprite_t *sprite)
     printf("scene2 flag1\n");
     exit(1);
   }
+#ifdef DEBUG
+   dump_sprites();
+#endif
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
   sprite = sprite->next_in_scene;
@@ -368,12 +373,17 @@ void render_scene(scene_t *scene, sprite_t *sprite)
       render_sprites(scene, sc_sprite);
       break;
     default: 
-      printf("sprite state = %d\n", sprite->state);
-      exit(1);
+      sprite = delete_sprite(prev, sprite);
+      process_new_sprites(sprite);
+      render_sprites(scene, sc_sprite);
     }
     prev = sprite;
     sprite = sprite->next_in_scene;
   }
+#ifdef DEBUG
+  printf("After rendering:\n");
+  dump_sprites();
+#endif
 }
 
 /// главный цикл рендеринга по сценам
