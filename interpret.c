@@ -105,7 +105,7 @@ func vm_op[] = {
   nimp, // 3c
   nimp, // 3d
   nimp, // 3e
-  yield_no_saved, // 3f
+  thread_stop_yield_no_saved, // 3f
   run_script, // 40
   nimp, // 41
   yield, // 42
@@ -144,7 +144,7 @@ func vm_op[] = {
   nimp, // 63
   thread_receive_msg, // 64
   nimp, // 65
-  nimp, // 66
+  thread_clear_messages, // 66
   nimp, // 67
   nimp, // 68
   nimp, // 69
@@ -341,16 +341,6 @@ void yield()
 #ifdef DEBUG
   printf("yield\n");
 #endif
-}
-
-/// передача управления только если без сохранения стека вызовов
-void yield_no_saved()
-{
-#ifdef DEBUG
-  printf("no saved yield\n");
-#endif
-  if (no_saved_return)
-    yield();
 }
 
 /// Чтение состояния мыши в 3 переменные

@@ -20,7 +20,6 @@ void nimp();
 void set_frame_num();
 void yield();
 void mouse_read();
-void yield_no_saved();
 
 extern byte *current_ip;
 extern thread_t *run_thread;

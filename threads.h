@@ -41,7 +41,7 @@ typedef struct thread_s {
   int version;			/**< версия сценария */
   byte frames_to_skip;		/**< число кадров через сколько выполняется сценарий */
   byte cur_frames_to_skip;		/**< текущий отсчет кадров для выполнения */
-  byte running;			/**< поток запущен */
+  byte running;			/**< основной сценарий потока запущен */
   word flags2;			/**< доп. флаги потока */
   int flags;			/**< флаги потока */
   int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
@@ -72,6 +72,8 @@ void thread_clear_flags0();
 void thread_send_message();
 void op_thread_kill_remove_all();
 void get_message();
+void thread_stop_yield_no_saved();
+void thread_clear_messages();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */

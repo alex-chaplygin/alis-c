@@ -181,7 +181,7 @@ void threads_run()
 	set_translate((word *)t->data->data);
 	no_saved_return++;
 	t->ip = interpret(t, t->ip);
-	if (t->header->entry2) {
+	if (t->header->entry2 && t->running) {
 #ifdef DEBUG
 	  printf("starting entry2: %x\n", t->header->entry2);
 #endif
@@ -331,4 +331,28 @@ void get_message()
   printf("get_message: %x; %d\n", current_value, current_value);
   printf("flags = %x\n", run_thread->flags);
   #endif
+}
+
+/** 
+ * Остановка выполнения основного скрипта потока
+ * передача управления только если без сохранения стека вызовов
+ */
+void thread_stop_yield_no_saved()
+{
+#ifdef DEBUG
+  printf("thread stop no saved yield\n");
+#endif
+  run_thread->running = 0;
+  if (no_saved_return)
+    yield();
+}
+
+/// Очищает стек сообщений потока
+void thread_clear_messages()
+{
+  stack_clear(run_thread->msg_stack);
+  run_thread->flags &= ~THREAD_MSG;
+#ifdef DEBUG
+  printf("clear messages flags = %x\n", run_thread->flags);
+#endif
 }
