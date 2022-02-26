@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "interpret.h"
 #include "memory.h"
+#include "append.h"
 
 /// вызов
 void call(int pos)
@@ -266,5 +267,21 @@ void compare_jump_word_skip_nz()
     short b = (short)fetch_word();
     current_ip++;
     current_ip += b;
+  }
+}
+
+/** 
+ * Уменьшает значение переменной на единицу,
+ * если результат больше 0, то делает переход
+ */
+void dec_jump_byte()
+{
+  byte *ip = current_ip++;
+  current_value = -1;
+  if (exchange_strings_append()) {
+    current_ip = ip + (char)fetch_byte();
+#ifdef DEBUG
+    printf("dec jump byte\n");
+#endif
   }
 }

@@ -17,3 +17,4 @@ void compare_jump_word_skip_z();//1a
 void compare_jump_byte_nz();//1b
 void compare_jump_word_nz();//1c
 void compare_jump_word_skip_nz();//1d
+void dec_jump_byte();

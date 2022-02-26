@@ -9,7 +9,7 @@
       exit(1);\
     }}	      
     
-typedef void (*func)();
+typedef int (*func)();
 
 byte *interpret(thread_t *t, byte *ip);
 byte fetch_byte();

@@ -85,7 +85,7 @@ func vm_op[] = {
   nimp, // 28
   array_new, // 29
   set_random_seed, // 2a
-  nimp, // 2b
+  dec_jump_byte, // 2b
   nimp, // 2c
   nimp, // 2d
   nimp, // 2e

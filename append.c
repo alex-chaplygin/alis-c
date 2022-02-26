@@ -31,15 +31,11 @@ func add_op[] = {
 };
 
 /** 
- * Новое выражение для добавления результатов
- * Сохраняет предыдущее значение, получает новое,
  * меняет местами строки загрузки и сохранения
  * вызывает подфункцию добавления.
  */
-void append()
+int exchange_strings_append()
 {
-  init_stack();
-  save_get();
   switch_string();
   byte op = fetch_byte();
   if (op & 1) {
@@ -51,22 +47,36 @@ void append()
     printf("Unknown add op %x\n", op * 2);
     exit(1);
   }
-  add_op[op]();
+  return add_op[op]();
+}
+
+/** 
+ * Новое выражение для добавления результатов
+ * Сохраняет предыдущее значение, получает новое,
+ * меняет местами строки загрузки и сохранения
+ * вызывает подфункцию добавления.
+ */
+int append()
+{
+  init_stack();
+  save_get();
+  return exchange_strings_append();
 }
 
 /// добавляет значение byte к переменной word
-void add_byte_mem_word()
+int add_byte_mem_word()
 {
   word w = fetch_word();
   byte *p = seg_read(run_thread->data, w);
-  *p += (byte)current_value;
+  *p += (char)current_value;
 #ifdef DEBUG
-  printf("addb varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+  printf("addb varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
+  return *p;
 }
 
 /// добавляет значение word к переменной word
-void add_word_mem_word()
+int add_word_mem_word()
 {
   word w = fetch_word();
   word *p = (word *)seg_read(run_thread->data, w);
@@ -74,10 +84,11 @@ void add_word_mem_word()
 #ifdef DEBUG
   printf("addw varw_%x, %x; %d\n", w, current_value, current_value);
 #endif
+  return *p;
 }
 
 /// добавляет строку сохранения к строковой переменной адрес word
-void add_string_mem_word()
+int add_string_mem_word()
 {
   word w = fetch_word();
   char *dst = (char *)seg_read(run_thread->data, w);
@@ -88,21 +99,23 @@ void add_string_mem_word()
 #ifdef DEBUG
   printf("addw strw_%x; \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
 #endif
+  return 1;
 }
 
 /// добавляет значение byte к переменной byte
-void add_byte_mem_byte()
+int add_byte_mem_byte()
 {
   byte w = fetch_byte();
   byte *p = seg_read(run_thread->data, w);
-  *p += (byte)current_value;
+  *p += (char)current_value;
 #ifdef DEBUG
-  printf("addb varb_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+  printf("addb varb_%x, %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
+  return *p;
 }
 
 /// добавляет значение word к переменной byte
-void add_word_mem_byte()
+int add_word_mem_byte()
 {
   byte w = fetch_byte();
   word *p = (word *)seg_read(run_thread->data, w);
@@ -110,10 +123,11 @@ void add_word_mem_byte()
 #ifdef DEBUG
   printf("addw varb_%x, %x; %d\n", w, current_value, current_value);
 #endif
+  return *p;
 }
 
 /// добавляет строку сохранения к строковой переменной адрес byte
-void add_string_mem_byte()
+int add_string_mem_byte()
 {
   byte w = fetch_byte();
   char *dst = (char *)seg_read(run_thread->data, w);
@@ -124,4 +138,5 @@ void add_string_mem_byte()
 #ifdef DEBUG
   printf("adds strb_%x; \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
 #endif
+  return 1;
 }
