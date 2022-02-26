@@ -237,3 +237,11 @@ void show_object_flipped()
 #endif
   show_object_with_flip(run_thread->x_flip ^ 1);  
 }
+
+void set_tag()
+{
+  new_get();
+#ifdef DEBUG
+  printf("set tag %x\n", current_value);
+#endif
+}

@@ -94,7 +94,7 @@ func vm_op[] = {
   nimp, // 31
   nimp, // 32
   nimp, // 33
-  nimp, // 34
+  set_tag, // 34
   nimp, // 35
   null_op, // 36
   null_op, // 37
