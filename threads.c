@@ -208,10 +208,10 @@ void thread_receive_msg()
 #endif
 }
 
-/// очистка флага 0 в состоянии текущего потока
-void thread_clear_flags0()
+/// команда - разрешение потоку принимать сообщения
+void thread_ready_to_receive()
 {
-  run_thread->flags &= ~THREAD_FLAG0;
+  run_thread->flags &= ~THREAD_NOMSG;
 #ifdef DEBUG
   printf("clear flags 0: %x\n", run_thread->flags);
 #endif
@@ -234,6 +234,14 @@ void thread_send_message()
   printf("send message thread: %d count: %d\n", current_value, count);
 #endif
   thread_t *t = threads_table[current_value / 6].thread;
+  if (!t) {
+    printf("thread is NULL\n");
+    exit(1);
+  }
+  if (t->flags & THREAD_NOMSG) {
+    printf("thread flag = no send\n");
+    exit(1);
+  }
   while (count--) {
     new_get();
 #ifdef DEBUG
@@ -283,7 +291,7 @@ void thread_kill(int num, int remove)
   free_thread = cur;
   if (run_thread == t) {
     printf("kill thread run_thread == t\n");
-    exit(1);
+    exit(1); // должен запуститься следующий поток
     run_thread = tab->thread;
   }
 }
@@ -355,4 +363,21 @@ void thread_clear_messages()
 #ifdef DEBUG
   printf("clear messages flags = %x\n", run_thread->flags);
 #endif
+}
+
+/** 
+ * Останавливает все потоки сценария
+ * 
+ * @param id номер сценария
+ */
+void kill_thread_by_script(int id)
+{
+  int i;
+  for (thread_table_t *t = threads_table->next; t;) {
+    printf("killing thread after free script\n");
+    exit(1);
+    /*    if (t->id == id)
+      thread_kill(i * 6, 0);
+      t = t->next;*/
+  }
 }

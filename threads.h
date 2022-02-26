@@ -5,7 +5,7 @@
 #include "memory.h"
 #include "sprite.h"
 
-#define THREAD_FLAG0 (1 << 0)
+#define THREAD_NOMSG (1 << 0)	/**< поток не принимает сообщения */
 #define THREAD_NOSTART3 (1 << 1)	/**< не запуск сценария 3 каждый фрейм */
 #define THREAD_MSG (1 << 7) /**< есть сообщения для потока */
 
@@ -68,12 +68,13 @@ thread_t *thread_add(byte *script, int size);
 void threads_run();
 
 void thread_receive_msg();
-void thread_clear_flags0();
+void thread_ready_to_receive();
 void thread_send_message();
 void op_thread_kill_remove_all();
 void get_message();
 void thread_stop_yield_no_saved();
 void thread_clear_messages();
+void kill_thread_by_script(int id);
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
