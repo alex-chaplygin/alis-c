@@ -257,7 +257,7 @@ func vm_op[] = {
   null_op, // d4
   nimp, // d5
   nimp, // d6
-  nimp, // d7
+  set_skip_palette, // d7
   nimp, // d8
   nimp, // d9
   nimp, // da

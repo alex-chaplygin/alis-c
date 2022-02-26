@@ -199,3 +199,12 @@ void palette_set_fade()
     palette_load(pal + 1);
   skip_palette = 0;
 }
+
+void set_skip_palette()
+{
+  new_get();
+  skip_palette = (byte)current_value;
+#ifdef DEBUG
+  printf("set skip_palette = %d\n", skip_palette);
+#endif
+}
