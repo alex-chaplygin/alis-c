@@ -154,3 +154,21 @@ void scene_translate(scene_t *scene, sprite_t *c)
   printf("scene translate: (%d %d %d) flags = %x\n", scene->origin_x, scene->origin_y, scene->origin_z, scene->flags);
 #endif  
 }
+
+void scenes_free_sprites()
+{
+  scene_t *s = scene_list_head;
+  sprite_t *sp;
+  while (1) {
+    sp = sprites + s->scene_sprite;
+    sp = sp->next_in_scene;
+    while (sp) {
+      printf("scenes free sprites\n");
+      exit(1);
+      sp = sp->next;
+    }
+    if (!s->next)
+      break;
+    s = (scene_t *)(memory + s->next);
+  }
+}

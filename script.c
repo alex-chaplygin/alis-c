@@ -256,3 +256,38 @@ void run_script()
   thread_t *t = thread_add(script_table[i], script_sizes[i]);
   switch_string_store();
 }
+
+/** 
+ * Команда - завершение работы сценария
+ * Освобождается память сценария, останавливаются потоки сценария
+ */
+void free_script()
+{
+  int scr_num = fetch_word();
+  int num = scr_num;
+#ifdef DEBUG
+  printf("free script: %x\n", num);
+  printf("cur script id = %x\n", run_thread->id);
+#endif
+  if (num == -1 || num == run_thread->id)
+    return;
+  num = script_loaded(num); // позиция в таблице сценариев
+  if (num == -1)
+    return;
+#ifdef DEBUG
+  printf("free script pos = %d\n", num);
+#endif
+  // play sound
+  free(script_table[num]);
+  for (int i = num; i < num_scripts; i++)
+    if (i + 1 == total_scripts) {
+      script_table[i] = 0;
+      script_sizes[i] = 0;
+    } else {
+      script_table[i] = script_table[i + 1];
+      script_sizes[i] = script_sizes[i + 1];
+    }
+  num_scripts--;
+  kill_thread_by_script(scr_num);
+  scenes_free_sprites();
+}

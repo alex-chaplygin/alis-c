@@ -56,6 +56,7 @@ typedef struct scene_s {
 void scene_new();
 void scene_show();
 void scene_set();
+void scenes_free_sprites();
 
 extern scene_t *scene_list_head;	/**< список сцен */
 #endif
