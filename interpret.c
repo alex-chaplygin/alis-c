@@ -89,7 +89,7 @@ func vm_op[] = {
   nimp, // 2c
   nimp, // 2d
   nimp, // 2e
-  nimp, // 2f
+  op_jump_table, // 2f
   nimp, // 30
   nimp, // 31
   nimp, // 32
