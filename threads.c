@@ -158,7 +158,7 @@ void threads_run()
   for (current_thread = threads_table; current_thread; ) {
     t = current_thread->thread;
 #ifdef DEBUG
-    printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)t->ip, t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
+    printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->script), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
     no_saved_return = 0;
     if (t->flags & THREAD_MSG) // bit 7
@@ -181,13 +181,16 @@ void threads_run()
 	set_translate((word *)t->data->data);
 	no_saved_return++;
 	t->ip = interpret(t, t->ip);
-	if (t->header->entry2 && t->running) {
+#ifdef DEBUG
+	printf("ip = %x\n", (int)(t->ip - t->script));
+#endif
+	if (t->header->entry2) {
 #ifdef DEBUG
 	  printf("starting entry2: %x\n", t->header->entry2);
 #endif
 	  no_saved_return = 0;
 	  t->saved_sp = t->call_stack->sp;
-	  interpret(t, t->script + t->header->entry2);
+	  interpret(t, t->script + t->header->entry2 + 6);
 	  t->call_stack->sp = t->saved_sp;
 	}
 	sprites_translate((word *)t->data->data);
