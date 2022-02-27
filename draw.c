@@ -19,6 +19,7 @@ enum image_type_e {		/**< типы изображений */
   IMAGE_FILL = 1,		/**< заполнение постоянным цветом */
   IMAGE_4_A_PAL = 0x10,		/**< 4 бита с прозрачностью и смещением палитры */
   IMAGE_8_A = 0x14,		/**< 8 бит с прозрачностью */
+  IMAGE_8 = 0x16,		/**< 8 бит без прозрачности */
 };
   
 int image_add;			/**< смещение на следующую строчку изображения */
@@ -142,6 +143,24 @@ void draw_image_alpha(int x_flip)
   }
 }
 
+void draw_image8(int x_flip)
+{
+  for (int y = 0; y < num_rows; y++) {
+    if (x_flip)
+      for (int x = 0; x < num_cols; x++) {
+	*(blit_dst - 1) = *blit_src++;
+	--blit_dst;
+      }
+    else {
+      memcpy(blit_dst, blit_src, num_cols);
+      blit_dst += num_cols;
+      blit_src += num_cols;
+    }
+    blit_src += image_add;
+    blit_dst += video_add;
+  }
+}
+
 /** 
  * Рисует изображение 4 бит с прозрачностью
  * 
@@ -191,6 +210,12 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
   case IMAGE_8_A:
     draw_setup(origin, im, x_flip, blit_rec, 0);
     draw_image_alpha(x_flip);
+    break;
+  case IMAGE_8:
+    draw_setup(origin, im, x_flip, blit_rec, 0);
+    if (x_flip)
+      blit_dst += num_cols;
+    draw_image8(x_flip);
     break;
   case IMAGE_4_A:
     draw_setup(origin, im, x_flip, blit_rec, 1);
