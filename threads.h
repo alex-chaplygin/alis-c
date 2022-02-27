@@ -79,5 +79,6 @@ void kill_thread_by_script(int id);
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
 extern thread_t *main_thread;		/**< главный поток */
+extern thread_table_t *threads_table; /**< таблица потоков */
 
 #endif
