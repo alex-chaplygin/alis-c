@@ -49,7 +49,7 @@ void dump_palette(byte *palette)
  */
 void palette_fade_step()
 {
-  byte p;
+  int p;
   need_to_update_palette = 0;
   for (int i = 0; i < 768; i++) 
     if (palette[i] != load_palette[i]) {
