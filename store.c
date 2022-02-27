@@ -37,7 +37,7 @@ func set_op[] = {
   nimp,//set_string_global_array, //24
   nimp,//set_byte_global_array,//26
   nimp,//set_word_global_array,//28
-  nimp,//set_byte_far,//2a
+  store_byte_thread_word, //2a
   nimp,//set_word_far,//2c
   nimp,//set_string_far,//2e
   nimp,//set_string_far_array,//30
@@ -232,4 +232,17 @@ void set_string_array_byte()
 #ifdef DEBUG
   printf("store_str array_%x[%d], \"%s\"\n", w, idx, (char *)pos);
 #endif
+}
+
+/// запись переменной byte по адресу word из другого потока
+void store_byte_thread_word()
+{
+  int thr = fetch_word();
+  thr = *(word *)seg_read(run_thread->data, thr);
+  thread_t *t = threads_table[thr / 6].thread;
+  word adr = fetch_word();
+  seg_write_byte(t->data, adr, (byte)current_value);
+  #ifdef DEBUG
+  printf("store_byte thread: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
+  #endif
 }
