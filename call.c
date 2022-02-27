@@ -274,14 +274,20 @@ void compare_jump_word_skip_nz()
  * Уменьшает значение переменной на единицу,
  * если результат больше 0, то делает переход
  */
-void dec_jump_byte()
+void loop_byte()
 {
   byte *ip = current_ip++;
   current_value = -1;
   if (exchange_strings_append()) {
-    current_ip = ip + (char)fetch_byte();
+    current_ip = ip;
+    char ofs = (char)fetch_byte();
+    current_ip = ip + 1 + ofs;
 #ifdef DEBUG
-    printf("dec jump byte\n");
+    printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_thread->script));
+#endif
+  } else {
+#ifdef DEBUG
+    printf("loop end ip = %x\n", (int)(current_ip - run_thread->script));
 #endif
   }
 }
