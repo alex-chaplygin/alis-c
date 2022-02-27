@@ -206,10 +206,10 @@ void script_load(int id, char *name)
     return;
   io_file = file_open(name, "rb");
   file_read(io_file, &h, sizeof(h));
+  size = h.uncompressed_size + ((h.flags & 0xff) << 16);
 #ifdef DEBUG
-  printf("Uncompressed size = %d flags = %x type = %d\n", h.uncompressed_size, h.flags, h.type);
+  printf("Uncompressed size = %d flags = %x type = %d\n", size, h.flags, h.type);
 #endif
-  size = h.uncompressed_size + (h.flags & 0xff << 16);
   if (id == 0 || h.type == MAIN_TYPE)  {
     load_main_script();
     size -= 16;
