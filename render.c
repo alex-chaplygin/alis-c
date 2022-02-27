@@ -18,8 +18,11 @@
 #include "image.h"
 #include "draw.h"
 #include "project.h"
+#include "interpret.h"
+#include "get.h"
 
-byte frame_num;
+byte frames_to_skip;		/**< через сколько кадров обновляется экран */
+byte frame_num = 0;			/**< текущий счетчик кадров */
 rectangle_t sprites_rec;	/**< окно вывода новых спрайтов */
 rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну сцены */
 
@@ -390,6 +393,10 @@ void render_scene(scene_t *scene, sprite_t *sprite)
 void render_update()
 {
   scene_t *s = scene_list_head;
+  frame_num++;
+  if (frames_to_skip > frame_num)
+    return;
+  frame_num = 0;
   while (1) {
 #ifdef DEBUG
     printf("Rendering scene %x flags = %x flags2 = %x\n", (int)((byte *)s - memory), s->flags, s->flags2);
@@ -400,4 +407,14 @@ void render_update()
       break;
     s = (scene_t *)(memory + s->next);
   }
+}
+
+/// установка числа кадров, через сколько обновляется экран
+void set_frames_to_skip()
+{
+  new_get();
+  frames_to_skip = (byte)current_value;
+#ifdef DEBUG
+  printf("\t\tset frame num %d\n", frame_num);
+#endif
 }

@@ -17,7 +17,6 @@ word fetch_word();
 void null_op();
 void no_func();
 void nimp();
-void set_frame_num();
 void yield();
 void mouse_read();
 

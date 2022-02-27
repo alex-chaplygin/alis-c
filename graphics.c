@@ -21,8 +21,6 @@
 int mouse_x;
 int mouse_y;
 int mouse_button;
-byte frame_num = 0;
-byte timer_num = 0;
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
 SDL_Renderer *renderer;		/**< устройство вывода */

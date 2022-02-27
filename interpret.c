@@ -148,7 +148,7 @@ func vm_op[] = {
   nimp, // 67
   nimp, // 68
   nimp, // 69
-  set_frame_num, // 6a
+  set_frames_to_skip, // 6a
   nimp, // 6b
   nimp, // 6c
   play_sound, // 6d
@@ -319,16 +319,6 @@ byte *interpret(thread_t *t, byte *ip)
     }
   }
   return current_ip;
-}
-
-/// установка числа кадров, через сколько обновляется экран
-void set_frame_num()
-{
-  new_get();
-  frame_num = (byte)current_value;
-#ifdef DEBUG
-  printf("\t\tset frame num %d\n", frame_num);
-#endif
 }
 
 /** 
