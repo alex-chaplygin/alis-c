@@ -103,10 +103,7 @@ void palette_init_fade(int fade)
     fade_offset = 63 / (byte)fade + 1;
     palette_parameter = fade;
     fade_ticks = palette_fade_ticks = 1;
-  } else {
-    printf("palette_init_fade: failed\n");
-    exit(1);
-  }
+  } 
 #ifdef DEBUG
   printf("fade = %d fade offset: %d param: %d\n", fade, fade_offset, palette_parameter);
 #endif
@@ -207,4 +204,26 @@ void set_skip_palette()
 #ifdef DEBUG
   printf("set skip_palette = %d\n", skip_palette);
 #endif
+}
+
+/// устанавливает палитру по номеру ресурса без появления/увядания
+void set_palette_from_res()
+{
+  load_main_image = 0;
+  new_get();
+  if (current_value < 0) {
+    printf("set palette from res < 0\n");
+    exit(1);
+  }
+#ifdef DEBUG
+  printf("set palette from res: %x\n", current_value);
+#endif
+  if (!skip_palette) {
+    byte *pal = get_resource(current_value);
+    if (*pal == RES_PALETTE) {
+      fade_ticks = palette_fade_ticks = palette_parameter = prev_value = 0;
+      palette_load(pal + 1);
+    }
+  }
+  skip_palette = 0;
 }

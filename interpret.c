@@ -146,7 +146,7 @@ func vm_op[] = {
   nimp, // 65
   thread_clear_messages, // 66
   nimp, // 67
-  nimp, // 68
+  set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a
   nimp, // 6b
