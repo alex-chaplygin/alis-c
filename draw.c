@@ -131,10 +131,6 @@ void draw_alpha_pixel(byte c, int pal_ofs, int x_flip)
  */
 void draw_image_alpha(int x_flip)
 {
-  if (x_flip) {
-    printf("8 bit alpha x_flip\n");
-    exit(1);
-  }
   for (int y = 0; y < num_rows; y++) {
     for (int x = 0; x < num_cols; x++)
       draw_alpha_pixel(*blit_src++, 0, x_flip);
@@ -209,6 +205,8 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
     break;
   case IMAGE_8_A:
     draw_setup(origin, im, x_flip, blit_rec, 0);
+    if (x_flip)
+      blit_dst += num_cols;
     draw_image_alpha(x_flip);
     break;
   case IMAGE_8:
