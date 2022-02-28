@@ -63,6 +63,17 @@ int append()
   return exchange_strings_append();
 }
 
+/// вычитает значение выражения из переменной
+int subract()
+{
+  new_get();
+  current_value = -current_value;
+#ifdef DEBUG
+  printf("subtract: %d\n", current_value);
+#endif
+  return exchange_strings_append();
+}
+
 /// добавляет значение byte к переменной word
 int add_byte_mem_word()
 {

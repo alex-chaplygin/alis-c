@@ -75,7 +75,7 @@ func vm_op[] = {
   assign, //1e
   new_get, //1f
   append, //20
-  nimp, // 21
+  subract, // 21
   null_op, // 22
   null_op, // 23
   nimp, // 24
