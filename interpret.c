@@ -110,7 +110,7 @@ func vm_op[] = {
   nimp, // 41
   yield, // 42
   nimp, // 43
-  nimp, // 44
+  thread_stop, // 44
   op_script_load, // 45
   scene_new, // 46
   scene_set, // 47
@@ -317,6 +317,8 @@ byte *interpret(thread_t *t, byte *ip)
       printf("Unknown vm op: %x\n", op);
       exit(1);
     }
+    if (interpreting == 2)
+      break;
   }
   return current_ip;
 }

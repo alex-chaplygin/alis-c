@@ -184,6 +184,10 @@ void threads_run()
 #ifdef DEBUG
 	printf("ip = %x\n", (int)(t->ip - t->script));
 #endif
+	if (interpreting == 2) {
+	  current_thread = current_thread->next;
+	  continue;
+	}
 	if (t->header->entry2) {
 #ifdef DEBUG
 	  printf("starting entry2: %x\n", t->header->entry2);
@@ -268,7 +272,7 @@ void thread_kill(int num, int remove)
 {
   if (num < 0)
     return;
-  thread_t *t = threads_table[current_value / 6].thread;
+  thread_t *t = threads_table[num / 6].thread;
   if (!t)
     return;
   thread_t *rt = run_thread;
@@ -293,9 +297,9 @@ void thread_kill(int num, int remove)
   cur->next = free_thread;
   free_thread = cur;
   if (run_thread == t) {
-    printf("kill thread run_thread == t\n");
-    exit(1); // должен запуститься следующий поток
-    run_thread = tab->thread;
+    interpreting = 2;
+    // должен запуститься следующий поток или render
+    current_thread = tab;
   }
 }
 
@@ -383,4 +387,24 @@ void kill_thread_by_script(int id)
       thread_kill(i * 6, 0);
       t = t->next;*/
   }
+}
+
+/** 
+ * Останавливает текущий поток
+ * Если текущий поток - главный, то - выход
+ */
+void thread_stop()
+{
+#ifdef DEBUG
+  printf("thread_stop\n");
+  printf("run thread = %x\n", *run_thread->script);
+#endif
+  if (run_thread == threads_table->thread)
+    exit(0);
+  thread_table_t *tab = threads_table;
+  for (int i = 0; i < num_run_threads; i++, tab++)
+    if (tab->thread == run_thread) {
+      thread_kill(i * 6, 0);
+      break;
+    }
 }
