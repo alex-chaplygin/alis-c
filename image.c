@@ -34,22 +34,22 @@ typedef struct {
   short ofs_z;			/**< z */
 } subimage_t;
 
-int load_main_image = 0;	/**< флаг загрузки изображения из главного потока */
+int load_main_res = 0;	/**< флаг загрузки ресурса из главного потока */
 int image_flag = 0;
 
 /// получение данных изображения из таблицы ресурсов
 byte *get_resource(int num)
 {
   byte *script = run_thread->script;
-  if (load_main_image)
+  if (load_main_res)
     script = main_thread->script;
   script_t *h = (script_t *)script;
   resource_table_t *r = (resource_table_t *)(script + h->resources);
 #ifdef DEBUG
-    printf("get_resource: main %d num %d\n", load_main_image, num);
+    printf("get_resource: main %d num %d\n", load_main_res, num);
 #endif
   if (num >= r->image_count) {
-    printf("get_resource: main %d num %d > total %d\n", load_main_image, num, r->image_count);
+    printf("get_resource: main %d num %d > total %d\n", load_main_res, num, r->image_count);
     exit(1);
   }
   byte *pos = (byte *)r + r->image_table + num * sizeof(dword);
@@ -224,14 +224,14 @@ void show_object_with_flip(int x_flip)
 /// показать изображение по координатам центра.
 void show_object()
 {
-  load_main_image = 0;
+  load_main_res = 0;
   show_object_with_flip(run_thread->x_flip);
 }
 
 /// показать изображение, отраженное по горизонтали
 void show_object_flipped()
 {
-  load_main_image = 0;
+  load_main_res = 0;
 #ifdef DEBUG
   printf("show object flipped\n");
 #endif

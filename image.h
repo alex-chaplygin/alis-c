@@ -29,4 +29,4 @@ void show_object_flipped();
 byte *get_resource(int num);
 void set_tag();
 
-extern int load_main_image;	
+extern int load_main_res;	

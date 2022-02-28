@@ -177,7 +177,7 @@ void palette_clear_fade()
  */
 void palette_set_fade()
 {
-  load_main_image = 0;
+  load_main_res = 0;
   new_get();
   switch_get();
 #ifdef DEBUG
@@ -209,7 +209,7 @@ void set_skip_palette()
 /// устанавливает палитру по номеру ресурса без появления/увядания
 void set_palette_from_res()
 {
-  load_main_image = 0;
+  load_main_res = 0;
   new_get();
   if (current_value < 0) {
     printf("set palette from res < 0\n");
