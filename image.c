@@ -245,3 +245,12 @@ void set_tag()
   printf("set tag %x\n", current_value);
 #endif
 }
+
+/// Удаляет все объекты текущего потока
+void clear_all_objects()
+{
+  #ifdef DEBUG
+  printf("clear all objects\n");
+  #endif
+  remove_all_sprites(run_thread->sprite_list, 1);
+}

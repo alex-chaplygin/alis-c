@@ -262,7 +262,7 @@ func vm_op[] = {
   nimp, // d9
   nimp, // da
   nimp, // db
-  nimp, // dc
+  clear_all_objects, // dc
   nimp, // dd
   op_thread_kill_remove_all, // de
 };
