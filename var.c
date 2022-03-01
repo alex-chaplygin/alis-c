@@ -12,6 +12,7 @@
 #include "interpret.h"
 #include "memory.h"
 #include "get.h"
+#include "threads.h"
 
 /// чтение переменной типа byte по адресу word
 void get_byte_mem_word()
@@ -27,7 +28,10 @@ void get_byte_mem_word()
 void get_word_mem_word()
 {
   word w = fetch_word();
-  current_value = (short)*(word *)seg_read(run_thread->data, w);
+  if ((short)w == -40) // чтение номера родительского потока
+    current_value = thread_num(run_thread->parent);
+  else
+    current_value = (short)*(word *)seg_read(run_thread->data, w);
 #ifdef DEBUG
   printf("get word varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
