@@ -304,11 +304,9 @@ void op_jump_table()
   if ((int)(current_ip - run_thread->script) & 1)
     current_ip++;
   current_value += *(word *)current_ip;
-  if (current_value < 0 || current_value > c) {
-    printf("switch < 0 || > \n");
-    exit(1);
+  if (current_value < 0 || current_value > c)
     current_ip += 4 + c * 2;
-  } else {
+  else {
     current_ip += 2 + current_value * 2;
     current_ip += 2 + *(word *)current_ip;
   }
