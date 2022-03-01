@@ -18,6 +18,7 @@ enum image_type_e {		/**< типы изображений */
   IMAGE_4_A = 0,		/**< 4 бита с прозрачностью */
   IMAGE_FILL = 1,		/**< заполнение постоянным цветом */
   IMAGE_4_A_PAL = 0x10,		/**< 4 бита с прозрачностью и смещением палитры */
+  IMAGE_4_PAL = 0x12,		/**< 4 бита без прозрачности со смещением палитры */
   IMAGE_8_A = 0x14,		/**< 8 бит с прозрачностью */
   IMAGE_8 = 0x16,		/**< 8 бит без прозрачности */
 };
@@ -111,16 +112,17 @@ void fill_image(byte color)
  * @param c цвет точки
  * @param pal_ofs смещение в палитре
  * @param x_flip зеркальное отражение
+ * @param alpha если 1 - то с прозрачностью
  */
-void draw_alpha_pixel(byte c, int pal_ofs, int x_flip)
+void draw_pixel(byte c, int pal_ofs, int x_flip, int alpha)
 {
   if (!x_flip) {
-    if (c)
+    if (c || !alpha)
       *blit_dst++ = c + pal_ofs;
     else
       ++blit_dst;
   } else { // рисуем точки справо - налево
-    if (c)
+    if (c  || !alpha)
       *(blit_dst - 1) = c + pal_ofs;
     --blit_dst;
   }
@@ -135,12 +137,17 @@ void draw_image_alpha(int x_flip)
 {
   for (int y = 0; y < num_rows; y++) {
     for (int x = 0; x < num_cols; x++)
-      draw_alpha_pixel(*blit_src++, 0, x_flip);
+      draw_pixel(*blit_src++, 0, x_flip, 1);
     blit_src += image_add;
     blit_dst += video_add;
   }
 }
 
+/** 
+ * Рисует изображение 8 бит без прозрачности
+ * 
+ * @param x_flip отражение по горизонтали
+ */
 void draw_image8(int x_flip)
 {
   for (int y = 0; y < num_rows; y++) {
@@ -160,12 +167,13 @@ void draw_image8(int x_flip)
 }
 
 /** 
- * Рисует изображение 4 бит с прозрачностью
+ * Рисует изображение 4 бит
  * 
  * @param x_flip зеркальное отражение
  * @param pal_ofs смещение в палитре
+ * @param alpha если 1 - то с прозрачностью
  */
-void draw_image4_alpha(int x_flip, int pal_ofs)
+void draw_image4(int x_flip, int pal_ofs, int alpha)
 {
   byte c;
   byte c2;
@@ -175,15 +183,15 @@ void draw_image4_alpha(int x_flip, int pal_ofs)
   for (int y = 0; y < num_rows; y++) {
     if (h) {
       c = *blit_src++;
-      draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
+      draw_pixel(c & 0xf, pal_ofs, x_flip, alpha);
     }
     for (int x = 0; x < num_cols; x++) {
       c = *blit_src++;
-      draw_alpha_pixel(c >> 4, pal_ofs, x_flip);
+      draw_pixel(c >> 4, pal_ofs, x_flip, alpha);
       ++x;
       if (x == num_cols)
 	break;
-      draw_alpha_pixel(c & 0xf, pal_ofs, x_flip);
+      draw_pixel(c & 0xf, pal_ofs, x_flip, alpha);
     }      
     blit_src += image_add;
     blit_dst += video_add;
@@ -216,11 +224,15 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
   case IMAGE_4_A:
     draw_setup(origin, im, x_flip, blit_rec, 1);
     blit_src -= 2;
-    draw_image4_alpha(x_flip, 0);
+    draw_image4(x_flip, 0, 1);
     break;
   case IMAGE_4_A_PAL:
     draw_setup(origin, im, x_flip, blit_rec, 1);
-    draw_image4_alpha(x_flip, im->palette_offset);
+    draw_image4(x_flip, im->palette_offset, 1);
+    break;
+  case IMAGE_4_PAL:
+    draw_setup(origin, im, x_flip, blit_rec, 1);
+    draw_image4(x_flip, im->palette_offset, 0);
     break;
   default:
     printf("Unknown image type: %x\n", im->type);
