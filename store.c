@@ -31,7 +31,7 @@ func set_op[] = {
   set_string_array_byte,//18
   set_byte_array_byte,//1a
   set_word_array_byte,//1c
-  nimp,//set_byte_global, //1e
+  set_byte_global_word, //1e
   nimp,//set_word_global, //20
   nimp,//set_string_global, //22
   nimp,//set_string_global_array, //24
@@ -245,4 +245,14 @@ void store_byte_thread_word()
   #ifdef DEBUG
   printf("store_byte thread: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
   #endif
+}
+
+/// запись переменной byte по адресу word
+void set_byte_global_word()
+{
+  word w = fetch_word();
+  seg_write_byte(threads_table->thread->data, w, (byte)current_value);
+#ifdef DEBUG
+  printf("store_b glob_varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+#endif
 }
