@@ -87,6 +87,8 @@ void draw_setup(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec, i
 #ifdef DEBUG
   printf("draw setup: rows = %d cols = %d vid_add = %d im_add = %d x_fl = %d src = %d dst = %d odd = %d type = %x\n", num_rows, num_cols, video_add, image_add, x_flip, (int)(blit_src - (byte *)im), (int)(blit_dst - video_buffer), odd_data, im->type);
 #endif
+  if (x_flip)
+    blit_dst += num_cols;
 }
 
 /** 
@@ -205,14 +207,10 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
     break;
   case IMAGE_8_A:
     draw_setup(origin, im, x_flip, blit_rec, 0);
-    if (x_flip)
-      blit_dst += num_cols;
     draw_image_alpha(x_flip);
     break;
   case IMAGE_8:
     draw_setup(origin, im, x_flip, blit_rec, 0);
-    if (x_flip)
-      blit_dst += num_cols;
     draw_image8(x_flip);
     break;
   case IMAGE_4_A:
