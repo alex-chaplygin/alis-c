@@ -76,6 +76,8 @@ void thread_stop_yield_no_saved();
 void thread_clear_messages();
 void kill_thread_by_script(int id);
 void thread_stop();
+void thread_resume();
+int thread_num(thread_t *t);
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */

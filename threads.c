@@ -401,10 +401,37 @@ void thread_stop()
 #endif
   if (run_thread == threads_table->thread)
     exit(0);
+  thread_kill(thread_num(run_thread), 0);
+}
+
+/** 
+ * Продолжает выполнение потока
+ * Параметр - номер потока
+ */
+void thread_resume()
+{
+  new_get();
+  if (current_value < 0)
+    return;
+  thread_t *t = threads_table[current_value / 6].thread;
+#ifdef DEBUG
+  printf("resume thread %x num = %x\n", *t->script, current_value);
+#endif
+  t->running = 1;
+}
+
+/** 
+ * Вычисляет номер потока в таблице потоков * 6
+ * 
+ * @param t указатель потока
+ * 
+ * @return номер в таблице * 6
+ */
+int thread_num(thread_t *t)
+{
   thread_table_t *tab = threads_table;
   for (int i = 0; i < num_run_threads; i++, tab++)
-    if (tab->thread == run_thread) {
-      thread_kill(i * 6, 0);
-      break;
-    }
+    if (tab->thread == t)
+      return i * 6;
+  return -1;
 }
