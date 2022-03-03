@@ -56,3 +56,10 @@ void play_sound()
   printf("play_sound_res %d %d %d %d %d\n", num, s1, s2, s3, s4);
 #endif
 }
+
+void play_music()
+{
+#ifdef DEBUG
+  printf("play music\n");
+#endif
+}
