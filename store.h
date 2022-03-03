@@ -1,5 +1,6 @@
 void store();
 void store_expression();
+void exchange_strings_store();
 void set_byte_mem_word();//6
 void set_word_mem_word();//8
 void set_string_mem_word();//a

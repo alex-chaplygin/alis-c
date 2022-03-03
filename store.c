@@ -81,6 +81,19 @@ void store_expression()
   store();
 }
 
+/** 
+ * Строки чтения и записи меняются местами.
+ * Очищается стек и происходит запись.
+ */
+void exchange_strings_store()
+{
+  char *s = get_string;
+  get_string = store_string;
+  store_string = s;
+  init_stack();
+  store();
+}
+
 /// запись переменной byte по адресу word
 void set_byte_mem_word()
 {
