@@ -16,6 +16,7 @@
 #include "interpret.h"
 #include "render.h"
 #include "get.h"
+#include "store.h"
 
 thread_table_t *threads_table; /**< таблица потоков */
 int max_threads;		/**< максимальное количество потоков */
@@ -24,6 +25,8 @@ thread_table_t *current_thread;	/**< текущий поток */
 thread_t *main_thread;		/**< главный поток */
 int num_run_threads;		/**< число рабочих потоков */
 int no_saved_return;		/**< если 0, то позволяет возврат из сценария к сохраненному кадру стека */
+int thread_flag = 0;
+word thread_array[256];		/**< временный массив номеров потоков */
 
 /** 
  * Загрузка blancpc
@@ -59,7 +62,6 @@ void thread_init_table(int max)
   get_string = get_string_buf;
   string2 = string_buf2;
   store_string = store_string_buf;
-  string4 = string_buf4;
 }
 
 /** 
@@ -434,4 +436,45 @@ int thread_num(thread_t *t)
     if (tab->thread == t)
       return i * 6;
   return -1;
+}
+
+/** 
+ * Читает номер сценария и ищет все потоки, которые выполняют этот
+ * сценарий. Номера потоков записываются во временный массив
+ * и затем один поток сохраняется в переменную
+ */
+void script_num_to_thread_num()
+{
+  int num = fetch_word();
+  thread_table_t *tab = threads_table;
+  thread_t *t;
+  word *pos = thread_array;
+#ifdef DEBUG
+  printf("script num: %x to thread num\n", num);
+#endif
+  while (tab) {
+    t = tab->thread;
+    if (t->id == num && t != run_thread) {
+      pos[255] = 0;
+      *pos = (word)thread_num(t);
+#ifdef DEBUG
+  printf("thread num: %x\n", *pos);
+#endif
+      pos++;
+      if (!thread_flag)
+	break;
+      else {
+	printf("thread flag\n");
+	exit(1);
+      }
+    }
+    tab = tab->next;
+  }
+  *pos = (short)-1;
+  thread_flag = 0;
+  thread_array_pos = thread_array;
+  current_value = *(short *)thread_array_pos;
+  if (current_value >= 0)
+    thread_array_pos++;
+  exchange_strings_store();
 }

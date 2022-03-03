@@ -38,7 +38,7 @@ char string_buf4[MAX_STR];
 char *get_string;		/**< указатель строки для загрузки */
 char *string2;
 char *store_string;		/**< указатель строки сохранения */
-char *string4;
+word *thread_array_pos;		/**< указатель на массив номеров потоков */
 
 /// таблица инструкций
 func vm_op[] = {
@@ -190,7 +190,7 @@ func vm_op[] = {
   nimp, // 91
   nimp, // 92
   nimp, // 93
-  nimp, // 94
+  script_num_to_thread_num, // 94
   nimp, // 95
   nimp, // 96
   nimp, // 97

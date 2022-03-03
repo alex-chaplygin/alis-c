@@ -35,5 +35,5 @@ extern char string_buf4[MAX_STR];
 extern char *get_string;
 extern char *string2;
 extern char *store_string;
-extern char *string4;
+extern word *thread_array_pos;
 
