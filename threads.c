@@ -27,6 +27,7 @@ int num_run_threads;		/**< число рабочих потоков */
 int no_saved_return;		/**< если 0, то позволяет возврат из сценария к сохраненному кадру стека */
 int thread_flag = 0;
 word thread_array[256];		/**< временный массив номеров потоков */
+int kill_thread_flag = 1;		/**< если равен 0, то потоки не удаляются при освобождении сценария*/
 
 /** 
  * Загрузка blancpc
@@ -383,11 +384,12 @@ void kill_thread_by_script(int id)
 {
   int i;
   for (thread_table_t *t = threads_table->next; t;) {
-    printf("killing thread after free script\n");
-    exit(1);
-    /*    if (t->id == id)
-      thread_kill(i * 6, 0);
-      t = t->next;*/
+#ifdef DEBUG
+    printf("kill thread check = %x\n", t->thread->id);
+#endif
+    if (t->thread->id == id && kill_thread_flag)
+      thread_kill(thread_num(t->thread), 0);
+    t = t->next;
   }
 }
 

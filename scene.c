@@ -163,8 +163,8 @@ void scenes_free_sprites()
     sp = sprites + s->scene_sprite;
     sp = sp->next_in_scene;
     while (sp) {
-      printf("scenes free sprites\n");
-      exit(1);
+      //      printf("scenes free sprites\n");
+      //exit(1);
       sp = sp->next;
     }
     if (!s->next)
