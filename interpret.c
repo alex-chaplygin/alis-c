@@ -191,8 +191,8 @@ func vm_op[] = {
   nimp, // 92
   nimp, // 93
   script_num_to_thread_num, // 94
-  nimp, // 95
-  nimp, // 96
+  play_sound6, // 95
+  play_sound1, // 96
   nimp, // 97
   nimp, // 98
   nimp, // 99
@@ -247,7 +247,7 @@ func vm_op[] = {
   nimp, // ca
   nimp, // cb
   nimp, // cc
-  nimp, // cd
+  play_sound3, // cd
   nimp, // ce
   nimp, // cf
   nimp, // d0

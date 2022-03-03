@@ -63,3 +63,47 @@ void play_music()
   printf("play music\n");
 #endif
 }
+
+void play_sound1()
+{
+  load_main_res = 0;
+  new_get();
+  int s1 = current_value;
+#ifdef DEBUG
+  printf("play_sound1 %d\n", s1);
+#endif
+}
+
+void play_sound3()
+{
+  load_main_res = 0;
+  new_get();
+  int num = current_value;
+  new_get();
+  int s1 = current_value;
+  new_get();
+  int s2 = current_value;
+#ifdef DEBUG
+  printf("play_sound3 %d %d %d\n", num, s1, s2);
+#endif
+}
+
+void play_sound6()
+{
+  load_main_res = 0;
+  new_get();
+  int num = current_value;
+  new_get();
+  int s1 = current_value;
+  new_get();
+  int s2 = current_value;
+  new_get();
+  int s3 = current_value;
+  new_get();
+  int s4 = current_value;
+  new_get();
+  int s5 = current_value;
+#ifdef DEBUG
+  printf("play_sound6 %d %d %d %d %d %d\n", num, s1, s2, s3, s4, s5);
+#endif
+}
