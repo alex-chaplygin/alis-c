@@ -30,6 +30,7 @@ sprite_t *prev_sprite;		/**< предыдущий спрайт в списке �
 int sprite_flags;
 vec_t translate;			/**< вектор перемещения для всех спрайтов */
 int reg4;
+int remove_from_scene = 0;	/**< нужно ли удалять из сцены */
 
 /** 
  * Создание таблицы спрайтов
@@ -316,11 +317,22 @@ void clear_object()
     if (!found) {
       break;
     }
-    c = sprite_remove(c, 0);
+    c = sprite_remove(c, remove_from_scene);
   };
+  remove_from_scene = 0;
 #ifdef DEBUG
   dump_sprites();
 #endif
+}
+
+/** 
+ * Удаляет объект из сцены
+ * 
+ */
+void clear_object_from_scene()
+{
+  remove_from_scene = 1;
+  clear_object();
 }
 
 /** 
