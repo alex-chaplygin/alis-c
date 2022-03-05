@@ -352,7 +352,7 @@ void get_message()
 }
 
 /** 
- * Остановка выполнения основного скрипта потока
+ * Пристановка выполнения основного скрипта потока
  * передача управления только если без сохранения стека вызовов
  */
 void thread_pause_yield_no_saved()
@@ -435,7 +435,7 @@ void thread_resume()
 int thread_num(thread_t *t)
 {
   thread_table_t *tab = threads_table;
-  for (int i = 0; i < num_run_threads; i++, tab++)
+  for (int i = 0; tab; i++, tab++)
     if (tab->thread == t)
       return i * 6;
   return -1;
@@ -457,6 +457,9 @@ void script_num_to_thread_num()
 #endif
   while (tab) {
     t = tab->thread;
+#ifdef DEBUG
+    printf("check thread num: %x run_thread: %x\n", t->id, run_thread->id);
+#endif
     if (t->id == num && t != run_thread) {
       pos[255] = 0;
       *pos = (word)thread_num(t);
