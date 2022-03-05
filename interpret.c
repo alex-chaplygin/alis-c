@@ -105,7 +105,7 @@ func vm_op[] = {
   nimp, // 3c
   free_script, // 3d
   thread_resume, // 3e
-  thread_stop_yield_no_saved, // 3f
+  thread_pause_yield_no_saved, // 3f
   run_script, // 40
   nimp, // 41
   yield, // 42
@@ -114,7 +114,7 @@ func vm_op[] = {
   op_script_load, // 45
   scene_new, // 46
   scene_set, // 47
-  nimp, // 48
+  show_object_0, // 48
   show_object, // 49
   nimp, // 4a
   clear_object, // 4b

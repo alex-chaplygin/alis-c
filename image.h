@@ -29,5 +29,6 @@ void show_object_flipped();
 byte *get_resource(int num);
 void set_tag();
 void clear_all_objects();
+void show_object_0();
 
 extern int load_main_res;	

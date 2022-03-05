@@ -254,3 +254,16 @@ void clear_all_objects()
   #endif
   remove_all_sprites(run_thread->sprite_list, 1);
 }
+
+/// показывает объект со всеми координатами 0
+void show_object_0()
+{
+  vec_t coord;
+  load_main_res = 0;
+  new_get();
+  coord.x = coord.y = coord.z = 0;
+#ifdef DEBUG
+  printf("show object 0 (0 0 0) res = %d xflip = %d\n", current_value, run_thread->x_flip); 
+#endif
+  load_resource(&coord, run_thread->x_flip, 0);
+}
