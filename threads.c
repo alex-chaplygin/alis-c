@@ -355,10 +355,10 @@ void get_message()
  * Остановка выполнения основного скрипта потока
  * передача управления только если без сохранения стека вызовов
  */
-void thread_stop_yield_no_saved()
+void thread_pause_yield_no_saved()
 {
 #ifdef DEBUG
-  printf("thread stop no saved yield\n");
+  printf("thread pause no saved yield\n");
 #endif
   run_thread->running = 0;
   if (no_saved_return)
@@ -387,6 +387,7 @@ void kill_thread_by_script(int id)
 #ifdef DEBUG
     printf("kill thread check = %x\n", t->thread->id);
 #endif
+    exit(1);
     if (t->thread->id == id && kill_thread_flag)
       thread_kill(thread_num(t->thread), 0);
     t = t->next;

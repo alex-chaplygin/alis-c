@@ -72,7 +72,7 @@ void thread_ready_to_receive();
 void thread_send_message();
 void op_thread_kill_remove_all();
 void get_message();
-void thread_stop_yield_no_saved();
+void thread_pause_yield_no_saved();
 void thread_clear_messages();
 void kill_thread_by_script(int id);
 void thread_stop();
