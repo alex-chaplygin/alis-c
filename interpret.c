@@ -23,6 +23,7 @@
 #include "append.h"
 #include "image.h"
 #include "sound.h"
+#include "text.h"
 
 byte *current_ip;		/**< указатель команд */
 thread_t *run_thread;		/**< текущий выполняемый поток */
@@ -228,12 +229,12 @@ func vm_op[] = {
   nimp, // b7
   nimp, // b8
   nimp, // b9
-  nimp, // ba
+  set_text_params, // ba
   nimp, // bb
   palette_clear_fade, // bc
   nimp, // bd
   palette_set_fade, //be
-  nimp, // bf
+  set_text_pos, // bf
   nimp, // c0
   nimp, // c1
   nimp, // c2
