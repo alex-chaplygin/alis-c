@@ -417,6 +417,6 @@ void set_frames_to_skip()
   new_get();
   frames_to_skip = (byte)current_value;
 #ifdef DEBUG
-  printf("\t\tset frame num %d\n", frame_num);
+  printf("\t\tset frame num %d\n", frames_to_skip);
 #endif
 }
