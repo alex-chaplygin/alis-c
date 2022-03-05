@@ -16,7 +16,7 @@
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define FPS 10			/**< число кадров в секунду */
+#define FPS 30			/**< число кадров в секунду */
 
 int mouse_x;
 int mouse_y;
@@ -119,6 +119,12 @@ void graphics_close()
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+}
+
+/// Ожидание одного кадра
+void graphics_sleep()
+{
+    SDL_Delay(1000 / FPS);
 }
 
 /** 

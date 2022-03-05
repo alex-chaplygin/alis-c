@@ -20,6 +20,7 @@
 #include "project.h"
 #include "interpret.h"
 #include "get.h"
+#include "graphics.h"
 
 byte frames_to_skip;		/**< через сколько кадров обновляется экран */
 byte frame_num = 0;			/**< текущий счетчик кадров */
@@ -393,9 +394,10 @@ void render_scene(scene_t *scene, sprite_t *sprite)
 void render_update()
 {
   scene_t *s = scene_list_head;
-  frame_num++;
-  if (frames_to_skip > frame_num)
-    return;
+  while (frames_to_skip > frame_num) {
+    graphics_sleep();
+    frame_num++;
+  }
   frame_num = 0;
   while (1) {
 #ifdef DEBUG
