@@ -306,7 +306,7 @@ int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2)
 void clear_object()
 {
   new_get();
-  int tag = (byte)current_value;
+  int tag = (char)current_value;
   int found;
   sprite_t *c;
 #ifdef DEBUG
