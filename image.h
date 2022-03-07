@@ -30,5 +30,7 @@ byte *get_resource(int num);
 void set_tag();
 void clear_all_objects();
 void show_object_0();
+void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag);
 
 extern int load_main_res;	
+extern int image_flag;
