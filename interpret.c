@@ -122,7 +122,7 @@ func vm_op[] = {
   nimp, // 4c
   nimp, // 4d
   scene_show, // 4e
-  nimp, // 4f
+  scene_hide, // 4f
   nimp, // 50
   nimp, // 51
   nimp, // 52
@@ -308,6 +308,7 @@ byte *interpret(thread_t *t, byte *ip)
   interpreting = 1;
   run_thread = t;
   while (interpreting) {
+    graphics_get_events();
 #ifdef DEBUG
     printf("%04x:\t\t", (int)(current_ip - t->script));
 #endif
