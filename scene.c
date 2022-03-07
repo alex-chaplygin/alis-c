@@ -120,6 +120,19 @@ void scene_show()
 #endif
 }
 
+/** 
+ * Команда - сделать сцену невидимой
+ */
+void scene_hide()
+{
+  word w = fetch_word();
+  scene_t *sc = (scene_t *)memory_read(w);
+  sc->flags |= SCENE_HIDDEN;
+#ifdef DEBUG
+  printf("scene hide %x flags = %x\n", w, sc->flags);
+#endif
+}
+
 /// установка текущей сцены
 void scene_set()
 {
