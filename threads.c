@@ -61,7 +61,7 @@ void thread_init_table(int max)
   free_thread = threads_table + 1; // главный поток сразу запущен
   num_run_threads = 1;
   get_string = get_string_buf;
-  string2 = string_buf2;
+  text_string = text_string_buf;
   store_string = store_string_buf;
 }
 
