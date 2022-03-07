@@ -29,11 +29,11 @@ extern short prev_value;		/**< второй регистр */
 extern stack_t stack;			/**< стек для промежуточных результатов вычислений */
 extern int stack_data[MAX_STACK];
 extern char get_string_buf[MAX_STR];
-extern char string_buf2[MAX_STR];
+extern char text_string_buf[MAX_STR];
 extern char store_string_buf[MAX_STR];
 extern char string_buf4[MAX_STR];
 extern char *get_string;
-extern char *string2;
+extern char *text_string;
 extern char *store_string;
 extern word *thread_array_pos;
 
