@@ -21,6 +21,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "graphics.h"
+#include "palette.h"
 
 byte frames_to_skip;		/**< через сколько кадров обновляется экран */
 byte frame_num = 0;			/**< текущий счетчик кадров */
@@ -396,6 +397,7 @@ void render_update()
   scene_t *s = scene_list_head;
   while (frames_to_skip > frame_num) {
     graphics_sleep();
+    palette_update();
     frame_num++;
   }
   frame_num = 0;
