@@ -76,15 +76,17 @@ byte symbol_table[128] =
  * @param scan скан код клавиши
  * @param mod модификаторы Alt Ctrl Shift
  */
-void set_key(int scan, int mod)
+void set_key(int scan, int sym, int mod)
 {
   byte s = (scan & 0x7F) - 1;
   keypressed_table[s] = 1;
-  key_symbol = symbol_table[s];
+  key_symbol = sym;//symbol_table[s];
   key_mod = mod;
   //  if (scan == 29) ctrl_pressed = 1;
   //  if (s < 112) key_pressed = key_table[s];
-  //printf("set key %x %c\n", scan, key_pressed);
+#ifdef DEBUG
+  printf("press key %x s = %x '%c'; %x\n", scan, s, key_symbol, key_symbol);
+#endif
 }
 
 /** 
@@ -97,6 +99,9 @@ void release_key(int scan)
   byte s = (scan & 0x7F) - 1;
   keypressed_table[s] = 0;
   key_symbol = 0;
+#ifdef DEBUG
+  printf("release key %x %x\n", scan, s);
+#endif
 }
 
 /// возвращает символ нажатой клавишу или 0 - если не нажата

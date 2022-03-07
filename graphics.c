@@ -63,7 +63,7 @@ void graphics_init()
 }
 
 /// Обработка событий клавиатуры и мыши
-void graphics_get_events()
+int graphics_get_events()
 {
   SDL_Event e;
   if (SDL_PollEvent(&e)) {
@@ -71,7 +71,7 @@ void graphics_get_events()
       return 0;
     else if (e.type == SDL_KEYDOWN)
       // key func
-      set_key(e.key.keysym.scancode, e.key.keysym.mod);
+      set_key(e.key.keysym.scancode, e.key.keysym.sym, e.key.keysym.mod);
     else if (e.type == SDL_KEYUP)
       release_key(e.key.keysym.scancode);
     else if (e.type == SDL_MOUSEMOTION) {
@@ -85,6 +85,7 @@ void graphics_get_events()
     else if (e.type == SDL_MOUSEBUTTONUP)
       mouse_button = 0;
   }
+  return 1;
 }
 
 /** 
@@ -97,7 +98,8 @@ void graphics_get_events()
  */
 int graphics_update()
 {
-  graphics_get_events();
+  if (!graphics_get_events())
+    return 0;
   long now = SDL_GetTicks();
   if (now -  current_time < time_step)
     SDL_Delay(now - current_time);
