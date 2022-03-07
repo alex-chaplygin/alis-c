@@ -110,6 +110,36 @@ void palette_init_fade(int fade)
 }
 
 /** 
+ * Загрузка 16-ти цветной палитры
+ * 
+ * @param src данные палитры
+ * @param dst куда загружается
+ */
+void load_palette16(byte *src, byte *dst)
+{
+#ifdef DEBUG
+    printf("palette load: count = 0 16 colors\n");
+#endif
+    src -= 2;
+    for (int i = 0; i < 16; i++) {
+      byte b = *src++;
+      byte b2 = *src++;
+      b <<= 3;
+      if (b)
+	b |= 7;
+      *dst++ = b;
+      b = (b2 & 0xf0) >> 1;
+      if (b)
+	b |= 7;
+      *dst++ = b;
+      b = (b2 & 0x0f) << 3;
+      if (b)
+	b |= 7;
+      *dst++ = b;
+    }
+}
+
+/** 
  * Загружает палитру из файла. prev_value - параметр, если 0, то палитра
  * устанавливается сразу без появления / увядания.
  * палитра устанавливается с заданным количеством цветов (count),
@@ -128,10 +158,9 @@ void palette_load(byte *pal)
   int ofs = p->color_index * 3;
   byte *src = (byte *)(p + 1);
   byte *dst = load_palette + ofs;
-  if (p->count == 1) {
-    printf("palette load: count = 1\n");
-    exit(1);
-  }
+  if (p->count == 0)
+    load_palette16(src, dst);
+  else
   for (int i = 0; i < p->count + 1; i++)
     for (int j = 0; j < 3; j++)
       *dst++ = *src++ >> 2;
