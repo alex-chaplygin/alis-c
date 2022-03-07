@@ -6,6 +6,7 @@ void save_get();
 void get(byte op);
 void switch_string();
 void switch_string_store();
+void switch_string_get();
 void switch_get();
 
 void read_byte();//0

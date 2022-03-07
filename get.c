@@ -37,7 +37,7 @@ func get_op[] = {
   nimp,//get_string_array_byte,//18
   nimp,//get_byte_array_byte,//1a
   nimp,//get_word_array_byte,//1c
-  nimp,//get_byte_global,//1e
+  get_byte_global_word,//1e
   nimp,//get_word_global,//20
   nimp,//get_string_global,//22
   nimp,//get_string_global_array_word,//24
@@ -183,6 +183,16 @@ void switch_string_store()
   printf("%04x:\t\t", (int)(current_ip - run_thread->script));
 #endif
   store();
+}
+
+/// меняет местами строки и загружает строку
+void switch_string_get()
+{
+  char * s = get_string;
+  get_string = text_string;
+  text_string = s;
+  byte op = fetch_byte();
+  get(op);
 }
 
 /** 
