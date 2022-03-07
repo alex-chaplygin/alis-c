@@ -62,15 +62,8 @@ void graphics_init()
   //sound_init
 }
 
-/** 
- * Обновление графики.
- * Обработка событий клавиатуры, мыши.
- * Обновление таймера, задержка кадра для постоянного fps.
- * Отрисовка экранного буфера.
- * 
- * @return 0 - если окно было закрыто, иначе 1
- */
-int graphics_update()
+/// Обработка событий клавиатуры и мыши
+void graphics_get_events()
 {
   SDL_Event e;
   if (SDL_PollEvent(&e)) {
@@ -92,6 +85,19 @@ int graphics_update()
     else if (e.type == SDL_MOUSEBUTTONUP)
       mouse_button = 0;
   }
+}
+
+/** 
+ * Обновление графики.
+ * Обработка событий клавиатуры, мыши.
+ * Обновление таймера, задержка кадра для постоянного fps.
+ * Отрисовка экранного буфера.
+ * 
+ * @return 0 - если окно было закрыто, иначе 1
+ */
+int graphics_update()
+{
+  graphics_get_events();
   long now = SDL_GetTicks();
   if (now -  current_time < time_step)
     SDL_Delay(now - current_time);
