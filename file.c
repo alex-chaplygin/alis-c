@@ -11,6 +11,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "file.h"
+#include "interpret.h"
+#include "get.h"
+
+#define MODE_SEEK 0x800		/**< после открытия файла переместить указатель */
+
+FILE *handle;			/**< текущий файл с которым идет работа */
 
 /// преобразование строки в верхний регистр
 void uppercase(char *s)
@@ -79,4 +85,33 @@ int file_exists(char *s)
   } 
   fclose(f);
   return 1;
+}
+
+/** 
+ * Команда - открытие файла
+ * имя файла в get_string
+ */
+void op_open_file()
+{
+  if (*current_ip != 0xff) {
+    printf("open file skip name\n");
+    exit(1);
+  }
+  current_ip++;
+  switch_string_get();
+  new_get();
+  #ifdef DEBUG
+  printf("open file '%s' mode = %d buf = %x\n", get_string, current_value, prev_value);
+  #endif
+  switch (current_value) {
+  case 2: // открытие на чтение и запись
+    handle = file_open(get_string, "r+b");
+    break;
+  default:
+    printf("unknown mode: %d\n", current_value);
+  }
+  if (current_value & MODE_SEEK) {
+    printf("file seek\n");
+    exit(1);
+  }
 }

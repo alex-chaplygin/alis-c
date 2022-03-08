@@ -24,6 +24,7 @@
 #include "image.h"
 #include "sound.h"
 #include "text.h"
+#include "file.h"
 
 byte *current_ip;		/**< указатель команд */
 thread_t *run_thread;		/**< текущий выполняемый поток */
@@ -155,7 +156,7 @@ func vm_op[] = {
   play_sound_synth, // 6d
   nimp, // 6e
   nimp, // 6f
-  nimp, // 70
+  op_open_file, // 70
   nimp, // 71
   nimp, // 72
   nimp, // 73
