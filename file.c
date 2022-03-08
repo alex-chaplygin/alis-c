@@ -93,17 +93,23 @@ int file_exists(char *s)
  */
 void op_open_file()
 {
+  char *file;
+  int mode;
   if (*current_ip != 0xff) {
-    printf("open file skip name\n");
-    exit(1);
+    file = current_ip;
+    while (*current_ip++) ;
+    mode = fetch_word();
+  } else {
+    current_ip++;
+    switch_string_get();
+    new_get();
+    file = get_string;
+    mode = current_value;
   }
-  current_ip++;
-  switch_string_get();
-  new_get();
   #ifdef DEBUG
-  printf("open file '%s' mode = %d buf = %x\n", get_string, current_value, prev_value);
+  printf("open file '%s' mode = %d\n", file, mode);
   #endif
-  switch (current_value) {
+  switch (mode) {
   case 2: // открытие на чтение и запись
     handle = file_open(get_string, "r+b");
     break;
