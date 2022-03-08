@@ -36,7 +36,7 @@ func set_op[] = {
   nimp,//set_word_global, //20
   nimp,//set_string_global, //22
   nimp,//set_string_global_array, //24
-  nimp,//set_byte_global_array,//26
+  set_byte_global_array_word,//26
   set_word_global_array_word,//28
   store_byte_thread_word, //2a
   nimp,//set_word_far,//2c
@@ -277,7 +277,20 @@ void set_word_global_array_word()
   word w = fetch_word();
   short *b = (short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
   current_value = stack_pop(&stack);
+  *b = current_value;
 #ifdef DEBUG
-  printf("set word glob_arrw_%x %x; %d\n", w, current_value, current_value);
+  printf("set glob_arrw_%x %x; %d\n", w, current_value, current_value);
+#endif
+}
+
+/// запись байта в глобальный массив
+void set_byte_global_array_word()
+{
+  word w = fetch_word();
+  char *b = (char *)array_pos(seg_read(threads_table->thread->data, w), 0, 1);
+  current_value = stack_pop(&stack);
+  *b = (char)current_value;
+#ifdef DEBUG
+  printf("set glob_arrb_%x %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
 }
