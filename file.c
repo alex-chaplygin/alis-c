@@ -142,3 +142,12 @@ void op_read_file()
     ASSERT(*(word *)(buf + 16 * 2), 0xb)
 #endif
 }
+
+/// Команда - закрытие файла
+void op_close_file()
+{
+#ifdef DEBUG
+  printf("close file\n");
+  fclose(handle);
+#endif
+}

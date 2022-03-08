@@ -157,7 +157,7 @@ func vm_op[] = {
   nimp, // 6e
   nimp, // 6f
   op_open_file, // 70
-  nimp, // 71
+  op_close_file, // 71
   nimp, // 72
   nimp, // 73
   nimp, // 74
