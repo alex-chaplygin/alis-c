@@ -115,3 +115,30 @@ void op_open_file()
     exit(1);
   }
 }
+
+/// чтение из файла
+void op_read_file()
+{
+  word adr = fetch_word();
+  if (!adr) {
+    printf("read file to main mem\n");
+    exit(1);
+  }
+  word count = fetch_word();
+  word *buf = (word *)seg_read(run_thread->data, adr);
+  word *b = buf;
+  // проверяем верхнюю границу буфера
+  seg_read(run_thread->data, adr + count - 1);
+  file_read(handle, buf, count);
+  if (*((byte *)buf - 2) == 2) { // если это массив слов
+    for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
+      *b = ((*b & 0xff) << 8) + (*b >> 8);
+      b++;
+    }
+  }
+#ifdef DEBUG
+  printf("read from file: adr = %x count = %d\n", adr, count);
+  if (adr == 0x1978 && count == 140)
+    ASSERT(*(word *)(buf + 16 * 2), 0xb)
+#endif
+}
