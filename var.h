@@ -10,7 +10,7 @@ void get_string_mem_byte();//16
 void get_string_array_byte();//18
 void get_byte_array_byte();//1a
 void get_word_array_byte();//1c
-void get_byte_global();//1e
+void get_byte_global_word(); //1e
 void get_word_global();//20
 void get_string_global();//22
 void get_string_global_array_word();//24

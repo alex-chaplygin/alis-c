@@ -95,3 +95,24 @@ void get_byte_from_thread()
   #endif
   exit(1);
 }
+
+/// чтение глобальной переменной типа byte по адресу word
+void get_byte_global_word()
+{
+  word w = fetch_word();
+  current_value = (char)*seg_read(threads_table->thread->data, w);
+#ifdef DEBUG
+  printf("get byte glob_varw_%x: %x; %d\n", w, current_value, current_value);
+#endif
+  exit(1);
+}
+
+/// чтение из массива слов
+void get_word_array_word()
+{
+  word w = fetch_word();
+  current_value = *(short *)array_pos(seg_read(run_thread->data, w), 0, 2);
+#ifdef DEBUG
+  printf("get word arrw_%x: %x; %d\n", w, current_value, current_value);
+#endif
+}
