@@ -13,6 +13,7 @@
 #include "store.h"
 #include "array.h"
 #include "get.h"
+#include "memory.h"
 
 /// таблица опреаций присваивания переменных
 func set_op[] = {
@@ -36,7 +37,7 @@ func set_op[] = {
   nimp,//set_string_global, //22
   nimp,//set_string_global_array, //24
   nimp,//set_byte_global_array,//26
-  nimp,//set_word_global_array,//28
+  set_word_global_array_word,//28
   store_byte_thread_word, //2a
   nimp,//set_word_far,//2c
   nimp,//set_string_far,//2e
@@ -267,5 +268,16 @@ void set_byte_global_word()
   seg_write_byte(threads_table->thread->data, w, (byte)current_value);
 #ifdef DEBUG
   printf("store_b glob_varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+#endif
+}
+
+/// запись слова в глобальный массив
+void set_word_global_array_word()
+{
+  word w = fetch_word();
+  short *b = (short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+  current_value = stack_pop(&stack);
+#ifdef DEBUG
+  printf("set word glob_arrw_%x %x; %d\n", w, current_value, current_value);
 #endif
 }

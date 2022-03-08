@@ -15,3 +15,4 @@ void set_byte_array_byte();//1a
 void set_word_array_byte();//1c
 void set_byte_global_word();//1e
 void store_byte_thread_word();
+void set_word_global_array_word();//28
