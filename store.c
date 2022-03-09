@@ -285,11 +285,12 @@ void set_word_global_word()
 void set_word_global_array_word()
 {
   word w = fetch_word();
+  int idx = current_value;
   short *b = (short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
   current_value = stack_pop(&stack);
   *b = current_value;
 #ifdef DEBUG
-  printf("store_w main.arrw_%x %x; %d\n", w, current_value, current_value);
+  printf("store_w main.arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
 #endif
 }
 
@@ -306,14 +307,14 @@ void set_byte_global_array_word()
   current_value = stack_pop(&stack);
   *b = (char)current_value;
 #ifdef DEBUG
-  printf("store_b main.arrb_%x[%d] %x; %d\n", w, idx, (char)current_value, (char)current_value);
+  printf("store_b main.arrw_%x[%d] %x; %d\n", w, idx, (char)current_value, (char)current_value);
 #endif
 }
 
 /// запись в глобальный массив строк по адресу word
 void set_string_global_array_word()
 {
-  byte w = fetch_word();
+  word w = fetch_word();
   int idx = current_value;
   byte *pos = array_pos(seg_read(threads_table->thread->data, w), 1, 1);
   byte *p = pos;
