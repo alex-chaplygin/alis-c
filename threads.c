@@ -223,7 +223,7 @@ void thread_ready_to_receive()
 {
   run_thread->flags &= ~THREAD_NOMSG;
 #ifdef DEBUG
-  printf("clear flags 0: %x\n", run_thread->flags);
+  printf("thread ready to receive msg flags: %x\n", run_thread->flags);
 #endif
 }
 
