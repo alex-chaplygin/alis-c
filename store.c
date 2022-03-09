@@ -35,7 +35,7 @@ func set_op[] = {
   set_byte_global_word, //1e
   set_word_global_word, //20
   nimp,//set_string_global, //22
-  nimp,//set_string_global_array, //24
+  set_string_global_array_word, //24
   set_byte_global_array_word,//26
   set_word_global_array_word,//28
   store_byte_thread_word, //2a
@@ -301,10 +301,25 @@ void set_word_global_array_word()
 void set_byte_global_array_word()
 {
   word w = fetch_word();
+  int idx = current_value;
   char *b = (char *)array_pos(seg_read(threads_table->thread->data, w), 0, 1);
   current_value = stack_pop(&stack);
   *b = (char)current_value;
 #ifdef DEBUG
-  printf("store_b main.arrb_%x %x; %d\n", w, (char)current_value, (char)current_value);
+  printf("store_b main.arrb_%x[%d] %x; %d\n", w, idx, (char)current_value, (char)current_value);
+#endif
+}
+
+/// запись в глобальный массив строк по адресу word
+void set_string_global_array_word()
+{
+  byte w = fetch_word();
+  int idx = current_value;
+  byte *pos = array_pos(seg_read(threads_table->thread->data, w), 1, 1);
+  byte *p = pos;
+  byte *s = store_string;
+  while (*p++ = *s++);
+#ifdef DEBUG
+  printf("store_str main.arrw_%x[%d], \"%s\"\n", w, idx, (char *)pos);
 #endif
 }
