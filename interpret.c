@@ -126,7 +126,7 @@ func vm_op[] = {
   nimp, // 4d
   scene_show, // 4e
   scene_hide, // 4f
-  nimp, // 50
+  clear_all_objects2, // 50
   nimp, // 51
   nimp, // 52
   nimp, // 53

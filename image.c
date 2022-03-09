@@ -267,3 +267,12 @@ void show_object_0()
 #endif
   load_resource(&coord, run_thread->x_flip, 0);
 }
+
+/// Удаляет все объекты текущего потока, может не удалять из сцены
+void clear_all_objects2()
+{
+  #ifdef DEBUG
+  printf("clear all objects2\n");
+  #endif
+  remove_all_sprites(run_thread->sprite_list, remove_from_scene);
+}

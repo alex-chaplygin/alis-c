@@ -52,5 +52,6 @@ void clear_object_from_scene();
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
 extern sprite_t *cursor_sprite;	/**< спрайт курсора мыши */
+extern int remove_from_scene;	/**< нужно ли удалять из сцены */
 
 #endif
