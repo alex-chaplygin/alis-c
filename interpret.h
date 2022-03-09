@@ -18,7 +18,6 @@ void null_op();
 void no_func();
 void nimp();
 void yield();
-void mouse_read();
 
 extern byte *current_ip;
 extern thread_t *run_thread;

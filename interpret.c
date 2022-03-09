@@ -25,6 +25,8 @@
 #include "sound.h"
 #include "text.h"
 #include "file.h"
+#include "mouse.h"
+#include "graphics.h"
 
 byte *current_ip;		/**< указатель команд */
 thread_t *run_thread;		/**< текущий выполняемый поток */
@@ -179,7 +181,7 @@ func vm_op[] = {
   nimp, // 84
   nimp, // 85
   mouse_read, // 86
-  nimp, // 87
+  set_mouse_cursor, // 87
   nimp, // 88
   nimp, // 89
   nimp, // 8a
@@ -336,19 +338,4 @@ void yield()
 #ifdef DEBUG
   printf("yield\n");
 #endif
-}
-
-/// Чтение состояния мыши в 3 переменные
-void mouse_read()
-{
-#ifdef DEBUG
-  printf("set mouse_x mouse_y buttons:\n");
-#endif
-  // get mouse x, y, buttons
-  current_value = 0;
-  switch_string_store();
-  current_value = 0;
-  switch_string_store();
-  current_value = 0;
-  switch_string_store();
 }
