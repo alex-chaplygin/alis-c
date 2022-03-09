@@ -118,16 +118,26 @@ void get_word_array_word()
 #endif
 }
 
-/// чтение из массива слов
+/// чтение слова из массива по адресу word
 void get_word_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
   current_value = *(short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
 #ifdef DEBUG
-  printf("get word glob_arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+  printf("get word main.arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
 #endif
-  exit(1);
+}
+
+/// чтение слова из массива по адресу word
+void get_byte_global_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  current_value = *(char *)array_pos(seg_read(threads_table->thread->data, w), 0, 1);
+#ifdef DEBUG
+  printf("get byte main.arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
 }
 
 /// чтение строки из глобального массива word
@@ -135,9 +145,10 @@ void get_string_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+  char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 1, 1);
   char *dst = get_string;
+  while (*dst++ = *src++) ;
 #ifdef DEBUG
-  printf("get string glob_arrs_%x[%d] \"%s\"\n", w, idx, get_string);
+  printf("get string main.arrsw_%x[%d] \"%s\"\n", w, idx, get_string);
 #endif
 }
