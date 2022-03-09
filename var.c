@@ -13,6 +13,7 @@
 #include "memory.h"
 #include "get.h"
 #include "threads.h"
+#include "array.h"
 
 /// чтение переменной типа byte по адресу word
 void get_byte_mem_word()
@@ -104,15 +105,39 @@ void get_byte_global_word()
 #ifdef DEBUG
   printf("get byte glob_varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
-  exit(1);
 }
 
 /// чтение из массива слов
 void get_word_array_word()
 {
   word w = fetch_word();
+  int idx = current_value;
   current_value = *(short *)array_pos(seg_read(run_thread->data, w), 0, 2);
 #ifdef DEBUG
-  printf("get word arrw_%x: %x; %d\n", w, current_value, current_value);
+  printf("get word arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
+}
+
+/// чтение из массива слов
+void get_word_global_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  current_value = *(short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+#ifdef DEBUG
+  printf("get word glob_arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
+  exit(1);
+}
+
+/// чтение строки из глобального массива word
+void get_string_global_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+  char *dst = get_string;
+#ifdef DEBUG
+  printf("get string glob_arrs_%x[%d] \"%s\"\n", w, idx, get_string);
 #endif
 }
