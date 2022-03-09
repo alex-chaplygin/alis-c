@@ -33,7 +33,7 @@ func set_op[] = {
   set_byte_array_byte,//1a
   set_word_array_byte,//1c
   set_byte_global_word, //1e
-  nimp,//set_word_global, //20
+  set_word_global_word, //20
   nimp,//set_string_global, //22
   nimp,//set_string_global_array, //24
   set_byte_global_array_word,//26
@@ -261,13 +261,23 @@ void store_byte_thread_word()
   #endif
 }
 
-/// запись переменной byte по адресу word
+/// запись глобальной переменной byte по адресу word
 void set_byte_global_word()
 {
   word w = fetch_word();
   seg_write_byte(threads_table->thread->data, w, (byte)current_value);
 #ifdef DEBUG
-  printf("store_b glob_varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+  printf("store_b main.varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+#endif
+}
+
+/// запись глобальной переменной word по адресу word
+void set_word_global_word()
+{
+  word w = fetch_word();
+  seg_write_word(threads_table->thread->data, w, (word)current_value);
+#ifdef DEBUG
+  printf("store_w main.varw_%x, %x; %d\n", w, current_value, current_value);
 #endif
 }
 
@@ -279,7 +289,7 @@ void set_word_global_array_word()
   current_value = stack_pop(&stack);
   *b = current_value;
 #ifdef DEBUG
-  printf("set glob_arrw_%x %x; %d\n", w, current_value, current_value);
+  printf("store_w main.arrw_%x %x; %d\n", w, current_value, current_value);
 #endif
 }
 
@@ -295,6 +305,6 @@ void set_byte_global_array_word()
   current_value = stack_pop(&stack);
   *b = (char)current_value;
 #ifdef DEBUG
-  printf("set glob_arrb_%x %x; %d\n", w, (char)current_value, (char)current_value);
+  printf("store_b main.arrb_%x %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
 }
