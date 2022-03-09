@@ -69,6 +69,6 @@ byte *array_pos(byte *arr, int str, int size)
      --dim;
      idx *= *dim;
      pos += idx;
-    } while (dim_count--);
+    } while (--dim_count);
   return pos;
 }

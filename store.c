@@ -283,7 +283,11 @@ void set_word_global_array_word()
 #endif
 }
 
-/// запись байта в глобальный массив
+/** 
+ * Запись байта в глобальный массив
+ * current_value - первый индекс в массиве
+ * остальные индексы - в стеке
+ */
 void set_byte_global_array_word()
 {
   word w = fetch_word();
