@@ -13,6 +13,9 @@
 #include "sprite.h"
 #include "get.h"
 
+/** 
+ * Установка курсора мыши как изображение из ресурсов
+ */
 void set_mouse_cursor()
 {
   load_main_res = 0;
