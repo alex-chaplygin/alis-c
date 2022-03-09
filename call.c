@@ -314,3 +314,36 @@ void op_jump_table()
   printf("jump table count = %d cur_val = %x ip = %x\n", c, current_value, (int)(current_ip - run_thread->script));
   #endif
 }
+
+/** 
+ * Команда - выбор перехода в зависимости
+ * от значения выражения
+ */
+void op_switch_case()
+{
+  new_get();
+  int count = fetch_byte() + 1;
+  if ((int)(current_ip - run_thread->script) & 1)
+    current_ip++;
+#ifdef DEBUG
+  printf("switch case (%x) ; %d\n", current_value, current_value);
+#endif
+  short *val = (short *)current_ip;
+  for (int i = 0; i < count; i++) {
+#ifdef DEBUG
+  printf("case %x ; %d\n", *val, *val);
+#endif
+    if (current_value == *val){
+      val++;
+      current_ip = (byte *)val + *val + 2;
+      break;
+    } else if (current_value < *val) {
+      printf("switch < val\n");
+      exit(1);
+    }
+    val += 2;
+  }
+#ifdef DEBUG
+  printf("ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
+}

@@ -92,7 +92,7 @@ func vm_op[] = {
   loop_byte, // 2b
   nimp, // 2c
   nimp, // 2d
-  nimp, // 2e
+  op_switch_case, // 2e
   op_jump_table, // 2f
   nimp, // 30
   nimp, // 31

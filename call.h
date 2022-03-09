@@ -19,3 +19,4 @@ void compare_jump_word_nz();//1c
 void compare_jump_word_skip_nz();//1d
 void loop_byte();
 void op_jump_table();
+void op_switch_case();
