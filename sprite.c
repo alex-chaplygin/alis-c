@@ -220,6 +220,8 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   newc->tag = tag;
   newc->state = SPRITE_NEW;
   newc->f24 = run_thread->f2c;
+  newc->f1c = run_thread->f25;
+  // test f1c
   newc->layer = run_thread->layer;
   sprite_t *sc = sprites + run_thread->current_scene->scene_sprite;
   newc->next_in_scene = sc->next_in_scene;

@@ -484,3 +484,11 @@ void script_num_to_thread_num()
     thread_array_pos++;
   exchange_strings_store();
 }
+
+void set_thread_f25()
+{
+#ifdef DEBUG
+  printf("set thread f25 -1\n");
+  run_thread->f25 = -1;
+#endif
+}

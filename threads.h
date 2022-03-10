@@ -47,6 +47,7 @@ typedef struct thread_s {
   int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
   int layer;			/**< слой отрисовки для всех новых спрайтов */
   int f2c;
+  int f25;
   sprite_t *sprite_list;	/**< список спрайтов потока */
   scene_t *current_scene;		/**< текущая сцена */
   script_t *header;		/**< заголовок сценария */
@@ -79,6 +80,7 @@ void thread_stop();
 void thread_resume();
 int thread_num(thread_t *t);
 void script_num_to_thread_num();
+void set_thread_f25();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */

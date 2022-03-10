@@ -206,7 +206,7 @@ func vm_op[] = {
   play_sound, // 9d
   nimp, // 9e
   nimp, // 9f
-  nimp, // a0
+  set_thread_f25, // a0
   play_music, // a1
   nimp, // a2
   nimp, // a3
