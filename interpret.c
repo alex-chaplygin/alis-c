@@ -96,7 +96,7 @@ func vm_op[] = {
   op_jump_table, // 2f
   nimp, // 30
   nimp, // 31
-  nimp, // 32
+  call_skip_word_save, // 32
   nimp, // 33
   set_tag, // 34
   nimp, // 35

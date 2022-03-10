@@ -347,3 +347,24 @@ void op_switch_case()
   printf("ip = %x\n", (int)(current_ip - run_thread->script));
 #endif
 }
+
+/// вызов с возможным возвратом к сохраненному значению
+void call_save(int s)
+{
+  if (!no_saved_return) {
+    printf("call save no saved = 0\n");
+    exit(1);
+  }
+  call(s);
+}
+
+/// вызов word + 1 с возможным возвратом к сохраненному значению
+void call_skip_word_save()
+{
+  int s = (short)fetch_word();
+  current_ip++;
+  call_save(s);
+#ifdef DEBUG
+  printf("call skip word save: %d ip = %x\n", s, (int)(current_ip - run_thread->script));
+#endif
+}
