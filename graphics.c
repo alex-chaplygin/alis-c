@@ -89,6 +89,17 @@ int graphics_get_events()
 }
 
 /** 
+ * Обновляет палитру в начале каждого кадра
+ * Вызывается в цикле интерпретатора
+ */
+void graphics_palette_update()
+{
+  long now = SDL_GetTicks();
+  if ((now -  current_time) % time_step == 0)
+    palette_update();
+}
+
+/** 
  * Обновление графики.
  * Обработка событий клавиатуры, мыши.
  * Обновление таймера, задержка кадра для постоянного fps.
@@ -105,7 +116,6 @@ int graphics_update()
     SDL_Delay(now - current_time);
   else
     current_time = now;
-  palette_update();
   // sound update
   //printf("tick %i\n", now);
   SDL_UnlockSurface(screen);  

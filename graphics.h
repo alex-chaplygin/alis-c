@@ -9,5 +9,6 @@ void graphics_close();
 void graphics_set_palette(byte *palette);
 void graphics_sleep();
 int graphics_get_events();
+void graphics_palette_update();
 
 extern byte *video_buffer;
