@@ -338,8 +338,8 @@ void op_switch_case()
       current_ip = (byte *)val + *val + 2;
       break;
     } else if (current_value < *val) {
-      printf("switch < val\n");
-      exit(1);
+      current_ip += (count - i) * 4;
+      break;
     }
     val += 2;
   }
