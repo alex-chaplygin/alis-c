@@ -8,6 +8,7 @@ void switch_string();
 void switch_string_store();
 void switch_string_get();
 void switch_get();
+void get2switch();
 
 void read_byte();//0
 void read_word();//2

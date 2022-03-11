@@ -44,7 +44,7 @@ func get_op[] = {
   get_byte_global_array_word,//26
   get_word_global_array_word,//28
   get_byte_from_thread, //2a
-  nimp,//get_word_pointer,//2c
+  get_word_from_thread,//2c
   nimp,//get_string_pointer,//2e
   nimp,//get_string_pointer_array,//30
   nimp,//get_byte_pointer_array,//32
@@ -287,4 +287,11 @@ void get_push()
   printf("push %x\n", current_value);
 #endif
   stack_push(&stack, current_value);
+}
+
+/// получить 2 значения и поменять местами
+void get2switch()
+{
+  new_get();
+  switch_get();
 }

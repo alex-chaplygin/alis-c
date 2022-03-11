@@ -262,7 +262,7 @@ func vm_op[] = {
   new_get, // d5
   nimp, // d6
   set_skip_palette, // d7
-  nimp, // d8
+  get2switch, // d8
   nimp, // d9
   nimp, // da
   nimp, // db
