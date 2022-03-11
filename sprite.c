@@ -77,9 +77,9 @@ int num_free_sprites()
  */
 void set_translate(word *data)
 {
-  translate.x = *data++;
-  translate.y = *data++;
-  translate.z = *data++;
+  translate.x = *(short *)data++;
+  translate.y = *(short *)data++;
+  translate.z = *(short *)data++;
   reg4 = *data;
 #ifdef DEBUG
   printf("Set translate (%d %d %d %d)\n", translate.x, translate.y, translate.z, reg4);
@@ -94,9 +94,9 @@ void set_translate(word *data)
 void sprites_translate(word *data)
 {
   vec_t delta;
-  delta.x = *data++ - translate.x;
-  delta.y = *data++ - translate.y;
-  delta.z = *data++ - translate.z;
+  delta.x = *(short *)data++ - translate.x;
+  delta.y = *(short *)data++ - translate.y;
+  delta.z = *(short *)data++ - translate.z;
   if (!delta.z && !delta.x && !delta.y)
     return;
   printf("sprite translation delta = (%d %d %d)\n", delta.x, delta.y, delta.z);
