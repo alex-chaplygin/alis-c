@@ -1,7 +1,7 @@
 void str_trim(); //7c
 void str_part(); //7e
 void str_pos(); //80
-void str_len(); //82
+void get_string_len(); //82
 void str_char(); //84
 void num_to_str(); //86
 void str_cat(); //88

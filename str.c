@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "io.h"
-#include "script.h"
-#include "vm.h"
+#include "interpret.h"
 
+/*
 void str_from_stack()
 {
   char *dst = current_string;
@@ -53,15 +52,17 @@ void str_pos()
   *current_string = *pos;
   if (*current_string && current_value < 0) *(current_string + 1) = 0;
   printf("res: %s\n", current_string);
-}
+  }*/
 
-void str_len()
+/// Вычисляет длину строки
+void get_string_len()
 {
-  printf("str_len %s\n", current_string);
-  current_value = strlen(current_string);
-  printf("res = %d\n", current_value);
+  current_value = strlen(get_string);
+#ifdef DEBUG
+  printf("get_string_len \"%s\" res = %d\n", get_string, current_value);
+#endif
 }
-
+/*
 void str_char()
 {
   current_value = (byte)*current_string;
@@ -192,3 +193,4 @@ void set_char()
   *(current_string + 1) = 0;
   printf("set  char %s %x\n", current_string, (current_value & 0xff));
 }
+*/

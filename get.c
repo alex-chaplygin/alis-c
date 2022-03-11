@@ -19,6 +19,7 @@
 #include "threads.h"
 #include "key.h"
 #include "misc.h"
+#include "str.h"
 
 /// таблица подфункций для выражений
 func get_op[] = {
@@ -87,7 +88,7 @@ func get_op[] = {
   nimp,//str_trim, //7c
   nimp,//str_part, //7e
   nimp,//str_pos, //80
-  nimp,//str_len, //82
+  get_string_len, //82
   nimp,//str_char, //84
   nimp,//num_to_str, //86
   nimp,//str_cat, //88
