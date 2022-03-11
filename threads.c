@@ -26,7 +26,7 @@ thread_t *main_thread;		/**< главный поток */
 int num_run_threads;		/**< число рабочих потоков */
 int no_saved_return;		/**< если 0, то позволяет возврат из сценария к сохраненному кадру стека */
 int thread_flag = 0;
-word thread_array[256];		/**< временный массив номеров потоков */
+word threads_list[256];		/**< список номеров потоков */
 int kill_thread_flag = 1;		/**< если равен 0, то потоки не удаляются при освобождении сценария*/
 
 /** 
@@ -443,8 +443,19 @@ int thread_num(thread_t *t)
 }
 
 /** 
+ * Сохраняет очередной элемент списка потоков в переменную
+ */
+void store_thread_list()
+{
+  current_value = *(short *)threads_list_pos;
+  if (current_value >= 0)
+    threads_list_pos++;
+  exchange_strings_store();
+}
+
+/** 
  * Читает номер сценария и ищет все потоки, которые выполняют этот
- * сценарий. Номера потоков записываются во временный массив
+ * сценарий. Номера потоков записываются в список
  * и затем один поток сохраняется в переменную
  */
 void script_num_to_thread_num()
@@ -452,7 +463,7 @@ void script_num_to_thread_num()
   int num = fetch_word();
   thread_table_t *tab = threads_table;
   thread_t *t;
-  word *pos = thread_array;
+  word *pos = threads_list;
 #ifdef DEBUG
   printf("script num: %x to thread num\n", num);
 #endif
@@ -479,11 +490,8 @@ void script_num_to_thread_num()
   }
   *pos = (short)-1;
   thread_flag = 0;
-  thread_array_pos = thread_array;
-  current_value = *(short *)thread_array_pos;
-  if (current_value >= 0)
-    thread_array_pos++;
-  exchange_strings_store();
+  threads_list_pos = threads_list;
+  store_thread_list();
 }
 
 void set_thread_f25()
@@ -501,4 +509,35 @@ void set_sprites_thread()
   printf("set sprites thread: %x prev: %x\n", current_value, run_thread->sprites_thread);
 #endif
   run_thread->sprites_thread = current_value;
+}
+
+/** 
+ * Загружает список номеров всех потоков кроме главного
+ * Первый элемент списка сохраняет в переменную
+ */
+void get_threads_list()
+{
+  thread_table_t *tab = threads_table->next;
+  thread_t *t;
+  word *pos = threads_list;
+  int num;
+#ifdef DEBUG
+  printf("get threads list:\n");
+#endif
+  while (tab) {
+    t = tab->thread;
+    num = thread_num(t);
+    *pos++ = num;
+#ifdef DEBUG
+    printf("%x ", num);
+#endif
+    tab = tab->next;
+  }
+#ifdef DEBUG
+    printf("\n");
+#endif
+  *pos = -1;
+  thread_flag = 0;
+  threads_list_pos = threads_list;
+  store_thread_list();
 }
