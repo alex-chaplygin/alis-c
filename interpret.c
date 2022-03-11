@@ -133,7 +133,7 @@ func vm_op[] = {
   nimp, // 54
   nimp, // 55
   nimp, // 56
-  nimp, // 57
+  store_thread_num, // 57
   nimp, // 58
   nimp, // 59
   nimp, // 5a

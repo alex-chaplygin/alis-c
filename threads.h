@@ -84,6 +84,7 @@ void script_num_to_thread_num();
 void set_thread_f25();
 void set_sprites_thread();
 void get_threads_list();
+void store_thread_num();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
