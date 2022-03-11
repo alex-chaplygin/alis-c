@@ -96,6 +96,19 @@ void get_byte_from_thread()
   #endif
 }
 
+/// чтение переменной byte по адресу word из другого потока
+void get_word_from_thread()
+{
+  int thr = fetch_word();
+  thread_t *t = threads_table[thr / 6].thread;
+  word adr = fetch_word();
+  current_value =*(short *)seg_read(t->data, adr);
+#ifdef DEBUG
+  printf("get word thread: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
+#endif
+  exit(1);
+}
+
 /// чтение глобальной переменной типа byte по адресу word
 void get_byte_global_word()
 {
@@ -124,6 +137,17 @@ void get_word_array_word()
   current_value = *(short *)array_pos(seg_read(run_thread->data, w), 0, 2);
 #ifdef DEBUG
   printf("get word arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
+}
+
+/// чтение из массива слов
+void get_byte_array_byte()
+{
+  byte w = fetch_byte();
+  int idx = current_value;
+  current_value = *(char *)array_pos(seg_read(run_thread->data, w), 0, 1);
+#ifdef DEBUG
+  printf("get byte arrb_%x[%d] %x; %d\n", w, idx, current_value, current_value);
 #endif
 }
 

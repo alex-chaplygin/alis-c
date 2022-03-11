@@ -17,6 +17,7 @@ void get_string_global_array_word();//24
 void get_byte_global_array_word();//26
 void get_word_global_array_word();//28
 void get_byte_from_thread();//2a
+void get_word_from_thread();//2c
 void get_string_pointer_array();//30
 void get_byte_pointer_array();//32
 void get_word_pointer_array();//34
