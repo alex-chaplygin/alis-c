@@ -327,6 +327,7 @@ void op_switch_case()
     current_ip++;
 #ifdef DEBUG
   printf("switch case (%x) ; %d\n", current_value, current_value);
+  printf("ip = %x count = %d\n", (int)(current_ip - run_thread->script), count);
 #endif
   short *val = (short *)current_ip;
   for (int i = 0; i < count; i++) {
@@ -338,7 +339,7 @@ void op_switch_case()
       current_ip = (byte *)val + *val + 2;
       break;
     } else if (current_value < *val) {
-      current_ip += (count - i) * 4;
+      current_ip += count * 4;
       break;
     }
     val += 2;
