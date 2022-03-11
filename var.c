@@ -103,7 +103,17 @@ void get_byte_global_word()
   word w = fetch_word();
   current_value = (char)*seg_read(threads_table->thread->data, w);
 #ifdef DEBUG
-  printf("get byte glob_varw_%x: %x; %d\n", w, current_value, current_value);
+  printf("get byte main.varw_%x: %x; %d\n", w, current_value, current_value);
+#endif
+}
+
+/// чтение глобальной переменной типа word по адресу word
+void get_word_global_word()
+{
+  word w = fetch_word();
+  current_value = (char)*seg_read(threads_table->thread->data, w);
+#ifdef DEBUG
+  printf("get word main.varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
 }
 
