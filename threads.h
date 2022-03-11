@@ -17,10 +17,10 @@ typedef struct {
   word entry;			/**< адрес начала сценария */
   byte control;
   byte version;			/**< версия сценария */
-  word entry2;
+  word entry2;			/**< обработка нажатий клавиш */
   byte u1;
   byte u2;
-  word entry3;
+  word entry3;			/**< обработка сообщений */
   byte u4;
   byte u5;
   dword resources;		/**< адрес таблицы ресурсов */
@@ -42,7 +42,7 @@ typedef struct thread_s {
   byte frames_to_skip;		/**< число кадров через сколько выполняется сценарий */
   byte cur_frames_to_skip;		/**< текущий отсчет кадров для выполнения */
   byte running;			/**< основной сценарий потока запущен */
-  word flags2;			/**< доп. флаги потока */
+  int flags2;			/**< доп. флаги потока */
   int flags;			/**< флаги потока */
   int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
   int layer;			/**< слой отрисовки для всех новых спрайтов */
@@ -85,6 +85,7 @@ void set_thread_f25();
 void set_sprites_thread();
 void get_threads_list();
 void store_thread_num();
+void set_flags2();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */

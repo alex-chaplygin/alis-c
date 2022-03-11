@@ -91,7 +91,7 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   t->version = h->version;
   t->frames_to_skip = t->cur_frames_to_skip = 1;
   t->running = 0xff;
-  t->flags2 = 0xffff;
+  t->flags2 = -1;
   t->flags = THREAD_NOSTART3; // bit 1
   t->header = h;
   t->f2c = 0;
@@ -543,4 +543,13 @@ void get_threads_list()
   thread_flag = 0;
   threads_list_pos = threads_list;
   store_thread_num();
+}
+
+void set_flags2()
+{
+  new_get();
+  run_thread->flags2 = current_value;
+#ifdef DEBUG
+  printf("set flags2 = %x\n", current_value);
+#endif
 }
