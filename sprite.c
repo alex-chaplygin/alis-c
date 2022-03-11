@@ -94,22 +94,23 @@ void set_translate(word *data)
 void sprites_translate(word *data)
 {
   vec_t delta;
-  delta.x = translate.x - *data++;
-  delta.y = translate.y - *data++;
-  delta.z = translate.z - *data++;
+  delta.x = *data++ - translate.x;
+  delta.y = *data++ - translate.y;
+  delta.z = *data++ - translate.z;
   if (!delta.z && !delta.x && !delta.y)
     return;
-  printf("sprite translation\n");
-  exit(1);
+  printf("sprite translation delta = (%d %d %d)\n", delta.x, delta.y, delta.z);
   sprite_t *c = run_thread->sprite_list;
   while (c) {
     if (c->state == SPRITE_READY)
       c->state = SPRITE_UPDATED;
-    vec_add(&c->center, &delta, &c->center);
-    c = c->next;
+    c->center.x += delta.x;
+    c->center.y += delta.y;
+    c->center.z += delta.z;
 #ifdef DEBUG
     printf("Translate sprite %d (%d %d %d)\n", (int)(c - sprites), c->center.x, c->center.y, c->center.z);
 #endif
+    c = c->next;
   }
 }
 

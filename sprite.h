@@ -9,7 +9,7 @@ enum sprite_state_e {
   SPRITE_CURSOR = -2,		/**< спрайт курсора */
   SPRITE_NEW = -1,		/**< новый спрайт */
   SPRITE_READY = 0,		/**< спрайт готов к отрисовке */
-  SPRITE_REMOVED = 1,
+  SPRITE_REMOVED = 1,		/**< спрайт будет удален при отрисовке */
   SPRITE_UPDATED = 2,	/**< спрайт после обновления координат или изображения */
 };
   
