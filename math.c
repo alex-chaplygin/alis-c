@@ -176,7 +176,6 @@ void mul()
 /// унарный минус
 void neg()
 {
-  save_get();
 #ifdef DEBUG
   printf("\t\tneg %d\n", current_value);
 #endif
@@ -186,7 +185,6 @@ void neg()
 /// модуль
 void op_abs()
 {
-  save_get();
 #ifdef DEBUG
   printf("\t\tabs %d\n", current_value);
 #endif
