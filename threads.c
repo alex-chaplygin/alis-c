@@ -95,6 +95,7 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   t->flags = THREAD_NOSTART3; // bit 1
   t->header = h;
   t->f2c = 0;
+  t->sprites_thread = 0;
 }
 
 /// запуск главного потока
@@ -137,7 +138,7 @@ thread_t *thread_add(byte *script, int size)
   // нового потока
   t->current_scene = run_thread->current_scene;
   //   t->f22 = run_thread->f22
-  // t->thread_table2 = t->thread_table
+  t->sprites_thread = current_value;
 #ifdef DEBUG
   word *o = (word *)t->data->data;
   byte *o2 = t->data->data + 9;
@@ -491,4 +492,13 @@ void set_thread_f25()
   printf("set thread f25 -1\n");
   run_thread->f25 = -1;
 #endif
+}
+
+void set_sprites_thread()
+{
+  new_get();
+#ifdef DEBUG
+  printf("set sprites thread: %x prev: %x\n", current_value, run_thread->sprites_thread);
+#endif
+  run_thread->sprites_thread = current_value;
 }
