@@ -177,7 +177,7 @@ func vm_op[] = {
   nimp, // 80
   nimp, // 81
   nimp, // 82
-  nimp, // 83
+  set_sprites_thread, // 83
   nimp, // 84
   nimp, // 85
   mouse_read, // 86
