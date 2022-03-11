@@ -545,11 +545,16 @@ void get_threads_list()
   store_thread_num();
 }
 
-void set_flags2()
+void thread_set_flags2()
 {
   new_get();
   run_thread->flags2 = current_value;
 #ifdef DEBUG
   printf("set flags2 = %x\n", current_value);
 #endif
+}
+
+void thread_set_flag()
+{
+  thread_flag = 1;
 }

@@ -127,7 +127,7 @@ func vm_op[] = {
   scene_show, // 4e
   scene_hide, // 4f
   clear_all_objects2, // 50
-  set_flags2, // 51
+  thread_set_flags2, // 51
   nimp, // 52
   nimp, // 53
   nimp, // 54
@@ -149,7 +149,7 @@ func vm_op[] = {
   thread_receive_msg, // 64
   nimp, // 65
   thread_clear_messages, // 66
-  nimp, // 67
+  thread_set_flag, // 67
   set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a
