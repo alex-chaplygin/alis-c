@@ -258,7 +258,7 @@ void random_with_seed()
   short w = stack_pop(&stack);
   w = ror(w, 6);
 #ifdef DEBUG
-  printf("stack random: %d new seed = %x\n", current_value, w);
+  printf("random with seed: max = %d new seed = %x\n", current_value, w);
 #endif
   word s = random_seed;
   random_seed = w;
