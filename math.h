@@ -19,4 +19,4 @@ void op_random();
 void sign(); //66
 void not(); //68
 void set_random_seed();
-void stack_random();
+void random_with_seed();

@@ -8,8 +8,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "interpret.h"
 #include "get.h"
+#include "memory.h"
 
 word random_seed;		/**< псевдослучайное зерно */
 
@@ -246,18 +248,24 @@ word ror(word num, int count)
   }
   return num;
 }
-/*
-void stack_random()
+
+/** 
+ * Псевдослучайное число
+ * зерно берется из стека
+ */
+void random_with_seed()
 {
-  printf("stack random: %d\n", current_value);
-  if (stack_pos >= MAX_STACK) {
-    printf("Stack id empty\n");
-    exit(1);
-  }
-  short w = *(short *)&stack[stack_pos];
-  stack_pos += 2;
+  short w = stack_pop(&stack);
   w = ror(w, 6);
-  current_value = current_value * random_func(w) >> 16;
+#ifdef DEBUG
+  printf("stack random: %d new seed = %x\n", current_value, w);
+#endif
+  word s = random_seed;
+  random_seed = w;
+  op_random();
+#ifdef DEBUG
   printf("res: %d\n", current_value);
+#endif
+  random_seed = s;
 }
-*/
+
