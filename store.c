@@ -162,9 +162,9 @@ void set_byte_array_word()
   int idx = current_value;
   byte *pos = array_pos(seg_read(run_thread->data, w), 0, 1);
   current_value = (word)stack_pop(&stack);
-  *pos = current_value;
+  *pos = (byte)current_value;
 #ifdef DEBUG
-  printf("store_b array_%x[%d], %x; %d\n", w, idx, (byte)current_value, (byte)current_value);
+  printf("store_b arrw_%x[%d], %x; %d\n", w, idx, (byte)current_value, (byte)current_value);
 #endif
 }
 
@@ -173,11 +173,11 @@ void set_word_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 0, 2);
+  word *pos = (word *)array_pos(seg_read(run_thread->data, w), 0, 2);
   current_value = (word)stack_pop(&stack);
-  *(word *)pos = current_value;
+  *pos = current_value;
 #ifdef DEBUG
-  printf("store_w array_%x[%d], %x; %d\n", w, idx, current_value, current_value);
+  printf("store_w arrw_%x[%d], %x; %d\n", w, idx, current_value, current_value);
 #endif
 }
 
@@ -188,10 +188,9 @@ void set_byte_array_byte()
   int idx = current_value;
   byte *pos = array_pos(seg_read(run_thread->data, w), 0, 1);
   current_value = (word)stack_pop(&stack);
-  *(word *)pos = current_value;
   *pos = (byte)current_value;
 #ifdef DEBUG
-  printf("store_b array_%x[%d], %x; %d\n", w, idx, (byte)current_value, (byte)current_value);
+  printf("store_b arrb_%x[%d], %x; %d\n", w, idx, (byte)current_value, (byte)current_value);
 #endif
 }
 
@@ -200,11 +199,11 @@ void set_word_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 0, 2);
+  word *pos = array_pos(seg_read(run_thread->data, w), 0, 2);
   current_value = (word)stack_pop(&stack);
-  *pos = (byte)current_value;
+  *pos = current_value;
 #ifdef DEBUG
-  printf("store_w array_%x[%d], %x; %d\n", w, idx, current_value, current_value);
+  printf("store_w arrb_%x[%d], %x; %d\n", w, idx, current_value, current_value);
 #endif
 }
 
@@ -299,7 +298,7 @@ void set_word_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  short *b = (short *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+  word *b = (word *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
   current_value = stack_pop(&stack);
   *b = current_value;
 #ifdef DEBUG
@@ -316,9 +315,9 @@ void set_byte_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  char *b = (char *)array_pos(seg_read(threads_table->thread->data, w), 0, 1);
+  byte *b = array_pos(seg_read(threads_table->thread->data, w), 0, 1);
   current_value = stack_pop(&stack);
-  *b = (char)current_value;
+  *b = (byte)current_value;
 #ifdef DEBUG
   printf("store_b main.arrw_%x[%d] %x; %d\n", w, idx, (char)current_value, (char)current_value);
 #endif
