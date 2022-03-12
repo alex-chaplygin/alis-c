@@ -253,7 +253,7 @@ func vm_op[] = {
   nimp, // cc
   play_sound3, // cd
   nimp, // ce
-  nimp, // cf
+  set_thread_layer, // cf
   nimp, // d0
   nimp, // d1
   nimp, // d2

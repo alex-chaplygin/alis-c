@@ -501,8 +501,8 @@ void set_thread_f25()
 {
 #ifdef DEBUG
   printf("set thread f25 -1\n");
-  run_thread->f25 = -1;
 #endif
+  run_thread->f25 = -1;
 }
 
 void set_sprites_thread()
@@ -557,4 +557,17 @@ void thread_set_flags2()
 void thread_set_flag()
 {
   thread_flag = 1;
+}
+
+/** 
+ * Команда - установка слоя для новых объектов.
+ * Объекты при отрисовке будут сортироваться по убыванию слоев.
+ */
+void set_thread_layer()
+{
+  new_get();
+#ifdef DEBUG
+  printf("set thread layer = %x; %d\n", (char)current_value, (char)current_value);
+#endif
+  run_thread->layer = (char)current_value;
 }

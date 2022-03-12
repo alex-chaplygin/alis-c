@@ -82,6 +82,7 @@ void thread_resume();
 int thread_num(thread_t *t);
 void script_num_to_thread_num();
 void set_thread_f25();
+void set_thread_layer();
 void set_sprites_thread();
 void get_threads_list();
 void store_thread_num();
