@@ -37,7 +37,7 @@ func get_op[] = {
   get_string_mem_byte,//16
   nimp,//get_string_array_byte,//18
   get_byte_array_byte,//1a
-  nimp,//get_word_array_byte,//1c
+  get_word_array_byte,//1c
   get_byte_global_word,//1e
   get_word_global_word,//20
   nimp,//get_string_global,//22

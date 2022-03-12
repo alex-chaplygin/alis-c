@@ -129,7 +129,7 @@ void get_word_global_word()
 #endif
 }
 
-/// чтение из массива слов
+/// чтение слова из массива по адресу word
 void get_word_array_word()
 {
   word w = fetch_word();
@@ -140,7 +140,18 @@ void get_word_array_word()
 #endif
 }
 
-/// чтение из массива слов
+/// чтение слова из массива по адресу byte
+void get_word_array_byte()
+{
+  byte w = fetch_byte();
+  int idx = current_value;
+  current_value = *(short *)array_pos(seg_read(run_thread->data, w), 0, 2);
+#ifdef DEBUG
+  printf("get word arrb_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
+}
+
+/// чтение байта из массива по адресу byte
 void get_byte_array_byte()
 {
   byte w = fetch_byte();
