@@ -226,7 +226,10 @@ void get_expression()
     printf("%04x:\t\t", (int)(current_ip - run_thread->script));
 #endif
     get(op);
-  };  
+  };
+#ifdef DEBUG
+  printf("end of expression\n");
+#endif
 }
 
 /// читает байт из кода в аккумулятор
