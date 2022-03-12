@@ -40,3 +40,10 @@ void mouse_read()
   current_value = 0;
   switch_string_store();
 }
+
+void show_mouse_cursor()
+{
+#ifdef DEBUG
+  printf("show mouse cursor\n");
+#endif
+}
