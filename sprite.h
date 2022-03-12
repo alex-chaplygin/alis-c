@@ -50,6 +50,7 @@ void clear_object();
 void scene_translate(scene_t *scene, sprite_t *c);
 void remove_all_sprites(sprite_t *sp, int remove);
 void clear_object_from_scene();
+void set_coord_origin();
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */

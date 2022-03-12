@@ -357,3 +357,20 @@ void remove_all_sprites(sprite_t *sp, int remove)
   dump_sprites();
 #endif
 }
+
+/** 
+ * Установка начала координат для текущего потока
+ */
+void set_coord_origin()
+{
+  new_get();
+  seg_write_word(run_thread->data, 0, current_value);
+  new_get();
+  seg_write_word(run_thread->data, 2, current_value);
+  new_get();
+  seg_write_word(run_thread->data, 4, current_value);
+#ifdef DEBUG
+  short *w = (short *)run_thread->data;
+  printf("set coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
+#endif
+}
