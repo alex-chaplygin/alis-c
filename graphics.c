@@ -26,6 +26,7 @@ SDL_Window *window;		/**< окно SDL */
 SDL_Renderer *renderer;		/**< устройство вывода */
 SDL_Surface *screen;		/**< поверхность экрана */
 long current_time;		/**< текущее время */
+long frame_time = 0;
 long time_step = 1000 / FPS;	/**< длительность кадра */
 
 /** 
@@ -95,8 +96,10 @@ int graphics_get_events()
 void graphics_palette_update()
 {
   long now = SDL_GetTicks();
-  if ((now -  current_time) % time_step == 0)
+  if ((now -  frame_time) > time_step) {
     palette_update();
+    frame_time = now;
+  }
 }
 
 /** 
@@ -117,6 +120,7 @@ int graphics_update()
   else
     current_time = now;
   // sound update
+  palette_update();
   //printf("tick %i\n", now);
   SDL_UnlockSurface(screen);  
   SDL_RenderClear(renderer);
