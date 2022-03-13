@@ -48,7 +48,7 @@ typedef struct thread_s {
   int layer;			/**< слой отрисовки для всех новых спрайтов */
   int f2c;
   int f25;
-  int sprites_thread;
+  int sprites_thread;		/**< номер потока, которому будут принадлежать новые спрайты */
   sprite_t *sprite_list;	/**< список спрайтов потока */
   scene_t *current_scene;		/**< текущая сцена */
   script_t *header;		/**< заголовок сценария */

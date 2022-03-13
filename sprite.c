@@ -222,6 +222,7 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   newc->state = SPRITE_NEW;
   newc->f24 = run_thread->f2c;
   newc->f1c = run_thread->f25;
+  // спрайты могут создаваться разными потоками, но принадлежать одному
   newc->thread_offset = run_thread->sprites_thread;
   // test f1c
   newc->layer = run_thread->layer;
