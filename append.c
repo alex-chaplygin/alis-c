@@ -13,6 +13,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "append.h"
+#include "threads.h"
 
 /// таблица подфункций для добавления
 func add_op[] = {
@@ -28,15 +29,28 @@ func add_op[] = {
   add_byte_mem_byte, // 12
   add_word_mem_byte, // 14 
   add_string_mem_byte, // 16
+  nimp, // 18
+  nimp, // 1a
+  nimp, // 1c
+  add_byte_global_word, // 1e
+  add_word_global_word, // 20
+  nimp, // 22
+  nimp, // 24
+  nimp, // 26
+  nimp, // 28
+  nimp, // 2a
+  nimp, // 2c
+  nimp, // 2e
+  nimp, // 30
+  nimp, // 32
+  nimp, // 34
+  nimp, // 36
+  add_expression, // 38
 };
 
-/** 
- * меняет местами строки загрузки и сохранения
- * вызывает подфункцию добавления.
- */
-int exchange_strings_append()
+/// вызов одной подфункции добавления
+int op_append()
 {
-  switch_string();
   byte op = fetch_byte();
   if (op & 1) {
     printf("invalid append op %x\n", op);
@@ -48,6 +62,16 @@ int exchange_strings_append()
     exit(1);
   }
   return add_op[op]();
+}
+
+/** 
+ * меняет местами строки загрузки и сохранения
+ * вызывает подфункцию добавления.
+ */
+int exchange_strings_append()
+{
+  switch_string();
+  return op_append();
 }
 
 /** 
@@ -150,4 +174,41 @@ int add_string_mem_byte()
   printf("adds strb_%x; \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
 #endif
   return 1;
+}
+
+/// добавляет значение byte к глобальной переменной word
+int add_byte_global_word()
+{
+  word w = fetch_word();
+  char *p = (char *)seg_read(threads_table->thread->data, w);
+  *p += (char)current_value;
+#ifdef DEBUG
+  printf("addb main.varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
+#endif
+  exit(1);
+  return *p;
+}
+
+/// добавляет значение word к глобальной переменной word
+int add_word_global_word()
+{
+  word w = fetch_word();
+  short *p = (short *)seg_read(threads_table->thread->data, w);
+  *p += current_value;
+#ifdef DEBUG
+  printf("addw main.varw_%x, %x; %d\n", w, current_value, current_value);
+#endif
+  return *p;
+}
+
+/// выражение для добавления
+int add_expression()
+{
+  init_stack();
+  stack_push(&stack, current_value);
+#ifdef DEBUG
+  printf("add expression: cur = %x; %d\n", current_value, current_value);
+#endif
+  get_expression();
+  return op_append();
 }

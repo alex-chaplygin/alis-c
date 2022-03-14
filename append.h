@@ -7,3 +7,6 @@ int add_word_mem_byte();
 int add_string_mem_byte();
 int exchange_strings_append();
 int subract();
+int add_byte_global_word();
+int add_word_global_word();
+int add_expression();
