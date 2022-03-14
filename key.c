@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <SDL2/SDL_keycode.h>
 #include "types.h"
 #include "interpret.h"
 
@@ -36,7 +37,7 @@ byte symbol_table[128] =
   '3', 'E', ')', '-', '\b',	/* Backspace */
   '\t',			/* Tab */
   'q', 'w', 'e', 'r',	/* 19 */
-  't', 'y', 'u', 'i', 'o', 'p', '^', '$', '\n',	/* Enter key */
+  't', 'y', 'u', 'i', 'o', 'p', '^', '$', 0x0d,	/* Enter key */
     '|',			/* 29   - Control */
   'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',	/* 39 */
  '\'', '`',   '|',		/* Left shift */
@@ -82,8 +83,26 @@ void set_key(int scan, int sym, int mod)
   keypressed_table[s] = 1;
   key_symbol = sym;//symbol_table[s];
   key_mod = mod;
-  //  if (scan == 29) ctrl_pressed = 1;
-  //  if (s < 112) key_pressed = key_table[s];
+  if (scan >= SDL_SCANCODE_F1 && scan <= SDL_SCANCODE_F10)
+    key_symbol = 0xbb + scan - SDL_SCANCODE_F1;
+  else if (scan == SDL_SCANCODE_KP_8)
+    key_symbol = '8';
+  else if (scan == SDL_SCANCODE_KP_2)
+    key_symbol = '2';
+  else if (scan == SDL_SCANCODE_KP_4)
+    key_symbol = '4';
+  else if (scan == SDL_SCANCODE_KP_6)
+    key_symbol = '6';
+  else if (scan == SDL_SCANCODE_KP_7)
+    key_symbol = '7';
+  else if (scan == SDL_SCANCODE_KP_1)
+    key_symbol = '1';
+  else if (scan == SDL_SCANCODE_KP_9)
+    key_symbol = '9';
+  else if (scan == SDL_SCANCODE_KP_3)
+    key_symbol = '3';
+  else if (scan == SDL_SCANCODE_KP_0)
+    key_symbol = '0';
 #ifdef DEBUG
   printf("press key %x s = %x '%c'; %x\n", scan, s, key_symbol, key_symbol);
 #endif
