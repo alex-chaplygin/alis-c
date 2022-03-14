@@ -185,7 +185,6 @@ int add_byte_global_word()
 #ifdef DEBUG
   printf("addb main.varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
-  exit(1);
   return *p;
 }
 
