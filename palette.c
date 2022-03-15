@@ -168,12 +168,12 @@ void palette_load(byte *pal)
     fade_ticks = palette_parameter = palette_fade_ticks = 0;
     memcpy(palette, load_palette, 768);
   } else {
-  palette_fade_step();
+    palette_fade_step();
 #ifdef DEBUG
-  printf("load palette:\n");
-  dump_palette(load_palette);
-  printf("palette:\n");
-  dump_palette(palette);
+    printf("load palette:\n");
+    dump_palette(load_palette);
+    printf("palette:\n");
+    dump_palette(palette);
 #endif
   }
   need_to_update_palette = 1;
