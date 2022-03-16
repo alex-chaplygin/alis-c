@@ -108,7 +108,7 @@ void set_byte_mem_word()
   } else {
     seg_write_byte(run_thread->data, w, (byte)current_value);
 #ifdef DEBUG
-  printf("store_b var_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+    printf("store_b var_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
 #endif
   }
 }
