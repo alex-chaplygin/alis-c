@@ -303,12 +303,12 @@ void op_jump_table()
   int c = fetch_byte();
   if ((int)(current_ip - run_thread->script) & 1)
     current_ip++;
-  current_value += *(word *)current_ip;
+  current_value += *(short *)current_ip;
   if (current_value < 0 || current_value > c)
     current_ip += 4 + c * 2;
   else {
     current_ip += 2 + current_value * 2;
-    current_ip += 2 + *(word *)current_ip;
+    current_ip += 2 + *(short *)current_ip;
   }
   #ifdef DEBUG
   printf("jump table count = %d cur_val = %x ip = %x\n", c, current_value, (int)(current_ip - run_thread->script));
