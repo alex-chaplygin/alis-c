@@ -199,7 +199,7 @@ void set_word_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  word *pos = array_pos(seg_read(run_thread->data, w), 0, 2);
+  word *pos = (word *)array_pos(seg_read(run_thread->data, w), 0, 2);
   current_value = (word)stack_pop(&stack);
   *pos = current_value;
 #ifdef DEBUG
