@@ -505,6 +505,9 @@ void set_thread_f25()
   run_thread->f25 = -1;
 }
 
+/** 
+ * Установка номера потока, которому будут принадлежать новые спрайты
+ */
 void set_sprites_thread()
 {
   new_get();
@@ -557,6 +560,9 @@ void thread_set_flags2()
 void thread_set_flag()
 {
   thread_flag = 1;
+#ifdef DEBUG
+  printf("set flag = 1\n");
+#endif
 }
 
 /** 
