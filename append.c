@@ -102,7 +102,7 @@ int subract()
 int add_byte_mem_word()
 {
   word w = fetch_word();
-  byte *p = seg_read(run_thread->data, w);
+  char *p = (char *)seg_read(run_thread->data, w);
   *p += (char)current_value;
 #ifdef DEBUG
   printf("addb varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
@@ -114,7 +114,7 @@ int add_byte_mem_word()
 int add_word_mem_word()
 {
   word w = fetch_word();
-  word *p = (word *)seg_read(run_thread->data, w);
+  short *p = (short *)seg_read(run_thread->data, w);
   *p += current_value;
 #ifdef DEBUG
   printf("addw varw_%x, %x; %d\n", w, current_value, current_value);
@@ -141,7 +141,7 @@ int add_string_mem_word()
 int add_byte_mem_byte()
 {
   byte w = fetch_byte();
-  byte *p = seg_read(run_thread->data, w);
+  char *p = seg_read(run_thread->data, w);
   *p += (char)current_value;
 #ifdef DEBUG
   printf("addb varb_%x, %x; %d\n", w, (char)current_value, (char)current_value);
@@ -153,7 +153,7 @@ int add_byte_mem_byte()
 int add_word_mem_byte()
 {
   byte w = fetch_byte();
-  word *p = (word *)seg_read(run_thread->data, w);
+  short *p = (short *)seg_read(run_thread->data, w);
   *p += current_value;
 #ifdef DEBUG
   printf("addw varb_%x, %x; %d\n", w, current_value, current_value);
