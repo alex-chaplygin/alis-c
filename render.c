@@ -136,9 +136,6 @@ sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
   c->render_image = c->image;
   update_sprites_rec(c);
   sprite_t *s = sort_sprite(sc, c);
-#ifdef DEBUG
-   dump_sprites();
-#endif
    return prev;
 }
 
@@ -261,7 +258,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   sp->max.y = sp->origin.y + im->maxy;
   int cl = clip_sprite(sp, clip, &blit, 0);
 #ifdef DEBUG
-  printf("Sprite blit: ");
+  printf("Sprite blit: res = %d", cl);
   print_rec(&blit);
 #endif
   sp->max.x = mx;
@@ -355,7 +352,7 @@ void render_scene(scene_t *scene, sprite_t *sprite)
     exit(1);
   }
 #ifdef DEBUG
-   dump_sprites();
+   dump_sprites(scene);
 #endif
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
@@ -389,7 +386,7 @@ void render_scene(scene_t *scene, sprite_t *sprite)
   }
 #ifdef DEBUG
   printf("After rendering:\n");
-  dump_sprites();
+  dump_sprites(scene);
 #endif
 }
 
@@ -397,6 +394,9 @@ void render_scene(scene_t *scene, sprite_t *sprite)
 void render_update()
 {
   scene_t *s = scene_list_head;
+#ifdef DEBUG
+  printf("skipping frames: %d\n", frames_to_skip);
+#endif
   while (frames_to_skip > frame_num) {
     graphics_sleep();
     palette_update();

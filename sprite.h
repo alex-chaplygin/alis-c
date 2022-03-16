@@ -45,7 +45,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord);
 void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord);
 int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2);
 sprite_t *sprite_remove(sprite_t *c, int remove);
-void dump_sprites();
+void dump_sprites(scene_t *sc);
 void clear_object();
 void scene_translate(scene_t *scene, sprite_t *c);
 void remove_all_sprites(sprite_t *sp, int remove);

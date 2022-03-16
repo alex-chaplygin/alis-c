@@ -155,7 +155,7 @@ int sprite_find(int tag, sprite_t **c)
 }
 
 /// вывод списка спрайтов
-void dump_sprites()
+void dump_sprites(scene_t *sc)
 {
   printf("run_thread list:\n");
   sprite_t *c = run_thread->sprite_list;
@@ -164,7 +164,7 @@ void dump_sprites()
     c = c->next;
   }
   printf("\ncurrent scene_list:\n");
-  c = sprites + run_thread->current_scene->scene_sprite;
+  c = sprites + sc->scene_sprite;
   while (c) {
     printf("->origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.y, c->center.z, c->tag, c->state);
     c = c->next_in_scene;
@@ -188,7 +188,6 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
   vec_add(&translate, coord, &c->center);
 #ifdef DEBUG
   printf("update sprite: (%d %d %d)\n", coord->x, coord->y, coord->z);
-  dump_sprites();
 #endif  
 }
 
@@ -325,9 +324,6 @@ void clear_object()
     c = sprite_remove(c, remove_from_scene);
   };
   remove_from_scene = 0;
-#ifdef DEBUG
-  dump_sprites();
-#endif
 }
 
 /** 
@@ -354,9 +350,6 @@ void remove_all_sprites(sprite_t *sp, int remove)
   prev_sprite = 0;
   while (sp)
     sp = sprite_remove(sp, remove);
-#ifdef DEBUG
-  dump_sprites();
-#endif
 }
 
 /** 
@@ -371,7 +364,7 @@ void set_coord_origin()
   new_get();
   seg_write_word(run_thread->data, 4, current_value);
 #ifdef DEBUG
-  short *w = (short *)run_thread->data;
+  short *w = (short *)run_thread->data->data;
   printf("set coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
 #endif
 }
