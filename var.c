@@ -32,7 +32,7 @@ void get_word_mem_word()
   if ((short)w == -40) // чтение номера родительского потока
     current_value = thread_num(run_thread->parent);
   else
-    current_value = (short)*(word *)seg_read(run_thread->data, w);
+    current_value = *(short *)seg_read(run_thread->data, w);
 #ifdef DEBUG
   printf("get word varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
@@ -65,7 +65,7 @@ void get_byte_mem_byte()
 void get_word_mem_byte()
 {
   byte w = fetch_byte();
-  current_value = (short)*(word *)seg_read(run_thread->data, w);
+  current_value = *(short *)seg_read(run_thread->data, w);
 #ifdef DEBUG
   printf("get word varb_%x: %x; %d\n", w, current_value, current_value);
 #endif
@@ -102,7 +102,7 @@ void get_word_from_thread()
   int thr = fetch_word();
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
-  current_value =*(short *)seg_read(t->data, adr);
+  current_value = *(short *)seg_read(t->data, adr);
 #ifdef DEBUG
   printf("get word thread: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
 #endif
@@ -123,7 +123,7 @@ void get_byte_global_word()
 void get_word_global_word()
 {
   word w = fetch_word();
-  current_value = (char)*seg_read(threads_table->thread->data, w);
+  current_value = *(short *)seg_read(threads_table->thread->data, w);
 #ifdef DEBUG
   printf("get word main.varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
