@@ -103,6 +103,8 @@ void set_key(int scan, int sym, int mod)
     key_symbol = '3';
   else if (scan == SDL_SCANCODE_KP_0)
     key_symbol = '0';
+  else if (scan == SDL_SCANCODE_ESCAPE)
+    key_symbol = 0x1b;
 #ifdef DEBUG
   printf("press key %x s = %x '%c'; %x\n", scan, s, key_symbol, key_symbol);
 #endif
