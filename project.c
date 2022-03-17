@@ -16,10 +16,10 @@
 #include "image.h"
 
 /// арифметический сдвиг вправо
-int sar(int a, int c)
+short sar(short a, int c)
 {
-  int sign = a & (1 << 31);
-  int res = a;
+  int sign = a & 0x8000;
+  short res = a;
   for (int i = 0; i < c; i++)
     res = (res >> 1) | sign;
   return res;
