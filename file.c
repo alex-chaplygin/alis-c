@@ -129,6 +129,7 @@ void op_open_file()
   #ifdef DEBUG
   printf("open file '%s' mode = %d\n", file, mode);
   #endif
+  file_open(file, mode);
 }
 
 /// чтение из файла
@@ -163,6 +164,6 @@ void op_close_file()
 {
 #ifdef DEBUG
   printf("close file\n");
-  fclose(handle);
+  file_close();
 #endif
 }
