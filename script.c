@@ -38,7 +38,7 @@ typedef struct {
   int total_images;		/**< максимальное число одновременных изображений (спрайтов) */
 } main_header_t;
 
-FILE *io_file;			/**< текущий файл сценария */
+extern FILE *handle;			/**< текущий файл сценария */
 int *script_sizes;		/**< таблица размеров файлов */
 byte **script_table = 0;	/**< таблица загруженных сценариев */
 int total_scripts;		/**< всего сценариев */
@@ -57,15 +57,11 @@ word get_bits(int num)
 {
   word bits = 0;
   //  printf("get_bits %d", num);
-  if (!io_file) {
-    fprintf(stderr, "Read bits: no file\n");
-    exit(1);
-  }
-  if (feof(io_file))
+  if (feof(handle))
     return 0;
   while (num > 0) {
     if (!bitcount) {
-      cur_byte = fgetc(io_file);
+      cur_byte = fgetc(handle);
       bitcount = 8;
       //printf("cur_byte = %x count = %d\n", cur_byte, count);
     }
@@ -120,7 +116,7 @@ void uncompress(byte *out, int size)
   int offset;
 
   bitcount = 0;
-  file_read(io_file, dict, sizeof(dict));
+  file_read(dict, sizeof(dict));
   while (o < out + size) {
     i = get_bits(1);
     if (i) {
@@ -158,7 +154,7 @@ void load_main_script()
 {
   main_header_t mh;
 
-  file_read(io_file, &mh, sizeof(mh));
+  file_read(&mh, sizeof(mh));
 #ifdef DEBUG
     printf("Total scripts = %d\nTotal threads = %d\ntotal file size = %d\ntotal memory = %d\ntotal images = %d\n",
 	   mh.total_scripts, mh.total_threads, mh.size, mh.total_memory_size, mh.total_images);
@@ -204,8 +200,8 @@ void script_load(int id, char *name)
 
   if (script_loaded(id) != -1)
     return;
-  io_file = file_open(name, "rb");
-  file_read(io_file, &h, sizeof(h));
+  file_open(name, FILE_RW);
+  file_read(&h, sizeof(h));
   size = h.uncompressed_size + ((h.flags & 0xff) << 16);
 #ifdef DEBUG
   printf("Uncompressed size = %d flags = %x type = %d\n", size, h.flags, h.type);
@@ -220,7 +216,7 @@ void script_load(int id, char *name)
   script_sizes[num_scripts - 1] = size;
   if ((h.flags >> 8 & 0xfe) == 0xa0)
     uncompress(script, size);
-  fclose(io_file);
+  file_close();
   if (id == 0)
     thread_setup_main(script, size);
 }
