@@ -12,6 +12,12 @@
 #include "image.h"
 #include "sprite.h"
 #include "get.h"
+#include "graphics.h"
+
+#define CURSOR_LEN 8		/**< размер курсора мыши */
+
+byte under_cursor_image[CURSOR_LEN * CURSOR_LEN]; /**< изображение под курсором мыши */
+int show_cursor = -1;	/**< флаг курсора мыши */
 
 /** 
  * Установка курсора мыши как изображение из ресурсов
@@ -33,11 +39,11 @@ void mouse_read()
   printf("set mouse_x mouse_y buttons:\n");
 #endif
   // get mouse x, y, buttons
-  current_value = 0;
+  current_value = mouse_x;
   switch_string_store();
-  current_value = 0;
+  current_value = mouse_y;
   switch_string_store();
-  current_value = 0;
+  current_value = mouse_buttons;
   switch_string_store();
 }
 

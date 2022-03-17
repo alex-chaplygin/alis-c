@@ -12,3 +12,6 @@ int graphics_get_events();
 void graphics_palette_update();
 
 extern byte *video_buffer;
+extern int mouse_x;			/**< состояние мыши */
+extern int mouse_y;
+extern int mouse_buttons;
