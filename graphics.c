@@ -18,9 +18,9 @@
 #define WINDOW_HEIGHT 400
 #define FPS 40			/**< число кадров в секунду */
 
-int mouse_x;
+int mouse_x;			/**< состояние мыши */
 int mouse_y;
-int mouse_button;
+int mouse_buttons;
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
 SDL_Renderer *renderer;		/**< устройство вывода */
@@ -59,8 +59,6 @@ void graphics_init()
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
   SDL_LockSurface(screen);
   video_buffer = screen->pixels;
-  //mouse_init
-  //sound_init
 }
 
 /// Обработка событий клавиатуры и мыши
@@ -76,15 +74,14 @@ int graphics_get_events()
     else if (e.type == SDL_KEYUP)
       release_key(e.key.keysym.scancode);
     else if (e.type == SDL_MOUSEMOTION) {
-      SDL_GetGlobalMouseState(&mouse_x, &mouse_y);
+      mouse_buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
       mouse_x >>= 1;
       mouse_y >>= 1;
-      // mouse_func
     }
     else if (e.type == SDL_MOUSEBUTTONDOWN)
-      mouse_button = e.button.button;
+      mouse_buttons = e.button.button;
     else if (e.type == SDL_MOUSEBUTTONUP)
-      mouse_button = 0;
+      mouse_buttons = 0;
   }
   return 1;
 }
