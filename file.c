@@ -10,13 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include "file.h"
 #include "interpret.h"
 #include "get.h"
 
-#define MODE_SEEK 0x800		/**< после открытия файла переместить указатель */
-
 FILE *handle;			/**< текущий файл с которым идет работа */
+char file_name[20];		/**< имя файла */
 
 /// преобразование строки в верхний регистр
 void uppercase(char *s)
@@ -36,34 +36,54 @@ void uppercase(char *s)
  * 
  * @return указатель на файл
  */
-FILE *file_open(char *file_name, char *mode)
+void file_open(char *name, int mode)
 {
-  FILE *f = fopen(file_name, mode);
-  if (!f) {
+  char rw[] = "r+b";
+  char *m;
+  strcpy(file_name, name);
+  switch (mode) {
+  case 2: // открытие на чтение и запись
+    m = rw;
+    break;
+  default:
+    printf("unknown mode: %d\n", mode);
+    exit(1);
+  }
+  handle = fopen(file_name, m);
+  if (!handle) {
     uppercase(file_name);
-    f = fopen(file_name, mode);
-    if (!f) {
+    handle = fopen(file_name, m);
+    if (!handle) {
       fprintf(stderr, "File: %s not found\n", file_name);
       exit(1);
     }
   }
-  return f;
+#ifdef DEBUG
+  printf("file open: %s mode = %s\n", file_name, m);
+#endif
 }
 
 /** 
  * Чтение из файла с обработкой ошибок
  * 
- * @param f указатель на файл
  * @param buf адрес буфера куда происходит чтение
  * @param size размер буфера
  */
-void file_read(FILE *f, void *buf, int size)
+void file_read(void *buf, int size)
 {
-  int c = fread(buf, size, 1, f);
+  int c = fread(buf, size, 1, handle);
   if (c < 0) {
     fprintf(stderr, "File: read error size = %d, read bytes: %d\n", size, c);
     exit(1);
   }
+}
+
+/** 
+ * Закрытие текущего файла
+ */
+void file_close()
+{
+  fclose(handle);
 }
 
 /** 
@@ -109,17 +129,6 @@ void op_open_file()
   #ifdef DEBUG
   printf("open file '%s' mode = %d\n", file, mode);
   #endif
-  switch (mode) {
-  case 2: // открытие на чтение и запись
-    handle = file_open(get_string, "r+b");
-    break;
-  default:
-    printf("unknown mode: %d\n", current_value);
-  }
-  if (current_value & MODE_SEEK) {
-    printf("file seek\n");
-    exit(1);
-  }
 }
 
 /// чтение из файла
@@ -135,7 +144,7 @@ void op_read_file()
   word *b = buf;
   // проверяем верхнюю границу буфера
   seg_read(run_thread->data, adr + count - 1);
-  file_read(handle, buf, count);
+  file_read(buf, count);
   if (*((byte *)buf - 2) == 2) { // если это массив слов
     for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
       *b = ((*b & 0xff) << 8) + (*b >> 8);

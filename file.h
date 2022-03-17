@@ -1,5 +1,8 @@
-FILE *file_open(char *file_name, char *mode);
-void file_read(FILE *f, void *buf, int size);
+#define FILE_RW 2		/**< открытие на чтение и запись */
+
+void file_open(char *file_name, int mode);
+void file_read(void *buf, int size);
+void file_close();
 int file_exists(char *s);
 void op_open_file();
 void op_read_file();
