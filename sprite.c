@@ -166,7 +166,7 @@ void dump_sprites(scene_t *sc)
   printf("\ncurrent scene_list:\n");
   c = sprites + sc->scene_sprite;
   while (c) {
-    printf("->origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.y, c->center.z, c->tag, c->state);
+    printf("->origin(%d %d %d)center(%d(%4x) %d(%4x) %d(%4x))tag(%d)state(%d) layer(%2x)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.x, c->center.y, c->center.y, c->center.z, c->center.z, c->tag, c->state, c->layer);
     c = c->next_in_scene;
   }
 }
