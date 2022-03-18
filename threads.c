@@ -40,6 +40,20 @@ void thread_init()
 }
 
 /** 
+ * Отладочная печать потоков
+ */
+void dump_threads()
+{
+  printf("free threads: ");
+  thread_table_t *t = free_thread;
+  while (t->next) {
+    printf("->%x", (int)(t->next - threads_table) * 6);
+    t = t->next;
+  }
+  printf("\n");
+}
+
+/** 
  * Инициализация таблицы потоков
  * Потоки организуются в список, в начале только один главный поток,
  * остальные - свободны
@@ -60,6 +74,9 @@ void thread_init_table(int max)
   threads_table->next = 0;
   free_thread = threads_table + 1; // главный поток сразу запущен
   num_run_threads = 1;
+#ifdef DEBUG
+  dump_threads();
+#endif
   get_string = get_string_buf;
   text_string = text_string_buf;
   store_string = store_string_buf;
