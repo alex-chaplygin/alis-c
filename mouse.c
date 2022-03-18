@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "interpret.h"
 #include "image.h"
 #include "sprite.h"
@@ -47,9 +48,24 @@ void mouse_read()
   switch_string_store();
 }
 
+/** 
+ * Команда - показать курсор мыши
+ */
 void show_mouse_cursor()
 {
 #ifdef DEBUG
   printf("show mouse cursor\n");
 #endif
+}
+
+/** 
+ * Отрисовка курсора мыши
+ * 
+ */
+void draw_mouse_cursor()
+{
+  if (show_cursor == -1)
+    return;
+  printf("draw mouse cursor\n");
+  exit(1);
 }

@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include "types.h"
 #include "palette.h"
+#include "mouse.h"
 
 /** 
  * Обработчик таймера.
@@ -22,6 +23,7 @@
 void timer_handler(int i)
 {
   palette_update();
+  draw_mouse_cursor();
 }
 
 /** 
