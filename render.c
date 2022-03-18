@@ -23,7 +23,7 @@
 #include "graphics.h"
 #include "palette.h"
 
-byte frames_to_skip;		/**< через сколько кадров обновляется экран */
+byte frames_to_skip = 0;		/**< через сколько кадров обновляется экран */
 byte frame_num = 0;			/**< текущий счетчик кадров */
 rectangle_t sprites_rec;	/**< окно вывода новых спрайтов */
 rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну сцены */
