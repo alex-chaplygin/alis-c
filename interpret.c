@@ -38,7 +38,6 @@ int stack_data[MAX_STACK];	/**< буфер стека выражений */
 char get_string_buf[MAX_STR];	/**< буфер строки загрузки */
 char text_string_buf[MAX_STR];
 char store_string_buf[MAX_STR];	/**< буфер строки сохранения */
-char string_buf4[MAX_STR];
 char *get_string;		/**< указатель строки для загрузки */
 char *text_string;		/**< указатель на строку для вывода */
 char *store_string;		/**< указатель строки сохранения */
