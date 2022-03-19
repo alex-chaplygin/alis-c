@@ -24,20 +24,20 @@ typedef struct scene_s {
   byte f6;
   byte f7;			/**< проекция: перемещение y */
   byte f8;
-  word min_x;			/**< экранные прямоугольника сцены */
-  word min_y;
-  word width;			/**< ширина прямоугольника сцены */
-  word height;			/**< высота прямоугольника сцены */
-  byte origin_x;		/**< начало коодинат сцены в мировых координатах */
-  byte f18;
-  byte origin_y;
-  byte f20;
-  byte origin_z;
-  byte f22;
-  byte f23;
+  short min_x;			/**< экранные прямоугольника сцены */
+  short min_y;
+  short width;			/**< ширина прямоугольника сцены */
+  short height;			/**< высота прямоугольника сцены */
+  char origin_x;		/**< начало коодинат сцены в мировых координатах */
+  char f18;
+  char origin_y;
+  char f20;
+  char origin_z;
+  char f22;
+  char f23;
   char f24;
-  byte f25;
-  byte f26;
+  char f25;
+  char f26;
   char bx;			/**< система координат*/
   char by;			/**< вектор b (x) */
   char bz;
@@ -47,10 +47,10 @@ typedef struct scene_s {
   char cx;			/**< вектор c (z)*/
   char cy;
   char cz;
-  byte f36;
-  word delta_x;			/**< вектор перемещения */
-  word delta_y;
-  word delta_z;
+  char f36;
+  short delta_x;			/**< вектор перемещения */
+  short delta_y;
+  short delta_z;
 } scene_t;
 
 void scene_new();
