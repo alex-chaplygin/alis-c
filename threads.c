@@ -80,6 +80,7 @@ void thread_init_table(int max)
   get_string = get_string_buf;
   text_string = text_string_buf;
   store_string = store_string_buf;
+  threads_list_pos = threads_list;
 }
 
 /** 
@@ -103,16 +104,17 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   t->msg_stack = stack_new(h->msg_size);
   t->data = memory_alloc(h->data_size);
   t->ip = script + h->entry + 2;
-  t->script = script;
+  t->script = t->script2 = script;
   t->id = h->id;
   t->version = h->version;
   t->frames_to_skip = t->cur_frames_to_skip = 1;
-  t->running = 0xff;
+  t->running = -1;
   t->flags2 = -1;
   t->flags = THREAD_NOSTART3; // bit 1
   t->header = h;
   t->f2c = 0;
   t->sprites_thread = 0;
+  t->f26 = -1;
 }
 
 /// запуск главного потока
@@ -181,7 +183,7 @@ void threads_run()
 #ifdef DEBUG
     printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->script), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
-    no_saved_return = 0;
+    thread_flag = no_saved_return = 0;
     if (t->flags & THREAD_MSG) // bit 7
       if (!(t->flags & THREAD_NOSTART3)) // bit 1
 	if (t->header->entry3) {
@@ -195,7 +197,7 @@ void threads_run()
 	  sprites_translate((word *)t->data->data);
 	}
     if (t->running != 0) {
-      if ((char)t->running < 0)
+      if (t->running < 0)
 	t->running = 1;
       t->cur_frames_to_skip--;
       if (!t->cur_frames_to_skip) {
