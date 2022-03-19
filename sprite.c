@@ -29,7 +29,6 @@ sprite_t *free_sprite;		/**< последний свободный спрайт 
 sprite_t *prev_sprite;		/**< предыдущий спрайт в списке текущего потока */
 int sprite_flags;
 vec_t translate;			/**< вектор перемещения для всех спрайтов */
-int reg4;
 int remove_from_scene = 0;	/**< нужно ли удалять из сцены */
 
 /** 
@@ -80,9 +79,8 @@ void set_translate(word *data)
   translate.x = *(short *)data++;
   translate.y = *(short *)data++;
   translate.z = *(short *)data++;
-  reg4 = *data;
 #ifdef DEBUG
-  printf("Set translate (%d %d %d %d)\n", translate.x, translate.y, translate.z, reg4);
+  printf("Set translate (%d %d %d)\n", translate.x, translate.y, translate.z);
 #endif
 }
 
