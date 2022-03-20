@@ -44,8 +44,15 @@ void thread_init()
  */
 void dump_threads()
 {
+  printf("threads: ");
+  thread_table_t *t = threads_table->next;
+  while (t) {
+    printf("->%x", (int)(t - threads_table) * 6);
+    t = t->next;
+  }
+  printf("\n");
   printf("free threads: ");
-  thread_table_t *t = free_thread;
+  t = free_thread;
   while (t->next) {
     printf("->%x", (int)(t->next - threads_table) * 6);
     t = t->next;
@@ -301,6 +308,7 @@ void thread_kill(int num, int remove)
   thread_t *rt = run_thread;
 #ifdef DEBUG
   printf("kill thread %x\n", *t->script);
+  dump_threads();
 #endif
   run_thread = t;
   remove_all_sprites(t->sprite_list, remove);

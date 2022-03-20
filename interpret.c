@@ -311,6 +311,7 @@ byte *interpret(thread_t *t, byte *ip)
   run_thread = t;
   while (interpreting) {
     graphics_get_events();
+    graphics_palette_update();
 #ifdef DEBUG
     printf("%04x:\t\t", (int)(current_ip - t->script));
 #endif
