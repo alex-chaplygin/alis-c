@@ -110,7 +110,7 @@ func vm_op[] = {
   thread_resume, // 3e
   thread_pause_yield_no_saved, // 3f
   run_script, // 40
-  nimp, // 41
+  op_kill_thread, // 41
   yield, // 42
   nimp, // 43
   thread_stop, // 44

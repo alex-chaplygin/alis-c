@@ -309,20 +309,24 @@ void thread_kill(int num, int remove)
   stack_free(t->call_stack);
   stack_free(t->msg_stack);
   memory_free(t->data);
-  thread_table_t *tab = threads_table;
-  thread_table_t *cur;
-  for (int i = 0; i < num_run_threads; i++, tab++)
-    if (tab->next->thread == t)
+  thread_table_t *tab = threads_table->next;
+  thread_table_t *prev = threads_table;
+  while (tab) {
+    if (tab->thread == t)
       break;
+    prev = tab;
+    tab = tab->next;
+  }
   num_run_threads--;
-  cur = tab->next;
-  tab->next = cur->next;
-  cur->next = free_thread;
-  free_thread = cur;
+  prev->next = tab->next;
+  free(tab->thread);
+  tab->thread = 0;
+  tab->next = free_thread;
+  free_thread = tab;
   if (run_thread == t) {
     interpreting = 2;
     // должен запуститься следующий поток или render
-    current_thread = tab;
+    current_thread = prev;
   }
 }
 
@@ -597,4 +601,12 @@ void set_thread_layer()
   printf("set thread layer = %x; %d\n", (char)current_value, (char)current_value);
 #endif
   run_thread->layer = (char)current_value;
+}
+
+void op_kill_thread()
+{
+#ifdef DEBUG
+  printf("kill thread\n");
+#endif
+  op_thread_kill(0);
 }

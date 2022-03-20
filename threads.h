@@ -97,6 +97,7 @@ void get_threads_list();
 void store_thread_num();
 void thread_set_flags2();
 void thread_set_flag();
+void op_kill_thread();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
