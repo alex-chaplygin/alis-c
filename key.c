@@ -76,7 +76,7 @@ void release_key(int scan)
 void get_key()
 {
   // get pressed key
-  current_value = key_symbol;
+  current_value = (byte)key_symbol;
 #ifdef DEBUG
   printf("get key: %x\n", current_value);
 #endif
