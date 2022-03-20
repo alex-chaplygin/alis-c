@@ -167,3 +167,17 @@ void op_close_file()
   file_close();
 #endif
 }
+
+/// функция файл не существует
+void file_not_exists()
+{
+  if (!file_exists(get_string))
+    current_value = 0;
+  else
+    current_value = -1;
+#ifdef DEBUG
+  printf("file not exists: %s %d\n", get_string, current_value);
+#endif
+  if (!current_value)
+    exit(1);
+}

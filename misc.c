@@ -48,18 +48,6 @@ void get_free()
 #endif
 }
 
-/// функция файл не существует
-void file_not_exists()
-{
-  if (!file_exists(get_string))
-    current_value = 0;
-  else
-    current_value = -1;
-#ifdef DEBUG
-  printf("file not exists: %s %d\n", get_string, current_value);
-#endif
-}
-
 /// возвращает номер VGA порта
 void get_video_port()
 {
@@ -105,17 +93,8 @@ void set_0()
 /// возвращает флаги аппаратуры: клавиатура, мышь
 void get_hardware()
 {
-  current_value = 0x24;
+  current_value = 0x4;
 #ifdef DEBUG
   printf("get hardware: %x\n", current_value);
-#endif
-}
-
-/// возвращает состояние клавиш Shift, Alt, Ctrl
-void get_keyboard_flags()
-{
-  current_value = (byte)(key_mod & 0x1f); /**< все Shift Alt Ctrl */
-#ifdef DEBUG
-  printf("get key_flags: %x\n", current_value);
 #endif
 }
