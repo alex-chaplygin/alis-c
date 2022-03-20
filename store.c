@@ -105,6 +105,9 @@ void set_byte_mem_word()
   printf("store_b frames_to_skip, %x; %d\n", (byte)current_value, (byte)current_value);
 #endif
     run_thread->frames_to_skip = (byte)current_value;
+  } else if (ww < 0) {
+    printf("set byte mem word < 0\n");
+    exit(1);
   } else {
     seg_write_byte(run_thread->data, w, (byte)current_value);
 #ifdef DEBUG
@@ -252,6 +255,10 @@ void store_byte_thread_word()
 {
   int thr = fetch_word();
   thr = *(word *)seg_read(run_thread->data, thr);
+  if (thr % 6 != 0) {
+    printf("store byte thread word: invalid thread: %x\n", thr);
+    exit(1);
+  }
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
   seg_write_byte(t->data, adr, (byte)current_value);
@@ -265,6 +272,10 @@ void store_word_thread_word()
 {
   int thr = fetch_word();
   thr = *(word *)seg_read(run_thread->data, thr);
+  if (thr % 6 != 0) {
+    printf("store word thread word: invalid thread\n");
+    exit(1);
+  }
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
   seg_write_word(t->data, adr, current_value);
