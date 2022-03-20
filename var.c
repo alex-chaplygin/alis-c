@@ -31,7 +31,10 @@ void get_word_mem_word()
   word w = fetch_word();
   if ((short)w == -40) // чтение номера родительского потока
     current_value = thread_num(run_thread->parent);
-  else
+  else if (w < 0) {
+    printf("get word mem word < 0\n");
+    exit(1);
+  } else
     current_value = *(short *)seg_read(run_thread->data, w);
 #ifdef DEBUG
   printf("get word varw_%x: %x; %d\n", w, current_value, current_value);
@@ -49,6 +52,9 @@ void get_string_mem_word()
   printf("get string strw_%x: %s\n", w, get_string);
 #endif
   current_ip = ip;
+#ifdef DEBUG
+  printf("new ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
 }
 
 /// чтение переменной типа byte по адресу byte
@@ -87,7 +93,7 @@ void get_string_mem_byte()
 /// чтение переменной byte по адресу word из другого потока
 void get_byte_from_thread()
 {
-  int thr = fetch_word();
+  word thr = fetch_word();
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
   current_value =(char)*seg_read(t->data, adr);
@@ -99,7 +105,7 @@ void get_byte_from_thread()
 /// чтение переменной byte по адресу word из другого потока
 void get_word_from_thread()
 {
-  int thr = fetch_word();
+  word thr = fetch_word();
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
   current_value = *(short *)seg_read(t->data, adr);

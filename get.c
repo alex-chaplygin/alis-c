@@ -274,7 +274,9 @@ void  get_pop()
 {
   current_value = prev_value;
   prev_value = stack_pop(&stack);
+#ifdef DEBUG
   printf("pop %x %x\n", current_value, prev_value);
+#endif
 }
 
 /// ошибочная функция для get и store

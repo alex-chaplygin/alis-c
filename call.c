@@ -20,6 +20,9 @@ void call(int pos)
 {
   stack_push(run_thread->call_stack, (int)current_ip);
   current_ip += pos;
+#ifdef DEBUG
+  printf("new ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
 }
 
 /// ближний вызов
@@ -90,15 +93,21 @@ void jump_skip_word()
 void saved_return()
 {
 #ifdef DEBUG
-  printf("saved return\n");
+  printf("saved return stack pos = %d\n", (int)(run_thread->call_stack->sp - run_thread->saved_sp));
 #endif
   if (!no_saved_return) {
+    printf("no saved return = 0\n");
+    exit(1);
     if (run_thread->call_stack->sp >= run_thread->saved_sp) {
-      interpreting = 0;
+      yield();
+      exit(1);
       return;
     }
   }
   current_ip = (byte *)stack_pop(run_thread->call_stack);
+#ifdef DEBUG
+  printf("new ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
 }
 
 /// ближний переход если равно
@@ -113,6 +122,9 @@ void jump_byte_z()
     char b = (char)fetch_byte();
     current_ip += b;
   }
+#ifdef DEBUG
+  printf("new ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
 }
 
 /// дальний переход если равно
@@ -197,6 +209,10 @@ void compare_jump_byte_z()
     char b = (char)fetch_byte();
     current_ip += b;
   }
+#ifdef DEBUG
+  printf("new ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
+  exit(1);
 }
 
 /// сравнение и дальний переход если равно
