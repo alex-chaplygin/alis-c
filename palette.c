@@ -29,7 +29,8 @@ int fade_ticks = 0;		/**< текущий кадр появления / угас�
 int palette_fade_ticks = 0;	/**< число кадров между шагами появления / угасания (скорость) */
 int fade_offset = 0;		/**< шаг яркости в палитре для появления / угасания */
 int palette_parameter;
-int skip_palette = 0;
+int skip_palette = 0;		/**< пропуск загрузки палитры */
+int palette_lock = 0;		/**< блокировка изменения палитры */
 byte palette[768];		/**< текущая палитра */
 byte load_palette[768];		/**< палитра, к которой стремится текущая при появлении / увядании */
 
@@ -75,6 +76,8 @@ void palette_update()
 {
   if (!need_to_update_palette)
     return;
+  if (palette_lock)
+    return;
 #ifdef DEBUG
   printf("update palette\n");
   printf("load palette:\n");
@@ -94,6 +97,7 @@ void palette_update()
 /// рассчет парметров появления/угасания
 void palette_init_fade(int fade)
 {
+  palette_lock = 1;
   fade_offset = 1;
   if (fade && fade >= 63) {
     palette_parameter = 63;
@@ -167,8 +171,11 @@ void palette_load(byte *pal)
   if (!current_value) {
     fade_ticks = palette_parameter = palette_fade_ticks = 0;
     memcpy(palette, load_palette, 768);
+    palette_lock = 0;
   } else {
+    palette_lock = 1;
     palette_fade_step();
+    palette_lock = 0;
 #ifdef DEBUG
     printf("load palette:\n");
     dump_palette(load_palette);
@@ -190,7 +197,9 @@ void palette_clear_fade()
   fade = current_value = prev_value;
   palette_init_fade(fade);
   memset(load_palette, 0, sizeof(load_palette));
+  palette_lock = 1;
   palette_fade_step();
+  palette_lock = 0;
   need_to_update_palette = 1;
   skip_palette = 0;
 #ifdef DEBUG
