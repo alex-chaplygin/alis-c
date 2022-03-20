@@ -81,7 +81,7 @@ func get_op[] = {
   get_joy, //6e 
   random_with_seed, //70
   get_message, //72
-  get_keyboard_flags, //74
+  get_keyboard_mod, //74
   get_free, //76
   get_video_port, //78
   nimp,//wait_key, //7a

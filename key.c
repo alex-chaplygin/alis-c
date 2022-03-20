@@ -91,3 +91,12 @@ void get_joy()
   printf("get joy: %x\n", current_value);
 #endif
 }
+
+/// возвращает состояние клавиш Shift, Alt, Ctrl
+void get_keyboard_mod()
+{
+  current_value = (byte)(key_mod & 0x1f); /**< все Shift Alt Ctrl */
+#ifdef DEBUG
+  printf("get key_flags: %x\n", current_value);
+#endif
+}
