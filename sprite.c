@@ -274,9 +274,12 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_scene)
 {
   if (c->state >= SPRITE_READY)
     c->state = SPRITE_REMOVED;
-  if (!prev_sprite)
+  if (!prev_sprite) {
+#ifdef DEBUG
+    printf("remove head\n");
+#endif
     run_thread->sprite_list = c->next;
-  else
+  } else
     prev_sprite->next = c->next;
 #ifdef DEBUG
   printf("remove sprite: center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
@@ -286,9 +289,12 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_scene)
     free_sprite = c;
     sprite_remove_from_scene_list(c);
   }
-  if (!prev_sprite)
+  if (!prev_sprite) {
+#ifdef DEBUG
+    printf("next: %x\n", (int)run_thread->sprite_list);
+#endif
     return run_thread->sprite_list;
-  else
+  } else
     return prev_sprite->next;
 }
 
