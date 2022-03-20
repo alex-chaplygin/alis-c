@@ -66,7 +66,17 @@ void sprites_init(int num)
 /// возвращает число свободных спрайтов
 int num_free_sprites()
 {
-  return num_sprites - (free_sprite - sprites);
+  sprite_t *c = free_sprite;
+  int count = 0;
+  while (c) {
+    count++;
+    c = c->next;
+  }
+#ifdef DEBUG
+  printf("num free sprites: %d\n", count);
+#endif
+  exit(1);
+  return count;
 }
 
 /** 
