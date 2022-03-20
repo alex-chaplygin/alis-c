@@ -144,7 +144,7 @@ void mod()
 #ifdef DEBUG
   printf("\t\tmod %d %d\n", prev_value, current_value);
 #endif
-  word w = prev_value;
+  short w = prev_value;
   prev_value = current_value;
   if (!prev_value)
     prev_value = 1;
@@ -158,7 +158,7 @@ void op_div()
 #ifdef DEBUG
   printf("\t\tdiv %d %d\n", prev_value, current_value);
 #endif
-  word w = prev_value;
+  short w = prev_value;
   prev_value = current_value;
   if (!prev_value)
     prev_value = 1;
