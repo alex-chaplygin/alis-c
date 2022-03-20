@@ -358,9 +358,11 @@ void op_thread_kill_remove_all()
 void get_message()
 {
   stack_t *s = run_thread->msg_stack;
-  if (stack_empty(run_thread->msg_stack))
+  if (stack_empty(run_thread->msg_stack)) {
+    printf("get message stack is empty\n");
+    exit(1); 
     current_value = -1;
-  else {
+  } else {
     current_value = stack_pop(run_thread->msg_stack);
     if (stack_empty(run_thread->msg_stack))
       run_thread->flags &= ~THREAD_MSG;
