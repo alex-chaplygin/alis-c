@@ -90,22 +90,38 @@ void get_string_mem_byte()
   current_ip = ip;
 }
 
-/// чтение переменной byte по адресу word из другого потока
+/** 
+ * чтение переменной byte по адресу word из другого потока
+ * номер потока берется из переменной word
+ */
 void get_byte_from_thread()
 {
   word thr = fetch_word();
+  thr = *(word *)seg_read(run_thread->data, thr);
+  if (thr % 6 != 0) {
+    printf("get byte thread word: invalid thread: %x\n", thr);
+    exit(1);
+  }
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
-  current_value =(char)*seg_read(t->data, adr);
+  current_value =*(char *)seg_read(t->data, adr);
   #ifdef DEBUG
   printf("get byte thread: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
   #endif
 }
 
-/// чтение переменной byte по адресу word из другого потока
+/** 
+ * чтение переменной word по адресу word из другого потока
+ * номер потока берется из переменной word
+ */
 void get_word_from_thread()
 {
   word thr = fetch_word();
+  thr = *(word *)seg_read(run_thread->data, thr);
+  if (thr % 6 != 0) {
+    printf("get word thread word: invalid thread\n");
+    exit(1);
+  }
   thread_t *t = threads_table[thr / 6].thread;
   word adr = fetch_word();
   current_value = *(short *)seg_read(t->data, adr);
