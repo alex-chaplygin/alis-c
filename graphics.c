@@ -13,7 +13,7 @@
 #include "key.h"
 #include "palette.h"
 #include "graphics.h"
-#include "timer.h"
+#include "mouse.h"
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
@@ -56,7 +56,6 @@ void graphics_init()
     colors[i].g = i;
     colors[i].b = i;
   }
-  init_timer(time_step);
   SDL_SetPaletteColors(screen->format->palette, colors, 0, 256);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
   SDL_LockSurface(screen);
@@ -89,6 +88,19 @@ int graphics_get_events()
 }
 
 /** 
+ * Обновляет палитру в начале каждого кадра
+ * Вызывается в цикле интерпретатора
+ */
+void graphics_palette_update()
+{
+  long now = SDL_GetTicks();
+  if ((now -  frame_time) > time_step) {
+    palette_update();
+    frame_time = now;
+  }
+}
+
+/** 
  * Обновление графики.
  * Обработка событий клавиатуры, мыши.
  * Обновление таймера, задержка кадра для постоянного fps.
@@ -105,6 +117,7 @@ int graphics_update()
     SDL_Delay(now - current_time);
   else
     current_time = now;
+  draw_mouse_cursor();
   SDL_UnlockSurface(screen);  
   SDL_RenderClear(renderer);
   SDL_Texture* t = SDL_CreateTextureFromSurface(renderer, screen);
