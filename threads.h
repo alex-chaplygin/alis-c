@@ -75,7 +75,7 @@ void thread_init();
 void thread_init_table();
 void thread_setup_main(byte *script, int size);
 void thread_setup(thread_table_t *tb, byte *script, int size);
-thread_t *thread_add(byte *script, int size);
+thread_t *thread_add(byte *script, int size, vec_t *translate);
 void threads_run();
 
 void thread_receive_msg();

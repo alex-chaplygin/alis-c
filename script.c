@@ -249,7 +249,9 @@ void run_script()
 #ifdef DEBUG
   printf("run script %x size = %d\n", id, script_sizes[i]);
 #endif
-  thread_t *t = thread_add(script_table[i], script_sizes[i]);
+  vec_t vec;
+  vec.x = vec.y = vec.z = 0;
+  thread_t *t = thread_add(script_table[i], script_sizes[i], &vec);
   switch_string_store();
 }
 
@@ -259,8 +261,7 @@ void run_script()
  */
 void free_script()
 {
-  int scr_num = fetch_word();
-  int num = scr_num;
+  int num = fetch_word();
 #ifdef DEBUG
   printf("free script: %x\n", num);
   printf("cur script id = %x\n", run_thread->id);
@@ -284,6 +285,6 @@ void free_script()
       script_sizes[i] = script_sizes[i + 1];
     }
   num_scripts--;
-  kill_thread_by_script(scr_num);
+  kill_thread_by_script(num);
   scenes_free_sprites();
 }

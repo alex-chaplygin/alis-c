@@ -139,10 +139,11 @@ void thread_setup_main(byte *script, int size)
  * Новый поток начинает работу
  * @param script образ сценария
  * @param size размер сценария
+ * @param translate вектор перемещения
  * 
  * @return 
  */
-thread_t *thread_add(byte *script, int size)
+thread_t *thread_add(byte *script, int size, vec_t *translate)
 {
   thread_table_t *next = current_thread->next;
   thread_table_t *new_thread = free_thread;
@@ -160,10 +161,13 @@ thread_t *thread_add(byte *script, int size)
   memcpy(t->data->data, run_thread->data->data, 6); /**< трансформация из текущего потока копируется в новый поток */
   memcpy(t->data->data + 9, run_thread->data->data + 9, 3); /**< копируются 3 байта начиная с 9-го */
   t->parent = run_thread;
-  // добавления вектора перемещения к началу координат
-  // нового потока
+  // добавления вектора перемещения к началу координат нового потока
+  short *coord = (short *)t->data->data;
+  coord[0] += translate->x;
+  coord[1] += translate->y;
+  coord[2] += translate->z;
   t->current_scene = run_thread->current_scene;
-  //   t->f22 = run_thread->f22
+  t->f22 = run_thread->f22;
   t->sprites_thread = current_value;
 #ifdef DEBUG
   word *o = (word *)t->data->data;
@@ -452,7 +456,12 @@ void thread_resume()
   new_get();
   if (current_value < 0)
     return;
-  thread_t *t = threads_table[current_value / 6].thread;
+  int thr = current_value;
+  if (thr % 6 != 0) {
+    printf("thread resume invalid thread: %x\n", thr);
+    exit(1);
+  }
+  thread_t *t = threads_table[thr / 6].thread;
 #ifdef DEBUG
   printf("resume thread %x num = %x\n", *t->script, current_value);
 #endif
