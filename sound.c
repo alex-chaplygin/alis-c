@@ -1,3 +1,13 @@
+/**
+ * @file   sound.c
+ * @author alex <alex@localhost>
+ * @date   Tue Apr  5 07:29:09 2022
+ * 
+ * @brief  Модуль обработки звуков
+ *
+ * Каналы звука заполняются по необходимости и микшируются
+ */
+
 #include "types.h"
 #include "sound.h"
 
