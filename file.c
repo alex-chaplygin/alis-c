@@ -74,6 +74,21 @@ void file_read(void *buf, int size)
 }
 
 /** 
+ * Запись в файл с обработкой ошибок
+ * 
+ * @param buf адрес буфера который записывается
+ * @param size размер буфера
+ */
+void file_write(void *buf, int size)
+{
+  int c = fwrite(buf, size, 1, handle);
+  if (c < 0) {
+    fprintf(stderr, "File: write error size = %d, read bytes: %d\n", size, c);
+    exit(1);
+  }
+}
+
+/** 
  * Закрытие текущего файла
  */
 void file_close()
