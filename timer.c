@@ -1,4 +1,6 @@
 #include "palette.h"
+#include "sound.h"
+#include "mouse.h"
 
 char frame_num = 0;		/**< номер кадра */
 
