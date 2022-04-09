@@ -27,7 +27,7 @@ void load_blancpc()
   byte *src;
   byte *dst;
   FILE *f;
-  file_open(BLANCPC, FILE_RW);
+  file_open(BLANCPC, 2);
   file_read(buffer, BLANCPC_SIZE);
   file_close();
   blancpc_data = buffer + BLANCPC_HEADER;
@@ -46,12 +46,4 @@ void load_blancpc()
     }
     *dst++ = b;
   }
-#ifdef DEBUG
-  printf("loaded blancpc\n");
-  for (int i = 0; i < 2560 / 16; i++) {
-    for (int j = 0; j < 16; j++)
-      printf("%02x ", blancpc_buffer[i * 16 + j]);
-    printf("\n");
-  }
-#endif
 }
