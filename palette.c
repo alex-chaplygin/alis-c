@@ -1,0 +1,3 @@
+void palette_update()
+{
+}
