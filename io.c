@@ -11,25 +11,7 @@
 #include <string.h>
 
 #include "types.h"
-
-#pragma pack(1)
-
-typedef struct {
-  word id;			/**< номер сценария */
-  word entry;			/**< адрес начала сценария */
-  byte control;
-  byte version;			/**< версия сценария */
-  word entry2;			/**< обработка нажатий клавиш */
-  byte u1;
-  byte u2;
-  word entry3;			/**< обработка сообщений */
-  byte u4;
-  byte u5;
-  dword resources;		/**< адрес таблицы ресурсов */
-  word stack_size;		/**< размер стека вызовов */
-  word data_size;		/**< размер сегмента данных */
-  word msg_size;		/**< размер стека сообщений */
-} io_unpacked_header_t;
+#include "io.h"
 
 /// таблица ресурсов
 typedef struct {
@@ -55,8 +37,11 @@ typedef struct {
   byte pad[9];
 } sound_header_t;
 
+int total_io_files;		/**< максимальное число загруженных io файлов */
+int loaded_io_files;		/**< число загруженных io файлов */
 /// таблица смещений в данных звука
 char sound_offset_table[] = {-34, -21, -13, -8, -5, -3, -2, -1, 1, 2, 3, 5, 8, 13, 21, 34};
+
 /** 
  * Распаковка звуковых данных в io файле
  * Звуковые данные упакованы как закодированные (по 4 бит) смещения
@@ -64,7 +49,7 @@ char sound_offset_table[] = {-34, -21, -13, -8, -5, -3, -2, -1, 1, 2, 3, 5, 8, 1
  */
 void io_unpack_sound(byte *io)
 {
-  io_unpacked_header_t *h = (io_unpacked_header_t *)io;
+  io_header_t *h = (io_header_t *)io;
   resource_table_t *res = (resource_table_t *)(io + h->resources);
   dword *tab = (dword *)((byte *)res + res->sound_table);
   sound_header_t *data;
@@ -96,4 +81,12 @@ void io_unpack_sound(byte *io)
       }
     ++tab;
   }
+}
+
+/** 
+ * Возвращает число свободных ячеек из таблицы загруженных io файлов
+ */
+int io_num_free_files()
+{
+  return total_io_files - loaded_io_files;
 }
