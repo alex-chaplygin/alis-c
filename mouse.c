@@ -7,6 +7,7 @@
  *
  * Системный курсор скрыт, вместо него рисуется изображение курсора
  */
+#include <SDL.h>
 
 int show_cursor = -1;	/**< флаг курсора мыши */
 int mouse_x;			/**< координаты курсора */
@@ -36,4 +37,13 @@ void mouse_get(int *x, int *y, int *buttons)
   *x = mouse_x;
   *y = mouse_y;
   *buttons = mouse_buttons;
+}
+
+void mouse_init()
+{
+  SDL_ShowCursor(SDL_FALSE);
+}
+
+void mouse_draw_cursor()
+{
 }
