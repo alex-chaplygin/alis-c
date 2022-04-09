@@ -102,3 +102,11 @@ void sound_update()
       if (!(ch->flags & CHANNEL_OFF))
 	sound_process_channel(ch);
 }
+
+/** 
+ * Инициализация звуковой системы
+ * Инициализация каналов
+ */
+void sound_init()
+{
+}
