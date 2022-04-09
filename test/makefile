@@ -1,6 +1,6 @@
 CFLAGS=-I. -I../
 
-all: /tmp/test_sound /tmp/test_mouse /tmp/test_key /tmp/test_io
+all: /tmp/test_sound /tmp/test_mouse /tmp/test_key /tmp/test_io /tmp/test_threads
 
 /tmp/test_sound: test_sound.c ../sound.c
 	gcc $(CFLAGS) -o $@ $^
@@ -12,4 +12,7 @@ all: /tmp/test_sound /tmp/test_mouse /tmp/test_key /tmp/test_io
 	gcc $^ -o $@ $(CFLAGS) -I/usr/include/SDL2 -lSDL2
 
 /tmp/test_io: test_io.c ../io.c
+	gcc $^ -o $@ $(CFLAGS)
+
+/tmp/test_threads: test_threads.c ../threads.c
 	gcc $^ -o $@ $(CFLAGS)
