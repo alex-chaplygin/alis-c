@@ -15,6 +15,7 @@ typedef struct {
   word ip;			/**< указатель команд */
   word call_sp;			/**< указатель стека вызовов */
   sprite_t *sprites;		/**< список спрайтов потока */
+  word *call_stack;		/**< стек вызовов */
 } thread_t;
 
 /// запись таблицы потоков
@@ -26,3 +27,4 @@ typedef struct threads_table_s {
 void threads_init();
 void threads_run();
 int threads_free_num();
+byte *threads_call(int step, byte *ip);

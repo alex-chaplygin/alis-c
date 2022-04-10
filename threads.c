@@ -83,3 +83,18 @@ int threads_free_num()
 {
   return max_threads - loaded_threads;
 }
+
+/** 
+ * Вызов подпрограммы
+ * Сохраняет предыдущее значение ip в стеке вызовов
+ * @param ip текущий ip
+ * @param step шаг перехода к подпрограмме
+ * 
+ * @return новый ip (адрес подпрограммы)
+ */
+byte *threads_call(int step, byte *ip)
+{
+  current_thread->call_sp--;
+  current_thread->call_stack[current_thread->call_sp] = ip - current_thread->io_file;
+  return ip + step;
+}
