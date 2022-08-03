@@ -30,12 +30,12 @@ func get_op[] = {
   get_word_mem_word,//8
   get_string_mem_word,//a
   nimp,//get_string_array_word,//c
-  nimp,//get_byte_array_word,//e
+  get_byte_array_word,//e
   get_word_array_word,//10
   get_byte_mem_byte,//12
   get_word_mem_byte,//14
   get_string_mem_byte,//16
-  nimp,//get_string_array_byte,//18
+  get_string_array_byte,//18
   get_byte_array_byte,//1a
   get_word_array_byte,//1c
   get_byte_global_word,//1e
