@@ -28,6 +28,7 @@ void stack_free(stack_t *s);
 void memory_free(seg_t *s);
 int stack_empty(stack_t *s);
 void stack_clear(stack_t *s);
+void dump_mem(byte *mem, int size);
 
 extern byte *memory;		/**< главная общая память данных потоков */
 

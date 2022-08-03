@@ -45,19 +45,42 @@ void thread_init()
 void dump_threads()
 {
   printf("threads: ");
-  thread_table_t *t = threads_table->next;
+  thread_table_t *t = threads_table;
+  thread_t *th;
   while (t) {
-    printf("->%x", (int)(t - threads_table) * 6);
+    th = t->thread;
+    if (!th) break;
+    printf("table id: %x ", (int)(t - threads_table) * 6);
+    printf("id: %x\n", th->id);
+    printf("data:\n");
+    dump_mem(th->data->data, th->data->size);
+    printf("\n");
     t = t->next;
   }
-  printf("\n");
+  /*  
+Ошибка : thread 48 class 41 adr: 16 must: 05 is: 00
+thr: 1e class: 4 adr: 25 must 05 is 0
+thr: 6 class: 1f
+must
+0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 00  ................
+0010: 00 01 16 02 01 02 00 0D 00 01 00 02 00 00 00 00  ................
+0020: 00 00 46 52 41 47 4F 4E 49 52 00 00 00 00 00 00  ..FRAGONIR......
+0030: FF FF
+is:
+0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 
+0010: 00 00 16 02 01 02 00 0d 00 01 00 03 00 00 00 00 
+0020: 00 00 46 52 41 47 4f 4e 49 52 00 00 00 00 00 00 
+0030: ff ff
+
+
+printf("\n");
   printf("free threads: ");
   t = free_thread;
   while (t->next) {
     printf("->%x", (int)(t->next - threads_table) * 6);
     t = t->next;
   }
-  printf("\n");
+  printf("\n");*/
 }
 
 /** 
@@ -230,7 +253,7 @@ void threads_run()
 	  t->saved_sp = t->call_stack->sp;
 	  interpret(t, t->script + t->header->entry2 + 6);
 	  t->call_stack->sp = t->saved_sp;
-	}
+	  }
 	sprites_translate((word *)t->data->data);
 	t->cur_frames_to_skip = t->frames_to_skip;
       }

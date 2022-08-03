@@ -189,3 +189,15 @@ void stack_clear(stack_t *s)
 {
   s->sp = s->data + s->size;
 }
+
+/// Дамп памяти
+void dump_mem(byte *mem, int size)
+{
+  int adr = 0;
+  while (adr < size) {
+    printf("%04x: ", adr);
+    for (int i = 0; i < 16 && adr < size; i++, adr++)
+      printf("%02x ", mem[adr]);
+    printf("\n");
+  }
+}
