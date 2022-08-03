@@ -383,6 +383,9 @@ void op_switch_case()
  */
 void call_resume(int s)
 {
+#ifdef DEBUG
+  printf("call resume to: %x\n", s);
+#endif
   if (main_run) { // главная программа потока
     if (run_thread->saved_sp) { // если был сохраненный sp
       run_thread->call_stack->sp = run_thread->saved_sp; // устанавливаем стек в сохраненный
@@ -402,7 +405,8 @@ void call_resume(int s)
     if (run_thread->saved_sp) { // если был сохраененный sp
       saved_sp = run_thread->saved_sp; // модифицируем sp, который будет указателем стека вызовов
 #ifdef DEBUG
-      printf("call resume no main saved\n");
+      printf("call resume no main saved saved_sp - th->saved: %x\n", saved_sp - run_thread->saved_sp);
+      printf("thr->ip = %x\n", (int)(run_thread->ip - run_thread->script));
 #endif
     } else {
       run_thread->saved_sp = --saved_sp; // текущий стек сохраняем
@@ -412,13 +416,13 @@ void call_resume(int s)
       printf("call resume no main no saved\n");
 #endif
     }
-    run_thread->ip += s; // ip для основной программы модифицируется
+    run_thread->ip = current_ip + s; // ip для основной программы модифицируется
     run_thread->running = 1; // программа запускается
     run_thread->cur_frames_to_skip = 1; // пропуска кадра не будет
 #ifdef DEBUG
     printf("ip = %x\n", (int)(current_ip - run_thread->script));
+    printf("thr->ip = %x\n", (int)(run_thread->ip - run_thread->script));
 #endif
-    exit(1);
   }
 }
 
