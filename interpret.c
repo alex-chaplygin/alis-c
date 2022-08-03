@@ -148,7 +148,7 @@ func vm_op[] = {
   thread_receive_msg, // 64
   nimp, // 65
   thread_clear_messages, // 66
-  thread_set_flag, // 67
+  thread_find_all, // 67
   set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a

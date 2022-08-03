@@ -25,7 +25,7 @@ thread_table_t *current_thread;	/**< текущий поток */
 thread_t *main_thread;		/**< главный поток */
 int num_run_threads;		/**< число рабочих потоков */
 int no_saved_return;		/**< если 0, то позволяет возврат из сценария к сохраненному кадру стека */
-int thread_flag = 0;
+int find_all_objects = 0;		/**< если 1, то ищутся все объекты по классу */
 word threads_list[256];		/**< список номеров потоков */
 int kill_thread_flag = 1;		/**< если равен 0, то потоки не удаляются при освобождении сценария*/
 
@@ -193,7 +193,7 @@ void threads_run()
 #ifdef DEBUG
     printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->script), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
-    thread_flag = no_saved_return = 0;
+    find_all_objects = no_saved_return = 0;
     if (t->flags & THREAD_MSG) // bit 7
       if (!(t->flags & THREAD_NOSTART3)) // bit 1
 	if (t->header->entry3) {
@@ -517,23 +517,17 @@ void script_num_to_thread_num()
     printf("check thread num: %x run_thread: %x\n", t->id, run_thread->id);
 #endif
     if (t->id == num && t != run_thread) {
-      pos[255] = 0;
-      *pos = (word)thread_num(t);
+      *pos++ = (word)thread_num(t);
 #ifdef DEBUG
   printf("thread num: %x\n", *pos);
 #endif
-      pos++;
-      if (!thread_flag)
+      if (!find_all_objects)
 	break;
-      else {
-	printf("thread flag\n");
-	exit(1);
-      }
     }
     tab = tab->next;
   }
   *pos = (short)-1;
-  thread_flag = 0;
+  find_all_objects = 0;
   threads_list_pos = threads_list;
   store_thread_num();
 }
@@ -584,7 +578,7 @@ void get_threads_list()
     printf("\n");
 #endif
   *pos = -1;
-  thread_flag = 0;
+  find_all_objects = 0;
   threads_list_pos = threads_list;
   store_thread_num();
 }
@@ -598,11 +592,11 @@ void thread_set_flags2()
 #endif
 }
 
-void thread_set_flag()
+void thread_find_all()
 {
-  thread_flag = 1;
+  find_all_objects = 1;
 #ifdef DEBUG
-  printf("set flag = 1\n");
+  printf("find all objects = 1\n");
 #endif
 }
 

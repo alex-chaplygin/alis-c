@@ -96,7 +96,7 @@ void set_sprites_thread();
 void get_threads_list();
 void store_thread_num();
 void thread_set_flags2();
-void thread_set_flag();
+void thread_find_all();
 void op_kill_thread();
 void thread_pause_by_ref();
 
