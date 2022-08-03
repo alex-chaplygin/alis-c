@@ -626,3 +626,21 @@ void op_kill_thread()
 #endif
   op_thread_kill(0);
 }
+
+/** 
+ * Остановка выполнения объекта, вход - указатель на объект
+ */
+void thread_pause_by_ref()
+{
+  new_get();
+#ifdef DEBUG
+  printf("thread pause ref = %x\n", current_value);
+#endif
+  if (!current_value)
+    return;
+  thread_t *t = threads_table[current_value / 6].thread;
+#ifdef DEBUG
+  printf("thread pause class = %x\n", *t->script);
+#endif
+  t->running = 0;
+}
