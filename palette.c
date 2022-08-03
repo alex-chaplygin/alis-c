@@ -255,7 +255,13 @@ void set_palette_from_res()
 {
   load_main_res = 0;
   new_get();
-  if (current_value < 0) {
+  if (current_value == -2) {
+    fade_ticks = palette_fade_ticks = palette_parameter = 0;
+    memset(load_palette, 0, 768);
+    memset(palette, 0, 768);
+    graphics_set_palette(palette);
+    return;
+  } else if (current_value < 0) {
     printf("set palette from res < 0\n");
     exit(1);
   }
