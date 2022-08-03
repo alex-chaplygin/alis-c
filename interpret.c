@@ -279,7 +279,6 @@ void null_op()
 void nimp()
 {
   printf("Not implemented: %x\n", *(current_ip - 1));
-  dump_threads();
   exit(1);
 }
 
