@@ -162,6 +162,17 @@ void get_word_array_word()
 #endif
 }
 
+/// чтение байта из массива по адресу word
+void get_byte_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  current_value = *(char *)array_pos(seg_read(run_thread->data, w), 0, 1);
+#ifdef DEBUG
+  printf("get byte arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+#endif
+}
+
 /// чтение слова из массива по адресу byte
 void get_word_array_byte()
 {
@@ -214,6 +225,27 @@ void get_string_global_array_word()
   char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 1, 1);
   char *dst = get_string;
   while (*dst++ = *src++) ;
+  if (dst - get_string >= MAX_STR) {
+    printf("MAX get string\n");
+    exit(1);
+  }
+#ifdef DEBUG
+  printf("get string main.arrsw_%x[%d] \"%s\"\n", w, idx, get_string);
+#endif
+}
+
+/// чтение строки из массива по адресу байт
+void get_string_array_byte()
+{
+  byte w = fetch_byte();
+  int idx = current_value;
+  char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 1, 1);
+  char *dst = get_string;
+  while (*dst++ = *src++) ;
+  if (dst - get_string >= MAX_STR) {
+    printf("MAX get string\n");
+    exit(1);
+  }
 #ifdef DEBUG
   printf("get string main.arrsw_%x[%d] \"%s\"\n", w, idx, get_string);
 #endif
