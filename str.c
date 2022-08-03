@@ -62,6 +62,19 @@ void get_string_len()
   printf("get_string_len \"%s\" res = %d\n", get_string, current_value);
 #endif
 }
+
+/// условие - строки не равны
+void str_neq()
+{
+  switch_string_get();
+  printf("str_neq %s %s\n", get_string, text_string);
+  if (strcmp(get_string, text_string))
+    current_value = 0;
+  else
+    current_value = -1;
+  printf("res: %d\n", current_value);
+}
+
 /*
 void str_char()
 {
@@ -96,15 +109,6 @@ void str_cat()
   current_string = prev_string;
   prev_string = str;
   printf("res: %s\n", current_string);
-}
-
-void str_neq()
-{
-  switch_str_get();
-  printf("str_neq %s %s\n", current_string, prev_string);
-  if (strcmp(current_string, prev_string)) current_value = 0;
-  else current_value = -1;
-  printf("res: %d\n", current_value);
 }
 
 void str_eq()
