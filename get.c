@@ -92,7 +92,7 @@ func get_op[] = {
   nimp,//str_char, //84
   nimp,//num_to_str, //86
   nimp,//str_cat, //88
-  nimp,//str_neq, //8a
+  str_neq, //8a
   nimp,//str_eq,//8c
   nimp,//str_gt,//8e
   nimp,//str_lt, //90
