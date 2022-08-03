@@ -367,7 +367,7 @@ void remove_all_sprites(sprite_t *sp, int remove)
 }
 
 /** 
- * Установка начала координат для текущего потока
+ * Установка начала координат для текущего объекта
  */
 void set_coord_origin()
 {
@@ -380,5 +380,26 @@ void set_coord_origin()
 #ifdef DEBUG
   short *w = (short *)run_thread->data->data;
   printf("set coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
+#endif
+}
+
+/** 
+ * Перемещение начала координат для текущего объекта
+ */
+void move_coord_origin()
+{
+  short d;
+  new_get();
+  d = *(short *)seg_read(run_thread->data, 0);
+  seg_write_word(run_thread->data, 0, current_value + d);
+  new_get();
+  d = *(short *)seg_read(run_thread->data, 2);
+  seg_write_word(run_thread->data, 2, current_value + d);
+  new_get();
+  d = *(short *)seg_read(run_thread->data, 4);
+  seg_write_word(run_thread->data, 4, current_value + d);
+#ifdef DEBUG
+  short *w = (short *)run_thread->data->data;
+  printf("move coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
 #endif
 }

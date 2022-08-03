@@ -122,7 +122,7 @@ func vm_op[] = {
   nimp, // 4a
   clear_object, // 4b
   set_coord_origin, // 4c
-  nimp, // 4d
+  move_coord_origin, // 4d
   scene_show, // 4e
   scene_hide, // 4f
   clear_all_objects2, // 50
