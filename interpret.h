@@ -21,7 +21,7 @@ void yield();
 
 extern byte *current_ip;
 extern thread_t *run_thread;
-extern int no_saved_return;
+extern int main_run;
 extern int interpreting;
 extern short current_value;		/**< аккумулятор */
 extern short prev_value;		/**< второй регистр */

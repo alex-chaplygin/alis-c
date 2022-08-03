@@ -104,5 +104,6 @@ extern int max_threads;		/**< максимальное количество по
 extern int num_run_threads;		/**< число рабочих потоков */
 extern thread_t *main_thread;		/**< главный поток */
 extern thread_table_t *threads_table; /**< таблица потоков */
+extern int *saved_sp;			/**< сохраненный указатель стека */
 
 #endif

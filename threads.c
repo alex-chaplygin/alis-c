@@ -23,8 +23,9 @@ int max_threads;		/**< максимальное количество поток�
 thread_table_t *free_thread;	/**< голова списка свободных потоков */
 thread_table_t *current_thread;	/**< текущий поток */
 thread_t *main_thread;		/**< главный поток */
+int *saved_sp;			/**< сохраненный указатель стека */
 int num_run_threads;		/**< число рабочих потоков */
-int no_saved_return;		/**< если 0, то позволяет возврат из сценария к сохраненному кадру стека */
+int main_run;		/**< 1 - во время главной программы, 0 - обработка сообщений */
 int find_all_objects = 0;		/**< если 1, то ищутся все объекты по классу */
 word threads_list[256];		/**< список номеров потоков */
 int kill_thread_flag = 1;		/**< если равен 0, то потоки не удаляются при освобождении сценария*/
@@ -193,17 +194,17 @@ void threads_run()
 #ifdef DEBUG
     printf("Run thread %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->script), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
-    find_all_objects = no_saved_return = 0;
+    find_all_objects = main_run = 0;
     if (t->flags & THREAD_MSG) // bit 7
       if (!(t->flags & THREAD_NOSTART3)) // bit 1
 	if (t->header->entry3) {
 #ifdef DEBUG
 	  printf("starting handle message: %x\n", t->header->entry3 + 0xa);
 #endif
-	  t->saved_sp = t->call_stack->sp;
+	  saved_sp = t->call_stack->sp;
 	  set_translate((word *)t->data->data);
 	  interpret(t, t->script + t->header->entry3 + 0xa);
-	  t->call_stack->sp = t->saved_sp;
+	  t->call_stack->sp = saved_sp;
 	  sprites_translate((word *)t->data->data);
 	}
     if (t->running != 0) {
@@ -212,7 +213,7 @@ void threads_run()
       t->cur_frames_to_skip--;
       if (!t->cur_frames_to_skip) {
 	set_translate((word *)t->data->data);
-	no_saved_return++;
+	main_run++;
 	t->ip = interpret(t, t->ip);
 #ifdef DEBUG
 	printf("ip = %x\n", (int)(t->ip - t->script));
@@ -225,10 +226,10 @@ void threads_run()
 #ifdef DEBUG
 	  printf("starting entry2: %x\n", t->header->entry2);
 #endif
-	  no_saved_return = 0;
-	  t->saved_sp = t->call_stack->sp;
+	  main_run = 0;
+	  saved_sp = t->call_stack->sp;
 	  interpret(t, t->script + t->header->entry2 + 6);
-	  t->call_stack->sp = t->saved_sp;
+	  t->call_stack->sp = saved_sp;
 	  }
 	sprites_translate((word *)t->data->data);
 	t->cur_frames_to_skip = t->frames_to_skip;
@@ -398,7 +399,7 @@ void thread_pause_yield_no_saved()
   printf("thread pause no saved yield\n");
 #endif
   run_thread->running = 0;
-  if (no_saved_return)
+  if (main_run)
     yield();
 }
 
