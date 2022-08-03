@@ -239,7 +239,7 @@ void get_string_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  char *src = (char *)array_pos(seg_read(threads_table->thread->data, w), 1, 1);
+  char *src = (char *)array_pos(seg_read(run_thread->data, w), 1, 1);
   char *dst = get_string;
   while (*dst++ = *src++) ;
   if (dst - get_string >= MAX_STR) {
@@ -247,6 +247,6 @@ void get_string_array_byte()
     exit(1);
   }
 #ifdef DEBUG
-  printf("get string main.arrsw_%x[%d] \"%s\"\n", w, idx, get_string);
+  printf("get string arrsb_%x[%d] \"%s\"\n", w, idx, get_string);
 #endif
 }
