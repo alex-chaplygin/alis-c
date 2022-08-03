@@ -5,7 +5,6 @@
  * 
  * @brief  Функции интерпретатора - вызовы и переходы: условные и безусловные
  * 
- * 
  */
 
 #include <stdio.h>
@@ -87,24 +86,35 @@ void jump_skip_word()
 }
 
 /** 
- * Для дополнительных процедур сценария предусмотрен
- * возврат к сохраненному состоянию стека вызовов
+ * Для обработчиков - возврат только один раз
+ * Для главной программы - обычный возврат, с обнулением сохранения
  */
 void saved_return()
 {
 #ifdef DEBUG
   printf("saved return stack pos = %d\n", (int)(run_thread->call_stack->sp - run_thread->saved_sp));
 #endif
-  if (!no_saved_return) {
-    printf("no saved return = 0\n");
-    exit(1);
-    if (run_thread->call_stack->sp >= run_thread->saved_sp) {
+  if (!main_run) {
+    if (run_thread->call_stack->sp >= saved_sp) {
       yield();
+#ifdef DEBUG
+      printf("main_run = 0 sp >= saved_sp\n");
+#endif
       exit(1);
       return;
     }
+#ifdef DEBUG
+    printf("main_run = 0 sp < saved_sp\n");
+#endif
   }
   current_ip = (byte *)stack_pop(run_thread->call_stack);
+  if (run_thread->call_stack->sp - 1 == run_thread->saved_sp) {
+    run_thread->saved_sp = 0;
+#ifdef DEBUG
+    printf("sp == saved_sp\n");
+    printf("ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
+  }
 #ifdef DEBUG
   printf("new ip = %x\n", (int)(current_ip - run_thread->script));
 #endif
@@ -365,14 +375,51 @@ void op_switch_case()
 #endif
 }
 
-/// вызов с возможным возвратом к сохраненному значению
-void call_save(int s)
+/** 
+ * Для главной программы - вызов с сохранением (однократное 
+ * сохранение в стеке.
+ * Для обработчиков - откладывание вызова, до основной программы
+ * @param s смещение вызова
+ */
+void call_resume(int s)
 {
-  if (!no_saved_return) {
-    printf("call save no saved = 0\n");
+  if (main_run) { // главная программа потока
+    if (run_thread->saved_sp) { // если был сохраненный sp
+      run_thread->call_stack->sp = run_thread->saved_sp; // устанавливаем стек в сохраненный
+      current_ip += s; // вызов без сохранения адреса возврата
+#ifdef DEBUG
+      printf("call resume main saved ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
+      exit(1);
+    } else {
+      call(s); // вызов с сохранением
+      run_thread->saved_sp = run_thread->call_stack->sp; // сохраняем sp
+#ifdef DEBUG
+      printf("call resume main not saved ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
+    }
+  } else { // обработка сообщений или клавиш
+    if (run_thread->saved_sp) { // если был сохраененный sp
+      saved_sp = run_thread->saved_sp; // модифицируем sp, который будет указателем стека вызовов
+#ifdef DEBUG
+      printf("call resume no main saved\n");
+#endif
+    } else {
+      run_thread->saved_sp = --saved_sp; // текущий стек сохраняем
+      saved_sp = run_thread->saved_sp;
+      *saved_sp = (int)run_thread->ip; // записываем текущий ip
+#ifdef DEBUG
+      printf("call resume no main no saved\n");
+#endif
+    }
+    run_thread->ip += s; // ip для основной программы модифицируется
+    run_thread->running = 1; // программа запускается
+    run_thread->cur_frames_to_skip = 1; // пропуска кадра не будет
+#ifdef DEBUG
+    printf("ip = %x\n", (int)(current_ip - run_thread->script));
+#endif
     exit(1);
   }
-  call(s);
 }
 
 /// вызов word + 1 с возможным возвратом к сохраненному значению
@@ -380,7 +427,7 @@ void call_skip_word_save()
 {
   int s = (short)fetch_word();
   current_ip++;
-  call_save(s);
+  call_resume(s);
 #ifdef DEBUG
   printf("call skip word save: %d ip = %x\n", s, (int)(current_ip - run_thread->script));
 #endif
