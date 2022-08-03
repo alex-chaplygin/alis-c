@@ -1,7 +1,7 @@
 #include "threads.h"
 
 #define MAX_STACK 20
-#define MAX_STR 30
+#define MAX_STR 130
 #define ASSERT(v1, v2) \
   {\
     if ((v1) != (v2)) {				\
