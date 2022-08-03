@@ -98,7 +98,7 @@ func vm_op[] = {
   call_skip_word_save, // 32
   nimp, // 33
   set_tag, // 34
-  nimp, // 35
+  thread_pause_by_ref, // 35
   null_op, // 36
   null_op, // 37
   nimp, // 38
