@@ -34,6 +34,9 @@ void reset_sprites_rec()
 {
   sprites_rec.min_x = sprites_rec.min_y = 32000;
   sprites_rec.max_x = sprites_rec.max_y = -32000;
+  sprites_rec.min_x = sprites_rec.min_y = 0;
+  sprites_rec.max_x = 319;
+  sprites_rec.max_y = 199;
 }
 
 /// Отладочная печать окна
