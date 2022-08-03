@@ -57,30 +57,6 @@ void dump_threads()
     printf("\n");
     t = t->next;
   }
-  /*  
-Ошибка : thread 48 class 41 adr: 16 must: 05 is: 00
-thr: 1e class: 4 adr: 25 must 05 is 0
-thr: 6 class: 1f
-must
-0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 00  ................
-0010: 00 01 16 02 01 02 00 0D 00 01 00 02 00 00 00 00  ................
-0020: 00 00 46 52 41 47 4F 4E 49 52 00 00 00 00 00 00  ..FRAGONIR......
-0030: FF FF
-is:
-0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 
-0010: 00 00 16 02 01 02 00 0d 00 01 00 03 00 00 00 00 
-0020: 00 00 46 52 41 47 4f 4e 49 52 00 00 00 00 00 00 
-0030: ff ff
-
-
-printf("\n");
-  printf("free threads: ");
-  t = free_thread;
-  while (t->next) {
-    printf("->%x", (int)(t->next - threads_table) * 6);
-    t = t->next;
-  }
-  printf("\n");*/
 }
 
 /** 
