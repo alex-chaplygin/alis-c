@@ -243,7 +243,7 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
 }
 
 /** 
- * Удаляет спрайт из списка отрисовки сцены, к которой он принадлежит
+ * Удаляет спрайт из списка окна, к которому он принадлежит
  * голова списка сцены находится в window_sprite
  * @param c удаляемый спрайт
  */
@@ -344,10 +344,10 @@ void clear_sprites_tag()
 }
 
 /** 
- * Удаляет объект из сцены
+ * Удаляет спрайты объекта из всех списков
  * 
  */
-void clear_object_from_window()
+void clear_sprites_from_window()
 {
   remove_from_window = 1;
   clear_sprites_tag();
@@ -536,7 +536,7 @@ void add_composite_sprite(byte *img, vec_t *coord, int x_flip, int tag)
  * @param x_flip зеркальное отражение
  * @param tag тег
  */
-void load_resource(vec_t *coord, int x_flip, int tag)
+void add_sprite_with_flip(vec_t *coord, int x_flip, int tag)
 {
   byte *img = res_get_image(current_value);
   if (*img == RES_PALETTE) {

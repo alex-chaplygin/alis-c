@@ -49,7 +49,7 @@ void dump_sprites(window_t *sc);
 void clear_sprites_tag();
 void window_translate(window_t *window, sprite_t *c);
 void remove_all_sprites(sprite_t *sp, int remove);
-void clear_object_from_window();
+void clear_sprites_from_window();
 void set_coord_origin();
 void move_coord_origin();
 void show_sprite();

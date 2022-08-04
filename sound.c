@@ -1,3 +1,12 @@
+/**
+ * @file   sound.c
+ * @author alex <alex@localhost>
+ * @date   Thu Aug  4 17:55:25 2022
+ * 
+ * @brief  Команды - работа со звуком
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "interpret.h"

@@ -1,3 +1,12 @@
+/**
+ * @file   str.c
+ * @author alex <alex@localhost>
+ * @date   Thu Aug  4 17:54:28 2022
+ * 
+ * @brief  Команды - работа со строками
+ * 
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "interpret.h"
