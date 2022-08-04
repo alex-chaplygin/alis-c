@@ -12,7 +12,7 @@
 #include <string.h>
 #include "types.h"
 #include "file.h"
-#include "threads.h"
+#include "objects.h"
 #include "memory.h"
 #include "sprite.h"
 #include "interpret.h"
@@ -32,7 +32,7 @@ typedef struct {
 /// заголовок главного файла сценариев
 typedef struct {
   word total_scripts;		/**< всего сценариев */
-  word total_threads;		/**< число одновременных потоков */
+  word total_objects;		/**< число одновременных потоков */
   int size;			/**< размер для теста памяти: не используется */
   int total_memory_size;	/**< сумма всех сегментов данных сценариев */
   int total_images;		/**< максимальное число одновременных изображений (спрайтов) */
@@ -156,15 +156,15 @@ void load_main_script()
 
   file_read(&mh, sizeof(mh));
 #ifdef DEBUG
-    printf("Total scripts = %d\nTotal threads = %d\ntotal file size = %d\ntotal memory = %d\ntotal images = %d\n",
-	   mh.total_scripts, mh.total_threads, mh.size, mh.total_memory_size, mh.total_images);
+    printf("Total scripts = %d\nTotal objects = %d\ntotal file size = %d\ntotal memory = %d\ntotal images = %d\n",
+	   mh.total_scripts, mh.total_objects, mh.size, mh.total_memory_size, mh.total_images);
 #endif
     total_scripts = mh.total_scripts;
     num_scripts = 0;
     script_table = xmalloc(total_scripts * sizeof(byte *));
     script_sizes = xmalloc(total_scripts * sizeof(int *));
     memset(script_table, 0, total_scripts * sizeof(byte *));
-    thread_init_table(mh.total_threads);
+    object_init_table(mh.total_objects);
     memory_init(mh.total_memory_size);
     sprites_init(mh.total_images);
 }
@@ -218,7 +218,7 @@ void script_load(int id, char *name)
     uncompress(script, size);
   file_close();
   if (id == 0)
-    thread_setup_main(script, size);
+    object_setup_main(script, size);
 }
 
 /// команда: загрузка сценария
@@ -251,7 +251,7 @@ void run_script()
 #endif
   vec_t vec;
   vec.x = vec.y = vec.z = 0;
-  thread_t *t = thread_add(script_table[i], script_sizes[i], &vec);
+  object_t *t = object_add(script_table[i], script_sizes[i], &vec);
   switch_string_store();
 }
 
@@ -264,9 +264,9 @@ void free_script()
   int num = fetch_word();
 #ifdef DEBUG
   printf("free script: %x\n", num);
-  printf("cur script id = %x\n", run_thread->id);
+  printf("cur script id = %x\n", run_object->id);
 #endif
-  if (num == -1 || num == run_thread->id)
+  if (num == -1 || num == run_object->id)
     return;
   num = script_loaded(num); // позиция в таблице сценариев
   if (num == -1)
@@ -285,6 +285,6 @@ void free_script()
       script_sizes[i] = script_sizes[i + 1];
     }
   num_scripts--;
-  kill_thread_by_script(num);
+  kill_object_by_script(num);
   window_free_sprites();
 }

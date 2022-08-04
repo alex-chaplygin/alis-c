@@ -18,7 +18,7 @@
 #include "get.h"
 #include "memory.h"
 #include "render.h"
-#include "threads.h"
+#include "objects.h"
 #include "res.h"
 #include "palette.h"
 
@@ -111,7 +111,7 @@ void sprites_translate(word *data)
   if (!delta.z && !delta.x && !delta.y)
     return;
   printf("sprite translation delta = (%d %d %d)\n", delta.x, delta.y, delta.z);
-  sprite_t *c = run_thread->sprite_list;
+  sprite_t *c = run_object->sprite_list;
   while (c) {
     if (c->state == SPRITE_READY)
       c->state = SPRITE_UPDATED;
@@ -142,7 +142,7 @@ void sprites_translate(word *data)
 int sprite_find(int tag, sprite_t **c)
 {
   prev_sprite = 0;
-  *c = run_thread->sprite_list;
+  *c = run_object->sprite_list;
   if (!*c)
     return 0;
   goto start;
@@ -152,9 +152,9 @@ int sprite_find(int tag, sprite_t **c)
     if (!*c)
       break;
   start:
-    if (run_thread->current_window < (*c)->window)
+    if (run_object->current_window < (*c)->window)
       continue;
-    if (run_thread->current_window != (*c)->window)
+    if (run_object->current_window != (*c)->window)
 	break;
     if (tag < (*c)->tag)
       continue;
@@ -168,8 +168,8 @@ int sprite_find(int tag, sprite_t **c)
 /// вывод списка спрайтов
 void dump_sprites(window_t *sc)
 {
-  printf("run_thread list:\n");
-  sprite_t *c = run_thread->sprite_list;
+  printf("run_object list:\n");
+  sprite_t *c = run_object->sprite_list;
   while (c) {
     printf("->center(%d %d %d)tag(%d)", c->center.x, c->center.y, c->center.z, c->tag);
     c = c->next;
@@ -223,20 +223,20 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   free_sprite = newc->next;
   if (!prev_sprite)
     // новый список
-    run_thread->sprite_list = newc;
+    run_object->sprite_list = newc;
   else
     prev_sprite->next = newc;
   newc->next = c;
-  newc->window = run_thread->current_window;
+  newc->window = run_object->current_window;
   newc->tag = tag;
   newc->state = SPRITE_NEW;
-  newc->f24 = run_thread->f2c;
-  newc->f1c = run_thread->f25;
+  newc->f24 = run_object->f2c;
+  newc->f1c = run_object->f25;
   // спрайты могут создаваться разными потоками, но принадлежать одному
-  newc->thread_offset = run_thread->sprites_thread;
+  newc->object_offset = run_object->sprites_object;
   // test f1c
-  newc->layer = run_thread->layer;
-  sprite_t *sc = sprites + run_thread->current_window->window_sprite;
+  newc->layer = run_object->layer;
+  sprite_t *sc = sprites + run_object->current_window->window_sprite;
   newc->next_in_window = sc->next_in_window;
   sc->next_in_window = newc;
   sprite_set(newc, image, x_flip, coord);
@@ -281,7 +281,7 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_window)
 #ifdef DEBUG
     printf("remove head\n");
 #endif
-    run_thread->sprite_list = c->next;
+    run_object->sprite_list = c->next;
   } else
     prev_sprite->next = c->next;
 #ifdef DEBUG
@@ -294,9 +294,9 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_window)
   }
   if (!prev_sprite) {
 #ifdef DEBUG
-    printf("next: %x\n", (int)run_thread->sprite_list);
+    printf("next: %x\n", (int)run_object->sprite_list);
 #endif
-    return run_thread->sprite_list;
+    return run_object->sprite_list;
   } else
     return prev_sprite->next;
 }
@@ -314,7 +314,7 @@ int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2)
 {
   prev_sprite = c;
   *c2 = c->next;
-  if (*c2 && run_thread->current_window == (*c2)->window)
+  if (*c2 && run_object->current_window == (*c2)->window)
     if ((*c2)->tag == tag)
       return 1;
   return 0;
@@ -375,13 +375,13 @@ void remove_all_sprites(sprite_t *sp, int remove)
 void set_coord_origin()
 {
   new_get();
-  seg_write_word(run_thread->data, 0, current_value);
+  seg_write_word(run_object->data, 0, current_value);
   new_get();
-  seg_write_word(run_thread->data, 2, current_value);
+  seg_write_word(run_object->data, 2, current_value);
   new_get();
-  seg_write_word(run_thread->data, 4, current_value);
+  seg_write_word(run_object->data, 4, current_value);
 #ifdef DEBUG
-  short *w = (short *)run_thread->data->data;
+  short *w = (short *)run_object->data->data;
   printf("set coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
 #endif
 }
@@ -393,16 +393,16 @@ void move_coord_origin()
 {
   short d;
   new_get();
-  d = *(short *)seg_read(run_thread->data, 0);
-  seg_write_word(run_thread->data, 0, current_value + d);
+  d = *(short *)seg_read(run_object->data, 0);
+  seg_write_word(run_object->data, 0, current_value + d);
   new_get();
-  d = *(short *)seg_read(run_thread->data, 2);
-  seg_write_word(run_thread->data, 2, current_value + d);
+  d = *(short *)seg_read(run_object->data, 2);
+  seg_write_word(run_object->data, 2, current_value + d);
   new_get();
-  d = *(short *)seg_read(run_thread->data, 4);
-  seg_write_word(run_thread->data, 4, current_value + d);
+  d = *(short *)seg_read(run_object->data, 4);
+  seg_write_word(run_object->data, 4, current_value + d);
 #ifdef DEBUG
-  short *w = (short *)run_thread->data->data;
+  short *w = (short *)run_object->data->data;
   printf("move coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
 #endif
 }
@@ -427,7 +427,7 @@ void delete_sprites(int tag)
 	c = sprite_remove(c, 0);
 	if (!c)
 	  break;
-	if (run_thread->current_window != c->window)
+	if (run_object->current_window != c->window)
 	  break;
 	if (tag != c->tag)
 	  break;
@@ -569,14 +569,14 @@ void show_sprite_with_flip(int x_flip)
 #ifdef DEBUG
   printf("show sprite (%d, %d, %d) xflip = %d res_num = %d tag = %d\n", coord.x, coord.y, coord.z, x_flip, current_value, tag); 
 #endif
-  load_resource(&coord, x_flip, tag);
+  add_sprite_with_flip(&coord, x_flip, tag);
 }
 
 /// показать спрайт по координатам центра.
 void show_sprite()
 {
   load_main_res = 0;
-  show_sprite_with_flip(run_thread->x_flip);
+  show_sprite_with_flip(run_object->x_flip);
 }
 
 /// показать изображение, отраженное по горизонтали
@@ -586,7 +586,7 @@ void show_sprite_flipped()
 #ifdef DEBUG
   printf("show object flipped\n");
 #endif
-  show_sprite_with_flip(run_thread->x_flip ^ 1);  
+  show_sprite_with_flip(run_object->x_flip ^ 1);  
 }
 
 /// установка тега
@@ -604,7 +604,7 @@ void clear_all_sprites()
   #ifdef DEBUG
   printf("clear all sprites\n");
   #endif
-  remove_all_sprites(run_thread->sprite_list, 1);
+  remove_all_sprites(run_object->sprite_list, 1);
 }
 
 /// показывает спрайт со всеми координатами 0
@@ -615,9 +615,9 @@ void show_sprite_0()
   new_get();
   coord.x = coord.y = coord.z = 0;
 #ifdef DEBUG
-  printf("show sprite 0 (0 0 0) res = %d xflip = %d\n", current_value, run_thread->x_flip); 
+  printf("show sprite 0 (0 0 0) res = %d xflip = %d\n", current_value, run_object->x_flip); 
 #endif
-  load_resource(&coord, run_thread->x_flip, 0);
+  add_sprite_with_flip(&coord, run_object->x_flip, 0);
 }
 
 /// Удаляет все спрайты текущего объекта, может не удалять из окна
@@ -626,5 +626,5 @@ void clear_all_sprites2()
   #ifdef DEBUG
   printf("clear all objects2\n");
   #endif
-  remove_all_sprites(run_thread->sprite_list, remove_from_window);
+  remove_all_sprites(run_object->sprite_list, remove_from_window);
 }

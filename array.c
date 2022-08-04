@@ -20,7 +20,7 @@
 void array_new()
 {
   word adr = fetch_word();
-  byte *pos = seg_read(run_thread->data, adr) - 1;
+  byte *pos = seg_read(run_object->data, adr) - 1;
   byte dim = fetch_byte();
   *pos-- = dim;
   byte d = fetch_byte();

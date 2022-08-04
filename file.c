@@ -156,10 +156,10 @@ void op_read_file()
     exit(1);
   }
   word count = fetch_word();
-  word *buf = (word *)seg_read(run_thread->data, adr);
+  word *buf = (word *)seg_read(run_object->data, adr);
   word *b = buf;
   // проверяем верхнюю границу буфера
-  seg_read(run_thread->data, adr + count - 1);
+  seg_read(run_object->data, adr + count - 1);
   file_read(buf, count);
   if (*((byte *)buf - 2) == 2) { // если это массив слов
     for (int i = 0; i < count / 2; i++) {// преобразуем в big endian

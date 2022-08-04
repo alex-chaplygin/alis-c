@@ -13,7 +13,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "append.h"
-#include "threads.h"
+#include "objects.h"
 
 /// таблица подфункций для добавления
 func add_op[] = {
@@ -102,7 +102,7 @@ int subract()
 int add_byte_mem_word()
 {
   word w = fetch_word();
-  char *p = (char *)seg_read(run_thread->data, w);
+  char *p = (char *)seg_read(run_object->data, w);
   *p += (char)current_value;
 #ifdef DEBUG
   printf("addb varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
@@ -114,7 +114,7 @@ int add_byte_mem_word()
 int add_word_mem_word()
 {
   word w = fetch_word();
-  short *p = (short *)seg_read(run_thread->data, w);
+  short *p = (short *)seg_read(run_object->data, w);
   *p += current_value;
 #ifdef DEBUG
   printf("addw varw_%x, %x; %d\n", w, current_value, current_value);
@@ -126,13 +126,13 @@ int add_word_mem_word()
 int add_string_mem_word()
 {
   word w = fetch_word();
-  char *dst = (char *)seg_read(run_thread->data, w);
+  char *dst = (char *)seg_read(run_object->data, w);
   char *src = store_string;
   while (*dst++);
   dst--;
   while (*dst++ = *src++);
 #ifdef DEBUG
-  printf("addw strw_%x; \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
+  printf("addw strw_%x; \"%s\"\n", w, (char *)seg_read(run_object->data, w));
 #endif
   return 1;
 }
@@ -141,7 +141,7 @@ int add_string_mem_word()
 int add_byte_mem_byte()
 {
   byte w = fetch_byte();
-  char *p = seg_read(run_thread->data, w);
+  char *p = seg_read(run_object->data, w);
   *p += (char)current_value;
 #ifdef DEBUG
   printf("addb varb_%x, %x; %d\n", w, (char)current_value, (char)current_value);
@@ -153,7 +153,7 @@ int add_byte_mem_byte()
 int add_word_mem_byte()
 {
   byte w = fetch_byte();
-  short *p = (short *)seg_read(run_thread->data, w);
+  short *p = (short *)seg_read(run_object->data, w);
   *p += current_value;
 #ifdef DEBUG
   printf("addw varb_%x, %x; %d\n", w, current_value, current_value);
@@ -165,13 +165,13 @@ int add_word_mem_byte()
 int add_string_mem_byte()
 {
   byte w = fetch_byte();
-  char *dst = (char *)seg_read(run_thread->data, w);
+  char *dst = (char *)seg_read(run_object->data, w);
   char *src = store_string;
   while (*dst++);
   dst--;
   while (*dst++ = *src++);
 #ifdef DEBUG
-  printf("adds strb_%x; \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
+  printf("adds strb_%x; \"%s\"\n", w, (char *)seg_read(run_object->data, w));
 #endif
   return 1;
 }
@@ -180,7 +180,7 @@ int add_string_mem_byte()
 int add_byte_global_word()
 {
   word w = fetch_word();
-  char *p = (char *)seg_read(threads_table->thread->data, w);
+  char *p = (char *)seg_read(objects_table->object->data, w);
   *p += (char)current_value;
 #ifdef DEBUG
   printf("addb main.varw_%x, %x; %d\n", w, (char)current_value, (char)current_value);
@@ -192,7 +192,7 @@ int add_byte_global_word()
 int add_word_global_word()
 {
   word w = fetch_word();
-  short *p = (short *)seg_read(threads_table->thread->data, w);
+  short *p = (short *)seg_read(objects_table->object->data, w);
   *p += current_value;
 #ifdef DEBUG
   printf("addw main.varw_%x, %x; %d\n", w, current_value, current_value);

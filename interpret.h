@@ -1,4 +1,4 @@
-#include "threads.h"
+#include "objects.h"
 
 #define MAX_STACK 20
 #define MAX_STR 130
@@ -11,7 +11,7 @@
     
 typedef int (*func)();
 
-byte *interpret(thread_t *t, byte *ip);
+byte *interpret(object_t *t, byte *ip);
 byte fetch_byte();
 word fetch_word();
 void null_op();
@@ -20,7 +20,7 @@ void nimp();
 void yield();
 
 extern byte *current_ip;
-extern thread_t *run_thread;
+extern object_t *run_object;
 extern int main_run;
 extern int interpreting;
 extern short current_value;		/**< аккумулятор */
@@ -34,5 +34,5 @@ extern char string_buf4[MAX_STR];
 extern char *get_string;
 extern char *text_string;
 extern char *store_string;
-extern word *threads_list_pos;
+extern word *objects_list_pos;
 

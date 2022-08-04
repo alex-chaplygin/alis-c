@@ -1,13 +1,13 @@
-#ifndef __THREADS__
-#define __THREADS__
+#ifndef __OBJECTS__
+#define __OBJECTS__
 
 #include "types.h"
 #include "memory.h"
 #include "sprite.h"
 
-#define THREAD_NOMSG (1 << 0)	/**< поток не принимает сообщения */
-#define THREAD_NOSTART3 (1 << 1)	/**< не запуск сценария 3 каждый фрейм */
-#define THREAD_MSG (1 << 7) /**< есть сообщения для потока */
+#define OBJECT_NOMSG (1 << 0)	/**< поток не принимает сообщения */
+#define OBJECT_NOSTART3 (1 << 1)	/**< не запуск сценария 3 каждый фрейм */
+#define OBJECT_MSG (1 << 7) /**< есть сообщения для потока */
 
 #pragma pack(1)
 
@@ -30,7 +30,7 @@ typedef struct {
 } script_t;
 
 /// структура потока
-typedef struct thread_s {
+typedef struct object_s {
   int id;			/**< номер сценария */
   stack_t *call_stack;		/**< стек вызовов */
   int *saved_sp;		/**< сохраненный указатель стека */
@@ -57,54 +57,54 @@ typedef struct thread_s {
   int f30;
   int f32;
   int f34;
-  int sprites_thread;		/**< номер потока, которому будут принадлежать новые спрайты */
+  int sprites_object;		/**< номер потока, которому будут принадлежать новые спрайты */
   sprite_t *sprite_list;	/**< список спрайтов потока */
   window_t *current_window;		/**< текущая сцена */
   script_t *header;		/**< заголовок сценария */
-  struct thread_s *parent;	/**< родительский поток */
-} thread_t;
+  struct object_s *parent;	/**< родительский поток */
+} object_t;
 
 /// запись таблицы потоков
-typedef struct threads_table_s {
-  thread_t *thread;		/**< структура потока */
-  struct threads_table_s *run_next; /**< следующий поток на запуск */
-  struct threads_table_s *next;	/**< следующий поток в списке в запуске */
-} thread_table_t;
+typedef struct objects_table_s {
+  object_t *object;		/**< структура потока */
+  struct objects_table_s *run_next; /**< следующий поток на запуск */
+  struct objects_table_s *next;	/**< следующий поток в списке в запуске */
+} object_table_t;
 
-void thread_init();
-void thread_init_table();
-void thread_setup_main(byte *script, int size);
-void thread_setup(thread_table_t *tb, byte *script, int size);
-thread_t *thread_add(byte *script, int size, vec_t *translate);
-void threads_run();
+void object_init();
+void object_init_table();
+void object_setup_main(byte *script, int size);
+void object_setup(object_table_t *tb, byte *script, int size);
+object_t *object_add(byte *script, int size, vec_t *translate);
+void objects_run();
 
-void thread_receive_msg();
-void thread_ready_to_receive();
-void thread_send_message();
-void op_thread_kill_remove_all();
+void object_receive_msg();
+void object_ready_to_receive();
+void object_send_message();
+void op_object_kill_remove_all();
 void get_message();
-void thread_pause_yield_no_saved();
-void thread_clear_messages();
-void kill_thread_by_script(int id);
-void thread_stop();
-void thread_resume();
-int thread_num(thread_t *t);
-void script_num_to_thread_num();
-void set_thread_f25();
-void set_thread_layer();
-void set_sprites_thread();
-void get_threads_list();
-void store_thread_num();
+void object_pause_yield_no_saved();
+void object_clear_messages();
+void kill_object_by_script(int id);
+void object_stop();
+void object_resume();
+int object_num(object_t *t);
+void script_num_to_object_num();
+void set_object_f25();
+void set_object_layer();
+void set_sprites_object();
+void get_objects_list();
+void store_object_num();
 void obj_set_form();
-void thread_find_all();
-void op_kill_thread();
-void thread_pause_by_ref();
-void dump_threads();
+void object_find_all();
+void op_kill_object();
+void object_pause_by_ref();
+void dump_objects();
 
-extern int max_threads;		/**< максимальное количество потоков */
-extern int num_run_threads;		/**< число рабочих потоков */
-extern thread_t *main_thread;		/**< главный поток */
-extern thread_table_t *threads_table; /**< таблица потоков */
+extern int max_objects;		/**< максимальное количество потоков */
+extern int num_run_objects;		/**< число рабочих потоков */
+extern object_t *main_object;		/**< главный поток */
+extern object_table_t *objects_table; /**< таблица потоков */
 extern int *saved_sp;			/**< сохраненный указатель стека */
 
 #endif

@@ -25,7 +25,7 @@ void get_free()
   case 2: // число свободных сценариев
     current_value = total_scripts - num_scripts; break; 
   case 3: // число свободных потоков
-    current_value = max_threads - num_run_threads; break; 
+    current_value = max_objects - num_run_objects; break; 
   case 4:
     current_value = num_free_sprites(); break; // число свободных спрайтов
   case 0x41:

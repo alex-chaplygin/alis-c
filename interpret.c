@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "interpret.h"
-#include "threads.h"
+#include "objects.h"
 #include "call.h"
 #include "get.h"
 #include "sprite.h"
@@ -28,7 +28,7 @@
 #include "graphics.h"
 
 byte *current_ip;		/**< указатель команд */
-thread_t *run_thread;		/**< текущий выполняемый поток */
+object_t *run_object;		/**< текущий выполняемый поток */
 int interpreting;		/**< 1 - выполняется */
 short current_value;		/**< аккумулятор */
 short prev_value;		/**< второй регистр */
@@ -40,7 +40,6 @@ char store_string_buf[MAX_STR];	/**< буфер строки сохранени�
 char *get_string;		/**< указатель строки для загрузки */
 char *text_string;		/**< указатель на строку для вывода */
 char *store_string;		/**< указатель строки сохранения */
-word *threads_list_pos;		/**< указатель на массив номеров потоков */
 
 /// таблица инструкций
 func vm_op[] = {
@@ -97,7 +96,7 @@ func vm_op[] = {
   call_skip_word_save, // 32
   nimp, // 33
   set_tag, // 34
-  thread_pause_by_ref, // 35
+  object_pause_by_ref, // 35
   null_op, // 36
   null_op, // 37
   nimp, // 38
@@ -106,13 +105,13 @@ func vm_op[] = {
   null_op, // 3b
   nimp, // 3c
   free_script, // 3d
-  thread_resume, // 3e
-  thread_pause_yield_no_saved, // 3f
+  object_resume, // 3e
+  object_pause_yield_no_saved, // 3f
   run_script, // 40
-  op_kill_thread, // 41
+  op_kill_object, // 41
   yield, // 42
   nimp, // 43
-  thread_stop, // 44
+  object_stop, // 44
   op_script_load, // 45
   window_new, // 46
   window_set, // 47
@@ -131,7 +130,7 @@ func vm_op[] = {
   nimp, // 54
   nimp, // 55
   nimp, // 56
-  store_thread_num, // 57
+  store_object_num, // 57
   nimp, // 58
   nimp, // 59
   nimp, // 5a
@@ -141,13 +140,13 @@ func vm_op[] = {
   nimp, // 5e
   nimp, // 5f
   nimp, // 60  
-  thread_send_message, // 61
-  thread_ready_to_receive, // 62
+  object_send_message, // 61
+  object_ready_to_receive, // 62
   nimp, // 63
-  thread_receive_msg, // 64
+  object_receive_msg, // 64
   nimp, // 65
-  thread_clear_messages, // 66
-  thread_find_all, // 67
+  object_clear_messages, // 66
+  object_find_all, // 67
   set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a
@@ -175,7 +174,7 @@ func vm_op[] = {
   nimp, // 80
   nimp, // 81
   nimp, // 82
-  set_sprites_thread, // 83
+  set_sprites_object, // 83
   show_mouse_cursor, // 84
   nimp, // 85
   mouse_read, // 86
@@ -192,7 +191,7 @@ func vm_op[] = {
   nimp, // 91
   nimp, // 92
   nimp, // 93
-  script_num_to_thread_num, // 94
+  script_num_to_object_num, // 94
   play_sound6, // 95
   play_sound1, // 96
   nimp, // 97
@@ -200,11 +199,11 @@ func vm_op[] = {
   nimp, // 99
   nimp, // 9a
   nimp, // 9b
-  get_threads_list, // 9c
+  get_objects_list, // 9c
   play_sound, // 9d
   nimp, // 9e
   nimp, // 9f
-  set_thread_f25, // a0
+  set_object_f25, // a0
   play_music, // a1
   nimp, // a2
   nimp, // a3
@@ -251,7 +250,7 @@ func vm_op[] = {
   nimp, // cc
   play_sound3, // cd
   nimp, // ce
-  set_thread_layer, // cf
+  set_object_layer, // cf
   nimp, // d0
   nimp, // d1
   nimp, // d2
@@ -266,7 +265,7 @@ func vm_op[] = {
   nimp, // db
   clear_all_sprites, // dc
   clear_sprites_from_window, // dd
-  op_thread_kill_remove_all // de
+  op_object_kill_remove_all // de
 };
 
 /// Пустая команда
@@ -278,7 +277,7 @@ void null_op()
 void nimp()
 {
   printf("Not implemented: %x\n", *(current_ip - 1));
-  dump_threads();
+  dump_objects();
   exit(1);
 }
 
@@ -303,12 +302,12 @@ word fetch_word()
  * 
  * @return указатель команд после выхода из интепретации
  */
-byte *interpret(thread_t *t, byte *ip)
+byte *interpret(object_t *t, byte *ip)
 {
   byte op;
   current_ip = ip;
   interpreting = 1;
-  run_thread = t;
+  run_object = t;
   while (interpreting) {
     graphics_get_events();
     graphics_palette_update();

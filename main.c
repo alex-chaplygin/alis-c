@@ -8,16 +8,16 @@
  */
 
 #include <stdio.h>
-#include "threads.h"
+#include "objects.h"
 #include "graphics.h"
 
 int main(int argc, char *argv[])
 {
   byte color;
   graphics_init();
-  thread_init();
+  object_init();
   while (1) {
-    threads_run();
+    objects_run();
     if (!graphics_update())
       break;
   }

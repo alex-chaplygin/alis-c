@@ -38,8 +38,8 @@ func set_op[] = {
   set_string_global_array_word, //24
   set_byte_global_array_word,//26
   set_word_global_array_word,//28
-  store_byte_thread_word, //2a
-  store_word_thread_word, //2c
+  store_byte_object_word, //2a
+  store_word_object_word, //2c
   nimp,//set_string_far,//2e
   nimp,//set_string_far_array,//30
   nimp,//set_byte_far_array,//32
@@ -77,7 +77,7 @@ void store_expression()
   stack_push(&stack, current_value);
   get_expression();
 #ifdef DEBUG
-  printf("%04x:\t\t", (int)(current_ip - run_thread->script));
+  printf("%04x:\t\t", (int)(current_ip - run_object->script));
 #endif
   store();
 }
@@ -104,12 +104,12 @@ void set_byte_mem_word()
 #ifdef DEBUG
   printf("store_b frames_to_skip, %x; %d\n", (byte)current_value, (byte)current_value);
 #endif
-    run_thread->frames_to_skip = (byte)current_value;
+    run_object->frames_to_skip = (byte)current_value;
   } else if (ww < 0) {
     printf("set byte mem word < 0\n");
     exit(1);
   } else {
-    seg_write_byte(run_thread->data, w, (byte)current_value);
+    seg_write_byte(run_object->data, w, (byte)current_value);
 #ifdef DEBUG
     printf("store_b var_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
 #endif
@@ -120,7 +120,7 @@ void set_byte_mem_word()
 void set_word_mem_word()
 {
   word w = fetch_word();
-  seg_write_word(run_thread->data, w, current_value);
+  seg_write_word(run_object->data, w, current_value);
 #ifdef DEBUG
   printf("store_w var_%x, %x; %d\n", w, current_value, current_value);
 #endif
@@ -130,11 +130,11 @@ void set_word_mem_word()
 void set_string_mem_word()
 {
   word w = fetch_word();
-  byte *pos = seg_read(run_thread->data, w);
+  byte *pos = seg_read(run_object->data, w);
   byte *s = store_string;
   while (*pos++ = *s++);
 #ifdef DEBUG
-  printf("store_str var_%x, \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
+  printf("store_str var_%x, \"%s\"\n", w, (char *)seg_read(run_object->data, w));
 #endif
 }
 
@@ -142,7 +142,7 @@ void set_string_mem_word()
 void set_byte_mem_byte()
 {
   byte w = fetch_byte();
-  seg_write_byte(run_thread->data, w, (byte)current_value);
+  seg_write_byte(run_object->data, w, (byte)current_value);
 #ifdef DEBUG
   printf("store_b var_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
 #endif
@@ -152,7 +152,7 @@ void set_byte_mem_byte()
 void set_word_mem_byte()
 {
   byte w = fetch_byte();
-  seg_write_word(run_thread->data, w, current_value);
+  seg_write_word(run_object->data, w, current_value);
 #ifdef DEBUG
   printf("store_w var_%x, %x; %d\n", w, current_value, current_value);
 #endif
@@ -163,7 +163,7 @@ void set_byte_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 0, 1);
+  byte *pos = array_pos(seg_read(run_object->data, w), 0, 1);
   current_value = (word)stack_pop(&stack);
   *pos = (byte)current_value;
 #ifdef DEBUG
@@ -176,7 +176,7 @@ void set_word_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  word *pos = (word *)array_pos(seg_read(run_thread->data, w), 0, 2);
+  word *pos = (word *)array_pos(seg_read(run_object->data, w), 0, 2);
   current_value = (word)stack_pop(&stack);
   *pos = current_value;
 #ifdef DEBUG
@@ -189,7 +189,7 @@ void set_byte_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 0, 1);
+  byte *pos = array_pos(seg_read(run_object->data, w), 0, 1);
   current_value = (word)stack_pop(&stack);
   *pos = (byte)current_value;
 #ifdef DEBUG
@@ -202,7 +202,7 @@ void set_word_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  word *pos = (word *)array_pos(seg_read(run_thread->data, w), 0, 2);
+  word *pos = (word *)array_pos(seg_read(run_object->data, w), 0, 2);
   current_value = (word)stack_pop(&stack);
   *pos = current_value;
 #ifdef DEBUG
@@ -215,7 +215,7 @@ void set_string_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 1, 1);
+  byte *pos = array_pos(seg_read(run_object->data, w), 1, 1);
   byte *p = pos;
   byte *s = store_string;
   while (*p++ = *s++);
@@ -228,11 +228,11 @@ void set_string_array_word()
 void set_string_mem_byte()
 {
   byte w = fetch_byte();
-  byte *pos = seg_read(run_thread->data, w);
+  byte *pos = seg_read(run_object->data, w);
   byte *s = store_string;
   while (*pos++ = *s++);
 #ifdef DEBUG
-  printf("store_str var_%x, \"%s\"\n", w, (char *)seg_read(run_thread->data, w));
+  printf("store_str var_%x, \"%s\"\n", w, (char *)seg_read(run_object->data, w));
 #endif
 }
 
@@ -241,7 +241,7 @@ void set_string_array_byte()
 {
   byte w = fetch_byte();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(run_thread->data, w), 1, 1);
+  byte *pos = array_pos(seg_read(run_object->data, w), 1, 1);
   byte *p = pos;
   byte *s = store_string;
   while (*p++ = *s++);
@@ -251,36 +251,36 @@ void set_string_array_byte()
 }
 
 /// запись переменной byte по адресу word из другого потока
-void store_byte_thread_word()
+void store_byte_object_word()
 {
   int thr = fetch_word();
-  thr = *(word *)seg_read(run_thread->data, thr);
+  thr = *(word *)seg_read(run_object->data, thr);
   if (thr % 6 != 0) {
-    printf("store byte thread word: invalid thread: %x\n", thr);
+    printf("store byte object word: invalid object: %x\n", thr);
     exit(1);
   }
-  thread_t *t = threads_table[thr / 6].thread;
+  object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
   seg_write_byte(t->data, adr, (byte)current_value);
   #ifdef DEBUG
-  printf("store_byte thread: id = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
+  printf("store_byte object: id = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
   #endif
 }
 
 /// запись переменной word по адресу word из другого потока
-void store_word_thread_word()
+void store_word_object_word()
 {
   int thr = fetch_word();
-  thr = *(word *)seg_read(run_thread->data, thr);
+  thr = *(word *)seg_read(run_object->data, thr);
   if (thr % 6 != 0) {
-    printf("store word thread word: invalid thread\n");
+    printf("store word object word: invalid object\n");
     exit(1);
   }
-  thread_t *t = threads_table[thr / 6].thread;
+  object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
   seg_write_word(t->data, adr, current_value);
   #ifdef DEBUG
-  printf("store_word thread: id = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
+  printf("store_word object: id = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
   #endif
 }
 
@@ -288,7 +288,7 @@ void store_word_thread_word()
 void set_byte_global_word()
 {
   word w = fetch_word();
-  seg_write_byte(threads_table->thread->data, w, (byte)current_value);
+  seg_write_byte(objects_table->object->data, w, (byte)current_value);
 #ifdef DEBUG
   printf("store_b main.varw_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
 #endif
@@ -298,7 +298,7 @@ void set_byte_global_word()
 void set_word_global_word()
 {
   word w = fetch_word();
-  seg_write_word(threads_table->thread->data, w, (word)current_value);
+  seg_write_word(objects_table->object->data, w, (word)current_value);
 #ifdef DEBUG
   printf("store_w main.varw_%x, %x; %d\n", w, current_value, current_value);
 #endif
@@ -309,7 +309,7 @@ void set_word_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  word *b = (word *)array_pos(seg_read(threads_table->thread->data, w), 0, 2);
+  word *b = (word *)array_pos(seg_read(objects_table->object->data, w), 0, 2);
   current_value = stack_pop(&stack);
   *b = current_value;
 #ifdef DEBUG
@@ -326,7 +326,7 @@ void set_byte_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  byte *b = array_pos(seg_read(threads_table->thread->data, w), 0, 1);
+  byte *b = array_pos(seg_read(objects_table->object->data, w), 0, 1);
   current_value = stack_pop(&stack);
   *b = (byte)current_value;
 #ifdef DEBUG
@@ -339,7 +339,7 @@ void set_string_global_array_word()
 {
   word w = fetch_word();
   int idx = current_value;
-  byte *pos = array_pos(seg_read(threads_table->thread->data, w), 1, 1);
+  byte *pos = array_pos(seg_read(objects_table->object->data, w), 1, 1);
   byte *p = pos;
   byte *s = store_string;
   while (*p++ = *s++);

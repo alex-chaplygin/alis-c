@@ -31,9 +31,9 @@ int load_main_res = 0;	/**< флаг загрузки ресурса из гла
  */
 byte *res_get_image(int num)
 {
-  byte *script = run_thread->script;
+  byte *script = run_object->script;
   if (load_main_res)
-    script = main_thread->script;
+    script = main_object->script;
   script_t *h = (script_t *)script;
   resource_table_t *r = (resource_table_t *)(script + h->resources);
 #ifdef DEBUG

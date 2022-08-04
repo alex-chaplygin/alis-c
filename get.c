@@ -16,7 +16,7 @@
 #include "math.h"
 #include "file.h"
 #include "script.h"
-#include "threads.h"
+#include "objects.h"
 #include "key.h"
 #include "misc.h"
 #include "str.h"
@@ -44,8 +44,8 @@ func get_op[] = {
   get_string_global_array_word,//24
   get_byte_global_array_word,//26
   get_word_global_array_word,//28
-  get_byte_from_thread, //2a
-  get_word_from_thread,//2c
+  get_byte_from_object, //2a
+  get_word_from_object,//2c
   nimp,//get_string_pointer,//2e
   nimp,//get_string_pointer_array,//30
   nimp,//get_byte_pointer_array,//32
@@ -103,7 +103,7 @@ func get_op[] = {
   nimp,//str_to_num, //9a
   file_not_exists, //9c
   nimp,//set_char, //9e
-  nimp,//get_drive, //a0
+  get_drive, //a0
   nimp,//get_keyboard, //a2
   nimp,//get_cpu_speed, //a4
   nimp,//set_0, //a6
@@ -181,7 +181,7 @@ void switch_string_store()
 {
   switch_string();
 #ifdef DEBUG
-  printf("%04x:\t\t", (int)(current_ip - run_thread->script));
+  printf("%04x:\t\t", (int)(current_ip - run_object->script));
 #endif
   store();
 }
@@ -203,7 +203,7 @@ void switch_string_get()
 void assign()
 {
 #ifdef DEBUG
-  printf("assign\n%04x:\t\t", (int)(current_ip - run_thread->script));
+  printf("assign\n%04x:\t\t", (int)(current_ip - run_object->script));
 #endif
   new_get();
   switch_string_store();
@@ -216,14 +216,14 @@ void get_expression()
 {
   byte op;
 #ifdef DEBUG
-  printf("%04x:\t\tget expression\n", (int)(current_ip - run_thread->script));
+  printf("%04x:\t\tget expression\n", (int)(current_ip - run_object->script));
 #endif
   while (1) {
     op = fetch_byte();
     if (op == 0x3a) 
       break;
 #ifdef DEBUG
-    printf("%04x:\t\t", (int)(current_ip - run_thread->script));
+    printf("%04x:\t\t", (int)(current_ip - run_object->script));
 #endif
     get(op);
   };

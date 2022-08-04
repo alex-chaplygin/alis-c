@@ -137,10 +137,10 @@ void window_hide()
 void window_set()
 {
   word w = fetch_word();
-  // if ((window_t *)(w + memory) != run_thread->current_window)
-    run_thread->current_window = (window_t *)memory_read(w);
+  // if ((window_t *)(w + memory) != run_object->current_window)
+    run_object->current_window = (window_t *)memory_read(w);
 #ifdef DEBUG
-  printf("set current window %x %x\n", w, (int)((byte *)run_thread->current_window - memory));
+  printf("set current window %x %x\n", w, (int)((byte *)run_object->current_window - memory));
 #endif
 }
 
