@@ -49,14 +49,6 @@ void graphics_init()
   }
   current_time = SDL_GetTicks();
   screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 8, 0, 0, 0, 0);
-  // Тестовая палитра
-  SDL_Color colors[256];
-  for(int i = 0; i < 256; i++){
-    colors[i].r = i;
-    colors[i].g = i;
-    colors[i].b = i;
-  }
-  SDL_SetPaletteColors(screen->format->palette, colors, 0, 256);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
   SDL_LockSurface(screen);
   video_buffer = screen->pixels;
