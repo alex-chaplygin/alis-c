@@ -13,17 +13,8 @@
 #include "vector.h"
 #include "sprite.h"
 #include "scene.h"
-#include "image.h"
-
-/// арифметический сдвиг вправо
-short sar(short a, int c)
-{
-  int sign = a & 0x8000;
-  short res = a;
-  for (int i = 0; i < c; i++)
-    res = (res >> 1) | sign;
-  return res;
-}
+#include "res.h"
+#include "math.h"
 
 /** 
  * Преобразование из мировых в оконные координаты

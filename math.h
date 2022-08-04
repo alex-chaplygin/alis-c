@@ -20,3 +20,4 @@ void sign(); //66
 void not(); //68
 void set_random_seed();
 void random_with_seed();
+short sar(short a, int c);

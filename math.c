@@ -269,3 +269,12 @@ void random_with_seed()
   random_seed = s;
 }
 
+/// арифметический сдвиг вправо
+short sar(short a, int c)
+{
+  int sign = a & 0x8000;
+  short res = a;
+  for (int i = 0; i < c; i++)
+    res = (res >> 1) | sign;
+  return res;
+}
