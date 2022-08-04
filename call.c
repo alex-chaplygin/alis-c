@@ -128,10 +128,8 @@ void jump_byte_z()
 #endif
   if (current_value)
     current_ip++;
-  else {
-    char b = (char)fetch_byte();
-    current_ip += b;
-  }
+  else
+    jump_byte();
 #ifdef DEBUG
   printf("new ip = %x\n", (int)(current_ip - run_thread->script));
 #endif
@@ -145,10 +143,8 @@ void jump_word_z()
 #endif
   if (current_value)
     current_ip += 2;
-  else {
-    short b = (short)fetch_word();
-    current_ip += b;
-  }
+  else
+    jump_word();
 }
 
 /// дальний переход + 1 если равно
@@ -159,10 +155,8 @@ void jump_word_skip_z()
 #endif
   if (current_value)
     current_ip += 3;
-  else {
-    short b = (short)fetch_word();    
-    current_ip += b + 1;
-  }
+  else
+    jump_skip_word();
 }
 
 /// ближний переход если не равно
@@ -173,10 +167,8 @@ void jump_byte_nz()
 #endif
   if (!current_value)
     current_ip++;
-  else {
-    char b = (char)fetch_byte();
-    current_ip += b;
-  }
+  else
+    jump_byte();
 }
 
 /// дальний переход если не равно
@@ -187,10 +179,8 @@ void jump_word_nz()
 #endif
   if (!current_value)
     current_ip += 2;
-  else {
-    short b = (short)fetch_word();
-    current_ip += b;
-  }
+  else
+    jump_word();
 }
 
 /// дальний переход + 1 если не равно
@@ -201,10 +191,8 @@ void jump_word_skip_nz()
 #endif
   if (!current_value)
     current_ip += 3;
-  else {
-    short b = (short)fetch_word();
-    current_ip += b + 1;
-  }
+  else
+    jump_skip_word();
 }
 
 /// сравнение и ближний переход если равно
@@ -215,10 +203,8 @@ void compare_jump_byte_z()
 #endif
   if (current_value != prev_value)
     current_ip++;
-  else {
-    char b = (char)fetch_byte();
-    current_ip += b;
-  }
+  else
+    jump_byte();
 #ifdef DEBUG
   printf("new ip = %x\n", (int)(current_ip - run_thread->script));
 #endif
@@ -233,10 +219,8 @@ void compare_jump_word_z()
 #endif
   if (current_value != prev_value)
     current_ip += 2;
-  else {
-    short b = (short)fetch_word();
-    current_ip += b;
-  }
+  else
+    jump_word();
 }
 
 /// сравнение и дальний переход + 1 если равно
@@ -247,11 +231,8 @@ void compare_jump_word_skip_z()
 #endif
   if (current_value != prev_value)
     current_ip += 3;
-  else {
-    short b = (short)fetch_word();
-    current_ip++;
-    current_ip += b;
-  }
+  else
+    jump_skip_word();
 }
 
 /// сравнение и ближний переход если не равно
@@ -262,10 +243,8 @@ void compare_jump_byte_nz()
 #endif
   if (current_value == prev_value)
     current_ip++;
-  else {
-    char b = (char)fetch_byte();
-    current_ip += b;
-  }
+  else
+    jump_byte();
 }
 
 /// сравнение и ближний переход если не равно
@@ -276,10 +255,8 @@ void compare_jump_word_nz()
 #endif
   if (current_value == prev_value)
     current_ip += 2;
-  else {
-    short b = (short)fetch_word();
-    current_ip += b;
-  }
+  else
+    jump_word();
 }
 
 /// сравнение и дальний переход + 1 если не равно
@@ -290,11 +267,8 @@ void compare_jump_word_skip_nz()
 #endif
   if (current_value == prev_value)
     current_ip += 3;
-  else {
-    short b = (short)fetch_word();
-    current_ip++;
-    current_ip += b;
-  }
+  else
+    jump_skip_word();
 }
 
 /** 
