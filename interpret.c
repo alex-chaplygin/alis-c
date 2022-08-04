@@ -265,7 +265,7 @@ func vm_op[] = {
   nimp, // da
   nimp, // db
   clear_all_sprites, // dc
-  clear_object_from_window, // dd
+  clear_sprites_from_window, // dd
   op_thread_kill_remove_all // de
 };
 
