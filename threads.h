@@ -99,6 +99,7 @@ void obj_set_form();
 void thread_find_all();
 void op_kill_thread();
 void thread_pause_by_ref();
+void dump_threads();
 
 extern int max_threads;		/**< максимальное количество потоков */
 extern int num_run_threads;		/**< число рабочих потоков */
