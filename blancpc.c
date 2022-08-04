@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "file.h"
 #include "types.h"
+#include "math.h"
 
 #define BLANCPC "blancpc.io"	/**< имя файла сценария */
 #define BLANCPC_SIZE 2500	/**< запакованный размер */
@@ -21,8 +22,6 @@
 byte buffer[BLANCPC_SIZE];	/**< буфер сценария - зашифрованный */
 byte blancpc_buffer[2560]; /**< разшифрованный */
 byte *blancpc_data;
-
-int sar(int a, int c);
 
 void load_blancpc()
 {
