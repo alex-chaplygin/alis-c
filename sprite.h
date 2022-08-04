@@ -46,12 +46,18 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
 int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2);
 sprite_t *sprite_remove(sprite_t *c, int remove);
 void dump_sprites(scene_t *sc);
-void clear_object();
+void clear_sprites_tag();
 void scene_translate(scene_t *scene, sprite_t *c);
 void remove_all_sprites(sprite_t *sp, int remove);
 void clear_object_from_scene();
 void set_coord_origin();
 void move_coord_origin();
+void show_sprite();
+void show_sprite_flipped();
+void set_tag();
+void clear_all_sprites();
+void show_sprite_0();
+void clear_all_sprites2();
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */

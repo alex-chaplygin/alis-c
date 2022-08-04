@@ -21,7 +21,6 @@
 #include "interpret.h"
 #include "palette.h"
 #include "append.h"
-#include "image.h"
 #include "sound.h"
 #include "text.h"
 #include "file.h"
@@ -117,16 +116,16 @@ func vm_op[] = {
   op_script_load, // 45
   scene_new, // 46
   scene_set, // 47
-  show_object_0, // 48
-  show_object, // 49
+  show_sprite_0, // 48
+  show_sprite, // 49
   nimp, // 4a
-  clear_object, // 4b
+  clear_sprites_tag, // 4b
   set_coord_origin, // 4c
   move_coord_origin, // 4d
   scene_show, // 4e
   scene_hide, // 4f
-  clear_all_objects2, // 50
-  thread_set_flags2, // 51
+  clear_all_sprites2, // 50
+  obj_set_form, // 51
   nimp, // 52
   nimp, // 53
   nimp, // 54
@@ -210,9 +209,9 @@ func vm_op[] = {
   nimp, // a2
   nimp, // a3
   nimp, // a4
-  nimp, // a5
+  nimp, //find_collision, // a5
   nimp, // a6
-  show_object_flipped, // a7
+  show_sprite_flipped, // a7
   nimp, // a8
   nimp, // a9
   nimp, // aa
@@ -265,9 +264,9 @@ func vm_op[] = {
   nimp, // d9
   nimp, // da
   nimp, // db
-  clear_all_objects, // dc
+  clear_all_sprites, // dc
   clear_object_from_scene, // dd
-  op_thread_kill_remove_all, // de
+  op_thread_kill_remove_all // de
 };
 
 /// Пустая команда
