@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "interpret.h"
-#include "image.h"
 #include "sprite.h"
 #include "get.h"
 #include "graphics.h"

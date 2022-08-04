@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "interpret.h"
 #include "get.h"
-#include "image.h"
+#include "res.h"
 
 void  add_sound(int s1)
 {

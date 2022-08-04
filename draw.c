@@ -11,7 +11,8 @@
 #include <string.h>
 #include "types.h"
 #include "vector.h"
-#include "image.h"
+#include "res.h"
+#include "draw.h"
 #include "graphics.h"
 
 enum image_type_e {		/**< типы изображений */

@@ -1,3 +1,5 @@
+#pragma once
+
 enum resource_e {
   RES_PALETTE = 0xfe,		/**< палитра */
   RES_COMPOSITE_SPRITE = 0xff,		/**< составной объект из спрайтов */

@@ -11,7 +11,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "vector.h"
-#include "image.h"
+#include "res.h"
 
 vec_t text_pos;			/**< текущая позиция вывода символа */
 int text_tag;			/**< номер объекта для текста */
