@@ -99,10 +99,12 @@ void palette_init_fade(int fade)
 {
   palette_lock = 1;
   fade_offset = 1;
-  if (fade && fade >= 63) {
+  if (!fade)
+    return;
+  if (fade >= 63) {
     palette_parameter = 63;
     fade_ticks = palette_fade_ticks = fade / palette_parameter;
-  } else if (fade) {
+  } else {
     // рассчет скорости появления / увядания
     fade_offset = 63 / (byte)fade + 1;
     palette_parameter = fade;
@@ -172,6 +174,7 @@ void palette_load(byte *pal)
     fade_ticks = palette_parameter = palette_fade_ticks = 0;
     memcpy(palette, load_palette, 768);
     palette_lock = 0;
+    graphics_set_palette(palette);
   } else {
     palette_lock = 1;
     palette_fade_step();
@@ -188,14 +191,14 @@ void palette_load(byte *pal)
 }
 
 /** 
+ * Команда bc
  * Очищает палитру и устанавливает скорость увядания
  */
 void palette_clear_fade()
 {
   int fade;
   switch_get();
-  fade = current_value = prev_value;
-  palette_init_fade(fade);
+  palette_init_fade(prev_value);
   memset(load_palette, 0, sizeof(load_palette));
   palette_lock = 1;
   palette_fade_step();
@@ -216,6 +219,7 @@ void palette_clear_fade()
 }
 
 /** 
+ * Команда be
  * Загружает новую палитру из ресурса
  * Устанавливает скорость появления
  */
@@ -241,6 +245,10 @@ void palette_set_fade()
   skip_palette = 0;
 }
 
+/** 
+ * Команда d7.
+ * Установка числа кадров для пропуска палитры
+ */
 void set_skip_palette()
 {
   new_get();
@@ -250,7 +258,10 @@ void set_skip_palette()
 #endif
 }
 
-/// устанавливает палитру по номеру ресурса без появления/увядания
+/** 
+ * Команда: 68
+ * Устанавливает палитру по номеру ресурса без появления/увядания
+ */
 void set_palette_from_res()
 {
   load_main_res = 0;
