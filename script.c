@@ -286,5 +286,5 @@ void free_script()
     }
   num_scripts--;
   kill_thread_by_script(num);
-  scenes_free_sprites();
+  window_free_sprites();
 }

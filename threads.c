@@ -166,7 +166,7 @@ thread_t *thread_add(byte *script, int size, vec_t *translate)
   coord[0] += translate->x;
   coord[1] += translate->y;
   coord[2] += translate->z;
-  t->current_scene = run_thread->current_scene;
+  t->current_window = run_thread->current_window;
   t->f22 = run_thread->f22;
   t->sprites_thread = current_value;
 #ifdef DEBUG

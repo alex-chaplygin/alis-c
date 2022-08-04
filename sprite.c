@@ -31,7 +31,7 @@ sprite_t *free_sprite;		/**< последний свободный спрайт 
 sprite_t *prev_sprite;		/**< предыдущий спрайт в списке текущего потока */
 int sprite_flags;
 vec_t translate;			/**< вектор перемещения для всех спрайтов */
-int remove_from_scene = 0;	/**< нужно ли удалять из сцены */
+int remove_from_window = 0;	/**< нужно ли удалять из сцены */
 int image_flag = 0;
 
 /** 
@@ -152,9 +152,9 @@ int sprite_find(int tag, sprite_t **c)
     if (!*c)
       break;
   start:
-    if (run_thread->current_scene < (*c)->scene)
+    if (run_thread->current_window < (*c)->window)
       continue;
-    if (run_thread->current_scene != (*c)->scene)
+    if (run_thread->current_window != (*c)->window)
 	break;
     if (tag < (*c)->tag)
       continue;
@@ -166,7 +166,7 @@ int sprite_find(int tag, sprite_t **c)
 }
 
 /// вывод списка спрайтов
-void dump_sprites(scene_t *sc)
+void dump_sprites(window_t *sc)
 {
   printf("run_thread list:\n");
   sprite_t *c = run_thread->sprite_list;
@@ -174,11 +174,11 @@ void dump_sprites(scene_t *sc)
     printf("->center(%d %d %d)tag(%d)", c->center.x, c->center.y, c->center.z, c->tag);
     c = c->next;
   }
-  printf("\ncurrent scene_list:\n");
-  c = sprites + sc->scene_sprite;
+  printf("\ncurrent window_list:\n");
+  c = sprites + sc->window_sprite;
   while (c) {
     printf("->origin(%d %d %d)center(%d(%4x) %d(%4x) %d(%4x))tag(%d)state(%d) layer(%2x)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.x, c->center.y, c->center.y, c->center.z, c->center.z, c->tag, c->state, c->layer);
-    c = c->next_in_scene;
+    c = c->next_in_window;
   }
 }
 
@@ -206,7 +206,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
  * добавляет новый спрайт в список текущего потока перед заданным
  * спрайтом в общий список потока или создает новый список в потоке
  * также добавляет в голову списка отрисовки
- * scene_sprite содержит голову списка
+ * window_sprite содержит голову списка
  * @param c спрайт перед которым добавляется новый
  * @param tag тег нового спрайта
  * @param image данные изображения
@@ -227,7 +227,7 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   else
     prev_sprite->next = newc;
   newc->next = c;
-  newc->scene = run_thread->current_scene;
+  newc->window = run_thread->current_window;
   newc->tag = tag;
   newc->state = SPRITE_NEW;
   newc->f24 = run_thread->f2c;
@@ -236,31 +236,31 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   newc->thread_offset = run_thread->sprites_thread;
   // test f1c
   newc->layer = run_thread->layer;
-  sprite_t *sc = sprites + run_thread->current_scene->scene_sprite;
-  newc->next_in_scene = sc->next_in_scene;
-  sc->next_in_scene = newc;
+  sprite_t *sc = sprites + run_thread->current_window->window_sprite;
+  newc->next_in_window = sc->next_in_window;
+  sc->next_in_window = newc;
   sprite_set(newc, image, x_flip, coord);
 }
 
 /** 
  * Удаляет спрайт из списка отрисовки сцены, к которой он принадлежит
- * голова списка сцены находится в scene_sprite
+ * голова списка сцены находится в window_sprite
  * @param c удаляемый спрайт
  */
-void sprite_remove_from_scene_list(sprite_t *c)
+void sprite_remove_from_window_list(sprite_t *c)
 {
-  scene_t *sc = c->scene;
-  sprite_t *sc_c = sprites + sc->scene_sprite;
+  window_t *sc = c->window;
+  sprite_t *sc_c = sprites + sc->window_sprite;
   if (c == sc_c) {
-    sc->scene_sprite = c->next_in_scene - sprites;
+    sc->window_sprite = c->next_in_window - sprites;
     return;
   }
   while (1) {
-    if (c == sc_c->next_in_scene) {
-      sc_c->next_in_scene = c->next_in_scene;
+    if (c == sc_c->next_in_window) {
+      sc_c->next_in_window = c->next_in_window;
       break;
     }
-    sc_c = sc_c->next_in_scene;
+    sc_c = sc_c->next_in_window;
   }
 }
 
@@ -269,11 +269,11 @@ void sprite_remove_from_scene_list(sprite_t *c)
  * Для спрайта устанавливается состояние - удален, он будет
  * удален из списка отрисовки при отрисовке
  * @param c спрайт
- * @param remove_from_scene если 1 - то спрайт будет удален из списка
+ * @param remove_from_window если 1 - то спрайт будет удален из списка
  * сцены и возвращен в список свободных спрайтов
  * @return спрайт после удаленного
  */
-sprite_t *sprite_remove(sprite_t *c, int remove_from_scene)
+sprite_t *sprite_remove(sprite_t *c, int remove_from_window)
 {
   if (c->state >= SPRITE_READY)
     c->state = SPRITE_REMOVED;
@@ -287,10 +287,10 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_scene)
 #ifdef DEBUG
   printf("remove sprite: center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
 #endif  
-  if (remove_from_scene) {
+  if (remove_from_window) {
     c->next = free_sprite;
     free_sprite = c;
-    sprite_remove_from_scene_list(c);
+    sprite_remove_from_window_list(c);
   }
   if (!prev_sprite) {
 #ifdef DEBUG
@@ -314,7 +314,7 @@ int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2)
 {
   prev_sprite = c;
   *c2 = c->next;
-  if (*c2 && run_thread->current_scene == (*c2)->scene)
+  if (*c2 && run_thread->current_window == (*c2)->window)
     if ((*c2)->tag == tag)
       return 1;
   return 0;
@@ -338,18 +338,18 @@ void clear_sprites_tag()
     if (!found) {
       break;
     }
-    c = sprite_remove(c, remove_from_scene);
+    c = sprite_remove(c, remove_from_window);
   };
-  remove_from_scene = 0;
+  remove_from_window = 0;
 }
 
 /** 
  * Удаляет объект из сцены
  * 
  */
-void clear_object_from_scene()
+void clear_object_from_window()
 {
-  remove_from_scene = 1;
+  remove_from_window = 1;
   clear_sprites_tag();
 }
 
@@ -427,7 +427,7 @@ void delete_sprites(int tag)
 	c = sprite_remove(c, 0);
 	if (!c)
 	  break;
-	if (run_thread->current_scene != c->scene)
+	if (run_thread->current_window != c->window)
 	  break;
 	if (tag != c->tag)
 	  break;
@@ -626,5 +626,5 @@ void clear_all_sprites2()
   #ifdef DEBUG
   printf("clear all objects2\n");
   #endif
-  remove_all_sprites(run_thread->sprite_list, remove_from_scene);
+  remove_all_sprites(run_thread->sprite_list, remove_from_window);
 }

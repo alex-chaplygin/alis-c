@@ -114,16 +114,16 @@ func vm_op[] = {
   nimp, // 43
   thread_stop, // 44
   op_script_load, // 45
-  scene_new, // 46
-  scene_set, // 47
+  window_new, // 46
+  window_set, // 47
   show_sprite_0, // 48
   show_sprite, // 49
   nimp, // 4a
   clear_sprites_tag, // 4b
   set_coord_origin, // 4c
   move_coord_origin, // 4d
-  scene_show, // 4e
-  scene_hide, // 4f
+  window_show, // 4e
+  window_hide, // 4f
   clear_all_sprites2, // 50
   obj_set_form, // 51
   nimp, // 52
@@ -265,7 +265,7 @@ func vm_op[] = {
   nimp, // da
   nimp, // db
   clear_all_sprites, // dc
-  clear_object_from_scene, // dd
+  clear_object_from_window, // dd
   op_thread_kill_remove_all // de
 };
 

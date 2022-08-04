@@ -12,7 +12,7 @@
 #include <string.h>
 #include "types.h"
 #include "sprite.h"
-#include "scene.h"
+#include "window.h"
 #include "memory.h"
 #include "vector.h"
 #include "draw.h"
@@ -86,7 +86,7 @@ sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
 #endif
   do {
     prev = c;
-    c = c->next_in_scene;
+    c = c->next_in_window;
     if (!c)
       break;
 #ifdef DEBUG
@@ -109,8 +109,8 @@ sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
     if (sprite->state == SPRITE_NEW)
       break;
   } while (c);
-  sprite->next_in_scene = c;
-  prev->next_in_scene = sprite;
+  sprite->next_in_window = c;
+  prev->next_in_window = sprite;
   sprite->state = SPRITE_READY;
   if (prev != sc)
     return sc;
@@ -130,7 +130,7 @@ sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
   // устанавливаем левый верхний угол после проецирования
   project_sprite(c, &c->origin);
   // удаление спрайта из списка сцены
-  prev->next_in_scene = c->next_in_scene;
+  prev->next_in_window = c->next_in_window;
   // устанавливаем изображение отрисовки
   c->render_image = c->image;
   update_sprites_rec(c);
@@ -149,7 +149,7 @@ sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
 sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
 {
   update_sprites_rec(c);
-  prev->next_in_scene = c->next_in_scene;
+  prev->next_in_window = c->next_in_window;
   c->next = free_sprite;
   free_sprite = c;
   return prev;
@@ -169,7 +169,7 @@ void process_new_sprites(sprite_t *sc_sprite)
 #endif
   do {
     prev = sprite;
-    sprite = sprite->next_in_scene;
+    sprite = sprite->next_in_window;
     if (!sprite)
       break;
 #ifdef DEBUG
@@ -273,37 +273,37 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
  * окно отсечения blit_rec, внутри которого будет отрисовка всех новых спрайтов
  * Спрайты с отрицательным z или несортированные не рисуются.
  */
-void render_all_scenes()
+void render_all_windows()
 {
-  scene_t *s = scene_list_head;
+  window_t *s = window_list_head;
   sprite_t *spr;
   rectangle_t blit_rec;
   while (1) {
 #ifdef DEBUG
-    printf("Scene %x flags: %x flags2: %x\n", (int)(s - scene_list_head), s->flags, s->flags2);
+    printf("Window %x flags: %x flags2: %x\n", (int)(s - window_list_head), s->flags, s->flags2);
 #endif
-    if (!(s->flags & SCENE_HIDDEN)) {
-      spr = sprites + s->scene_sprite;
+    if (!(s->flags & WINDOW_HIDDEN)) {
+      spr = sprites + s->window_sprite;
       if (clip_sprite(spr, &clip_rec, &blit_rec, 1)) {
 #ifdef DEBUG
 	printf("Blit rec: ");
 	print_rec(&blit_rec);
 #endif
-	if (!(s->flags2 & SCENE2_MOUSE)) {
+	if (!(s->flags2 & WINDOW2_MOUSE)) {
 	  printf("Set mouse flags\n");
 	  exit(1);
 	}
-	spr = spr->next_in_scene;
+	spr = spr->next_in_window;
 	while (spr) {
 	  if (spr->state >= SPRITE_READY && spr->origin.z >= 0)
 	    render_sprite(spr, &blit_rec);
-	  spr = spr->next_in_scene;
+	  spr = spr->next_in_window;
 	}
       }
     }
     if (!s->next)
       break;
-    s = (scene_t *)(memory + s->next);
+    s = (window_t *)(memory + s->next);
   }
 }
 
@@ -313,12 +313,12 @@ void render_all_scenes()
  * Вычисляется координатное окно пересечения всех новых спрайтов 
  * и окна текущей сцены
  * Перерисовка всех сцен в той части где были новые спрайты
- * @param scene текущая сцена
+ * @param window текущая сцена
  * @param spr спрайт сцены
  */
-void render_sprites(scene_t *scene, sprite_t *spr)
+void render_sprites(window_t *window, sprite_t *spr)
 {
-  if (scene->flags & SCENE_HIDDEN)
+  if (window->flags & WINDOW_HIDDEN)
     return;
   int clip = clip_sprite(spr, &sprites_rec, &clip_rec, 1);
 #ifdef DEBUG
@@ -327,9 +327,9 @@ void render_sprites(scene_t *scene, sprite_t *spr)
 #endif
   if (!clip)
     return;
-  render_all_scenes();
-  if (scene->flags2 & SCENE2_NOBLIT) {
-    printf("Scene: no blit\n");
+  render_all_windows();
+  if (window->flags2 & WINDOW2_NOBLIT) {
+    printf("Window: no blit\n");
     exit(1);
   }
 }
@@ -339,23 +339,23 @@ void render_sprites(scene_t *scene, sprite_t *spr)
  * если нет новых спрайтов, рендеринг не происходит
  * если появились новые спрайты, то перерисовывается часть сцены
  * где появились новые спрайты или было изменения
- * @param scene сцена
+ * @param window сцена
  * @param sprite голова списка холстов
  */
-void render_scene(scene_t *scene, sprite_t *sprite)
+void render_window(window_t *window, sprite_t *sprite)
 {
-  if (scene->flags & SCENE_NOTTRANSLATED)
-    scene_translate(scene, sprite);
-  if (scene->flags2 & SCENE2_FLAG1) {
-    printf("scene2 flag1\n");
+  if (window->flags & WINDOW_NOTTRANSLATED)
+    window_translate(window, sprite);
+  if (window->flags2 & WINDOW2_FLAG1) {
+    printf("window2 flag1\n");
     exit(1);
   }
 #ifdef DEBUG
-   dump_sprites(scene);
+   dump_sprites(window);
 #endif
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
-  sprite = sprite->next_in_scene;
+  sprite = sprite->next_in_window;
   reset_sprites_rec();
   while (sprite) {
     switch (sprite->state) {
@@ -365,34 +365,34 @@ void render_scene(scene_t *scene, sprite_t *sprite)
       sprite_thread_offset = sprite->thread_offset;
       sprite = process_sprite(sc_sprite, prev, sprite);
       process_new_sprites(sprite);
-      render_sprites(scene, sc_sprite);
+      render_sprites(window, sc_sprite);
       break;
     case SPRITE_UPDATED:
       sprite_thread_offset = sprite->thread_offset;
       update_sprites_rec(sprite);// прямоугольник рассчитан на предыдущую позицию объекта
       sprite = process_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
       process_new_sprites(sprite);
-      render_sprites(scene, sc_sprite);
+      render_sprites(window, sc_sprite);
       break;
     default: 
       sprite_thread_offset = sprite->thread_offset;
       sprite = delete_sprite(prev, sprite);
       process_new_sprites(sprite);
-      render_sprites(scene, sc_sprite);
+      render_sprites(window, sc_sprite);
     }
     prev = sprite;
-    sprite = sprite->next_in_scene;
+    sprite = sprite->next_in_window;
   }
 #ifdef DEBUG
   printf("After rendering:\n");
-  dump_sprites(scene);
+  dump_sprites(window);
 #endif
 }
 
 /// главный цикл рендеринга по сценам
 void render_update()
 {
-  scene_t *s = scene_list_head;
+  window_t *s = window_list_head;
 #ifdef DEBUG
   printf("skipping frames: %d\n", frames_to_skip);
 #endif
@@ -404,13 +404,13 @@ void render_update()
   frame_num = 0;
   while (1) {
 #ifdef DEBUG
-    printf("Rendering scene %x flags = %x flags2 = %x\n", (int)((byte *)s - memory), s->flags, s->flags2);
+    printf("Rendering window %x flags = %x flags2 = %x\n", (int)((byte *)s - memory), s->flags, s->flags2);
 #endif
-    if (!(s->flags & SCENE_HIDDEN))
-      render_scene(s, sprites + s->scene_sprite);
+    if (!(s->flags & WINDOW_HIDDEN))
+      render_window(s, sprites + s->window_sprite);
     if (!s->next)
       break;
-    s = (scene_t *)(memory + s->next);
+    s = (window_t *)(memory + s->next);
   }
 }
 

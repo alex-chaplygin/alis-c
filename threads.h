@@ -59,7 +59,7 @@ typedef struct thread_s {
   int f34;
   int sprites_thread;		/**< номер потока, которому будут принадлежать новые спрайты */
   sprite_t *sprite_list;	/**< список спрайтов потока */
-  scene_t *current_scene;		/**< текущая сцена */
+  window_t *current_window;		/**< текущая сцена */
   script_t *header;		/**< заголовок сценария */
   struct thread_s *parent;	/**< родительский поток */
 } thread_t;
