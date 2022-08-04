@@ -13,48 +13,9 @@
 #include "get.h"
 #include "palette.h"
 #include "image.h"
+#include "res.h"
 
-#pragma pack(1)
-
-/// таблица ресурсов
-typedef struct {
-  dword image_table;		/**< смещение таблицы изображений */
-  word image_count;		/**< число изображений */
-  dword anim_table;
-  word anim_count;
-  dword sound_table;		/**< смещение таблицы звуков */
-  word sound_count;		/**< число звуков */
-} resource_table_t;
-
-/// спрайт в составе объекта
-typedef struct {
-  word num;			/**< номер спрайта */
-  short ofs_x;			/**< смещение спрайта по x*/
-  short ofs_y;			/**< y */
-  short ofs_z;			/**< z */
-} subimage_t;
-
-int load_main_res = 0;	/**< флаг загрузки ресурса из главного потока */
 int image_flag = 0;
-
-/// получение данных изображения из таблицы ресурсов
-byte *get_resource(int num)
-{
-  byte *script = run_thread->script;
-  if (load_main_res)
-    script = main_thread->script;
-  script_t *h = (script_t *)script;
-  resource_table_t *r = (resource_table_t *)(script + h->resources);
-#ifdef DEBUG
-    printf("get_resource: main %d num %d\n", load_main_res, num);
-#endif
-  if (num >= r->image_count) {
-    printf("get_resource: main %d num %d > total %d\n", load_main_res, num, r->image_count);
-    exit(1);
-  }
-  byte *pos = (byte *)r + r->image_table + num * sizeof(dword);
-  return pos + *(dword *)pos;
-}
 
 /** 
  * Удаляет спрайты с заданным тегом, если у них состояние - готов
@@ -116,14 +77,14 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
   found = sprite_find(tag, &c);
   // если не найден, то добавляем
   if (!found)
-    sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
+    sprite_new_insert(c, tag, res_get_image(num), x_flip, origin);
   else {
     while(c) {
       if (c->state == SPRITE_READY) {
 	printf("add sprite: update sprite\n");
 	// обновить спрайт
 	c->state = SPRITE_UPDATED;
-	sprite_set(c, get_resource(num), x_flip, origin);
+	sprite_set(c, res_get_image(num), x_flip, origin);
 	goto end;
       }
       found = sprite_next_on_tag(c, tag, &c2);
@@ -131,7 +92,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
       if (!found)
 	break;
     }
-    sprite_new_insert(c, tag, get_resource(num), x_flip, origin);
+    sprite_new_insert(c, tag, res_get_image(num), x_flip, origin);
   }
  end:
   if (!is_object)
@@ -140,7 +101,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
 }
 
 /** 
- * Загрузка объекта.
+ * Добавление композитного спрайта
  * Состоит из одного или более спрайтов
  *
  * @param img данные объекта
@@ -148,7 +109,7 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
  * @param x_flip зеркальное отражение
  * @param tag тег объекта
  */
-void load_object(byte *img, vec_t *coord, int x_flip, int tag)
+void add_composite_sprite(byte *img, vec_t *coord, int x_flip, int tag)
 {
   vec_t vec;
   int x_fl, num;
@@ -179,7 +140,7 @@ void load_object(byte *img, vec_t *coord, int x_flip, int tag)
 
 /** 
  * Добавление изображения
- * Обработка палитры и составных изображений
+ * Обработка палитры и составных спрайтов
  * при загрузке палитры prev_value - скорость появления, 0 - без появления* 
  * @param coord центр изображения 
  * @param x_flip зеркальное отражение
@@ -187,13 +148,13 @@ void load_object(byte *img, vec_t *coord, int x_flip, int tag)
  */
 void load_resource(vec_t *coord, int x_flip, int tag)
 {
-  byte *img = get_resource(current_value);
+  byte *img = res_get_image(current_value);
   if (*img == RES_PALETTE) {
     printf("loading palette\n");
     exit(1);
     palette_load(img + 1);
-  } else if (*img == RES_OBJECT)
-    load_object(img, coord, x_flip, tag);
+  } else if (*img == RES_COMPOSITE_SPRITE)
+    add_composite_sprite(img, coord, x_flip, tag);
   else 
     add_sprite(current_value, coord, x_flip, 0, tag);
 }
@@ -238,6 +199,7 @@ void show_object_flipped()
   show_object_with_flip(run_thread->x_flip ^ 1);  
 }
 
+/// установка тега?
 void set_tag()
 {
   new_get();

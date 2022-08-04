@@ -43,7 +43,7 @@ typedef struct thread_s {
   int frames_to_skip;		/**< число кадров через сколько выполняется сценарий */
   int cur_frames_to_skip;		/**< текущий отсчет кадров для выполнения */
   int running;			/**< основной сценарий потока запущен */
-  int flags2;			/**< доп. флаги потока */
+  int form;			/**< номер формы для столкновений */
   int flags;			/**< флаги потока */
   int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
   int layer;			/**< слой отрисовки для всех новых спрайтов */
@@ -95,7 +95,7 @@ void set_thread_layer();
 void set_sprites_thread();
 void get_threads_list();
 void store_thread_num();
-void thread_set_flags2();
+void obj_set_form();
 void thread_find_all();
 void op_kill_thread();
 void thread_pause_by_ref();

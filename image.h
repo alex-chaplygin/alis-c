@@ -1,20 +1,3 @@
-enum resource_e {
-  RES_PALETTE = 0xfe,		/**< палитра */
-  RES_OBJECT = 0xff,		/**< составной объект из спрайтов */
-};
-
-/// заголовок изображения
-typedef struct {
-  byte type; 	/**< тип ресурса/изображения */
-  union {
-    byte num_subimages;		/**< для составного изображения
-число компонент */
-    byte fill_color;		/**< для типа 1 - цвет заливки */
-  };
-  word maxx;			/**< ширина - 1*/
-  word maxy;			/**< высота - 1 */
-  word palette_offset;		/**< смещение палитры для некоторых типов */
-} image_t;
 
 /// координатное окно
 typedef struct {
@@ -33,5 +16,4 @@ void show_object_0();
 void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag);
 void clear_all_objects2();
 
-extern int load_main_res;	
 extern int image_flag;

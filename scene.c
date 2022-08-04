@@ -74,7 +74,7 @@ void scene_new()
   printf("origin = %d %d %d max = %d %d\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->max.x, sprite->max.y);
   printf("a = (%d %d %d) b = (%d %d %d) c = (%d %d %d)\n", cl->ax, cl->ay, cl->az, cl->bx, cl->by, cl->bz, cl->cx, cl->cy, cl->cz);
   printf("%d %d %d\n%d %d %d\n%d %d\n", cl->f1, cl->f2, cl->f3, cl->f4, cl->f5, cl->f6, cl->f7, cl->f8);
-  ASSERT((byte *)scene_list_head - memory, 0xe)
+  //  ASSERT((byte *)scene_list_head - memory, 0xe)
 #endif
 }
 

@@ -14,6 +14,7 @@
 #include "sprite.h"
 #include "get.h"
 #include "graphics.h"
+#include "res.h"
 
 #define CURSOR_LEN 8		/**< размер курсора мыши */
 
@@ -27,7 +28,7 @@ void set_mouse_cursor()
 {
   load_main_res = 0;
   new_get();
-  cursor_sprite->image = get_resource(current_value);
+  cursor_sprite->image = res_get_image(current_value);
 #ifdef DEBUG
   printf("set mouse cursor resource = %x\n", current_value);
 #endif

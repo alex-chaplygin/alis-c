@@ -37,7 +37,7 @@ int kill_thread_flag = 1;		/**< если равен 0, то потоки не у
 void thread_init()
 {
   load_blancpc();
-  script_load(0, "MAIN.IO");
+  script_load(0, "main.io");
 }
 
 /** 
@@ -116,7 +116,7 @@ void thread_setup(thread_table_t *tb, byte *script, int size)
   t->version = h->version;
   t->frames_to_skip = t->cur_frames_to_skip = 1;
   t->running = -1;
-  t->flags2 = -1;
+  t->form = -1;
   t->flags = THREAD_NOSTART3; // bit 1
   t->header = h;
   t->f2c = 0;
@@ -584,12 +584,16 @@ void get_threads_list()
   store_thread_num();
 }
 
-void thread_set_flags2()
+/** 
+ * Устанавливает номер формы для объекта
+ * 
+ */
+void obj_set_form()
 {
   new_get();
-  run_thread->flags2 = current_value;
+  run_thread->form = current_value;
 #ifdef DEBUG
-  printf("set flags2 = %x\n", current_value);
+  printf("obj set form = %x\n", current_value);
 #endif
 }
 

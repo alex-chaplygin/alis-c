@@ -14,7 +14,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "graphics.h"
-#include "image.h"
+#include "res.h"
 
 #pragma pack(1)
 /// заголовок палитры в файле
@@ -235,7 +235,7 @@ void palette_set_fade()
     printf("palette_set  res_num < 0\n");
     exit(1);
   }
-  byte *pal = get_resource(current_value);
+  byte *pal = res_get_image(current_value);
   if (*pal == RES_PALETTE)
     palette_load(pal + 1);
   skip_palette = 0;
@@ -269,7 +269,7 @@ void set_palette_from_res()
   printf("set palette from res: %x\n", current_value);
 #endif
   if (!skip_palette) {
-    byte *pal = get_resource(current_value);
+    byte *pal = res_get_image(current_value);
     if (*pal == RES_PALETTE) {
       fade_ticks = palette_fade_ticks = palette_parameter = prev_value = 0;
       palette_load(pal + 1);
