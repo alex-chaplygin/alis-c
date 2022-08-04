@@ -28,6 +28,16 @@ void uppercase(char *s)
     }
 }
 
+/// преобразование строки в нижний регистр
+void lowercase(char *s)
+{
+    char *c = s;
+    while (*c) {
+      *c = tolower(*c);
+      c++;
+    }
+}
+
 /** 
  * Открытие файла.
  * Пытается открыть файл с именем в верхнем регистре
@@ -41,6 +51,7 @@ void file_open(char *name, int mode)
   char rw[] = "r+b";
   char *m;
   strcpy(file_name, name);
+  lowercase(file_name);
   switch (mode) {
   case 2: // открытие на чтение и запись
     m = rw;
@@ -49,6 +60,9 @@ void file_open(char *name, int mode)
     printf("unknown mode: %d\n", mode);
     exit(1);
   }
+#ifdef DEBUG
+  printf("file open: %s mode = %s\n", file_name, m);
+#endif
   handle = fopen(file_name, m);
   if (!handle) {
     uppercase(file_name);
@@ -96,6 +110,7 @@ void file_close()
  */
 int file_exists(char *s)
 {
+  lowercase(s);
   FILE *f = fopen(s, "rb");
   if (!f) {
     uppercase(s);
