@@ -15,7 +15,6 @@
 #include "scene.h"
 #include "memory.h"
 #include "vector.h"
-#include "image.h"
 #include "draw.h"
 #include "project.h"
 #include "interpret.h"
@@ -34,9 +33,6 @@ void reset_sprites_rec()
 {
   sprites_rec.min_x = sprites_rec.min_y = 32000;
   sprites_rec.max_x = sprites_rec.max_y = -32000;
-  sprites_rec.min_x = sprites_rec.min_y = 0;
-  sprites_rec.max_x = 319;
-  sprites_rec.max_y = 199;
 }
 
 /// Отладочная печать окна
@@ -219,7 +215,7 @@ int clip_sprite(sprite_t *sc_sprite, rectangle_t *rec, rectangle_t *out, int rou
   if (rec->max_y < sc_sprite->origin.y)
     return 0;
   if (round)
-    out->min_x = rec->min_x & 0xfff0; // округление до 16 в меньшую сторону
+    out->min_x = rec->min_x & 0xfffffff0; // округление до 16 в меньшую сторону
   else
     out->min_x = rec->min_x;
   // отсечение по окну сцены из спрайта сцены
