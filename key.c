@@ -12,20 +12,20 @@
 #include "types.h"
 #include "interpret.h"
 
-char key_symbol;
-
+char key_symbol;		/**< символ текущей нажатой клавиши */
 int key_mod = 0;		/**< нажатые модификаторы */
 
 /** 
- * Обработка события нажатия клавиши
+ * Обработка события нажатия клавиши.
+ * Преобразует SDL scan код в символ
  * 
  * @param scan скан код клавиши
  * @param mod модификаторы Alt Ctrl Shift
  */
-void set_key(int scan, int sym, int mod)
+void set_key(int scan, int sym, int m)
 {
   key_symbol = sym;
-  key_mod = mod;
+  key_mod = m;
   if (scan >= SDL_SCANCODE_F1 && scan <= SDL_SCANCODE_F10)
     key_symbol = 0xbb + scan - SDL_SCANCODE_F1;
   else if (scan == SDL_SCANCODE_KP_8)
@@ -75,7 +75,6 @@ void release_key(int scan)
 /// возвращает символ нажатой клавишу или 0 - если не нажата
 void get_key()
 {
-  // get pressed key
   current_value = (byte)key_symbol;
 #ifdef DEBUG
   printf("get key: %x\n", current_value);
@@ -85,7 +84,6 @@ void get_key()
 /// возвращает состояние кнопок джойстика
 void get_joy()
 {
-  // get pressed key
   current_value = 0;
 #ifdef DEBUG
   printf("get joy: %x\n", current_value);
