@@ -149,5 +149,5 @@ void class_free()
     }
   num_classes--;
   objects_kill_by_class(num);
-  window_free_sprites();
+  view_free_sprites();
 }

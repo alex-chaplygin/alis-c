@@ -1,20 +1,20 @@
-#ifndef __WINDOW__
-#define __WINDOW__
+#ifndef __VIEW__
+#define __VIEW__
 #pragma pack(1)
 
-#define WINDOW_HIDDEN (1 << 6)	/**< окно не рисуется */
-#define WINDOW_NOTTRANSLATED (1 << 7) /**< окно не была перемещена */
+#define VIEW_HIDDEN (1 << 6)	/**< окно не рисуется */
+#define VIEW_NOTTRANSLATED (1 << 7) /**< окно не была перемещена */
 
-#define WINDOW2_FLAG1 (1 << 1)
-#define WINDOW2_NOBLIT (1 << 5)	/**< окно не отправляется в видеопамять после отрисовки */
-#define WINDOW2_MOUSE (1 << 6)	/**< в окне присутствует курсор мыши */
-#define WINDOW2_3D (1 << 7)		/**< окно 3d */
+#define VIEW2_FLAG1 (1 << 1)
+#define VIEW2_NOBLIT (1 << 5)	/**< окно не отправляется в видеопамять после отрисовки */
+#define VIEW2_MOUSE (1 << 6)	/**< в окне присутствует курсор мыши */
+#define VIEW2_3D (1 << 7)		/**< окно 3d */
 
 /// окно графики
-typedef struct window_s {
+typedef struct view_s {
   byte flags;			/**< флаги окна */
   byte flags2;			
-  word window_sprite;		/**< спрайт окна */
+  word view_sprite;		/**< спрайт окна */
   word next;		/**< адрес следующей окна в списке */
   byte f1;
   byte f2;
@@ -51,13 +51,13 @@ typedef struct window_s {
   short delta_x;			/**< вектор перемещения */
   short delta_y;
   short delta_z;
-} window_t;
+} view_t;
 
-void window_new();
-void window_show();
-void window_set();
-void window_free_sprites();
-void window_hide();
+void view_new();
+void view_show();
+void view_set();
+void view_free_sprites();
+void view_hide();
 
-extern window_t *window_list_head;	/**< список окон */
+extern view_t *view_list_head;	/**< список окон */
 #endif

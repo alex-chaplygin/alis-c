@@ -59,7 +59,7 @@ typedef struct object_s {
   int f34;
   int sprites_object;		/**< номер объекта, которому будут принадлежать новые спрайты */
   sprite_t *sprite_list;	/**< список спрайтов объекта */
-  window_t *current_window;		/**< окно, куда добавляются новые спрайты */
+  view_t *current_view;		/**< окно, куда добавляются новые спрайты */
   program_t *header;		/**< заголовок программы */
   struct object_s *parent;	/**< родительский объект */
 } object_t;

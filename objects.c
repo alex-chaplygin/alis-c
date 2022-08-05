@@ -167,7 +167,7 @@ object_t *object_add(byte *class, int size, vec_t *translate)
   coord[0] += translate->x;
   coord[1] += translate->y;
   coord[2] += translate->z;
-  t->current_window = run_object->current_window;
+  t->current_view = run_object->current_view;
   t->f22 = run_object->f22;
   t->sprites_object = current_value;
 #ifdef DEBUG

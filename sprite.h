@@ -2,7 +2,7 @@
 #define __SPRITE__
 #include "types.h"
 #include "vector.h"
-#include "window.h"
+#include "view.h"
 
 /// состояния спрайтов
 enum sprite_state_e {
@@ -27,13 +27,13 @@ typedef struct sprite_s {
   int state;			/**< состояние спрайта*/
   int f24;
   int f1c;
-  int object_offset;		/**< поток, которому принадлежит спрайт */
+  int object;		/**< объект, которому принадлежит спрайт */
   int layer;			/**< слой определяет порядок отрисовки при одинаковой z координате, меньшее рисуется позднее */
   byte *image;			/**< установленное изображение спрайта */
   byte *render_image;			/**< изображение которое будет отрисовано */
-  struct sprite_s *next;	/**< следующий в списке потока спрайт */
-  struct sprite_s *next_in_window;	/**< следующий в списке отрисовки */
-  window_t *window;	/**< сцена к которой принадлежит спрайт */
+  struct sprite_s *next;	/**< следующий в списке объекта спрайт */
+  struct sprite_s *next_in_view;	/**< следующий спрайт в списке отображения */
+  view_t *view;	/**< отображение, к которому принадлежит спрайт */
 } sprite_t;
 
 void sprites_init(int num);
@@ -45,11 +45,11 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord);
 void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord);
 int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2);
 sprite_t *sprite_remove(sprite_t *c, int remove);
-void dump_sprites(window_t *sc);
+void dump_sprites(view_t *sc);
 void clear_sprites_tag();
-void window_translate(window_t *window, sprite_t *c);
+void view_translate(view_t *view, sprite_t *c);
 void remove_all_sprites(sprite_t *sp, int remove);
-void clear_sprites_from_window();
+void clear_sprites_from_view();
 void set_coord_origin();
 void move_coord_origin();
 void show_sprite();
@@ -62,6 +62,6 @@ void clear_all_sprites2();
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
 extern sprite_t *cursor_sprite;	/**< спрайт курсора мыши */
-extern int remove_from_window;	/**< нужно ли удалять из окна */
+extern int remove_from_view;	/**< нужно ли удалять из окна */
 
 #endif
