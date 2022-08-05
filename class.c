@@ -176,7 +176,7 @@ void load_main_script()
  * 
  * @return позицию в таблице сценариев или -1, если не найдено
  */
-int script_loaded(word id)
+int class_loaded(word id)
 {
   if (!script_table)
     return -1;
@@ -187,18 +187,18 @@ int script_loaded(word id)
 }
 
 /** 
- * Загрузка сценария
+ * Загрузка класса из IO файла
  * 
- * @param id внутренний номер сценария, 0 - главный сценарий
- * @param name имя файла сценария
+ * @param id внутренний номер класс, 0 - главный класс
+ * @param name имя файла класса
  */
-void script_load(int id, char *name)
+void class_load(int id, char *name)
 {
   io_header_t h;
   int size;
   byte *script;
 
-  if (script_loaded(id) != -1)
+  if (class_loaded(id) != -1)
     return;
   file_open(name, FILE_RW);
   file_read(&h, sizeof(h));
@@ -222,14 +222,14 @@ void script_load(int id, char *name)
 }
 
 /// команда: загрузка сценария
-void op_script_load()
+void op_class_load()
 {
   word id = fetch_word();
 #ifdef DEBUG
   printf("load script %x %s\n", id, current_ip);
 #endif
   if (id) {
-    script_load(id, current_ip);
+    class_load(id, current_ip);
     while (*current_ip++);
     return;
   }
@@ -241,7 +241,7 @@ void op_script_load()
 void run_script()
 {
   word id = fetch_word();
-  int i = script_loaded(id);
+  int i = class_loaded(id);
   if (i == -1) {
     printf("Script %x (total %d) is not loaded\n", id, total_scripts);
     exit(1);
@@ -268,7 +268,7 @@ void free_script()
 #endif
   if (num == -1 || num == run_object->id)
     return;
-  num = script_loaded(num); // позиция в таблице сценариев
+  num = class_loaded(num); // позиция в таблице сценариев
   if (num == -1)
     return;
 #ifdef DEBUG

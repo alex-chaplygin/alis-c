@@ -1,7 +1,7 @@
 
 void load_blancpc();
-void script_load(int id, char *name);
-void op_script_load();
+void class_load(int id, char *name);
+void op_class_load();
 void run_script();
 void free_script();
 
