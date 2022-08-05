@@ -1,3 +1,12 @@
+/**
+ * @file   io.c
+ * @author alex <alex@localhost>
+ * @date   Fri Aug  5 17:13:03 2022
+ * 
+ * @brief  Работа с IO файлом. Разпаковка.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
