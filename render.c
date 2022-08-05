@@ -26,7 +26,7 @@ byte frames_to_skip = 0;		/**< через сколько кадров обнов
 byte frame_num = 0;			/**< текущий счетчик кадров */
 rectangle_t sprites_rec;	/**< окно вывода новых спрайтов */
 rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну сцены */
-int sprite_thread_offset;	/**< поток, чьи спрайты обрабатываются вместе */
+int sprite_object_offset;	/**< поток, чьи спрайты обрабатываются вместе */
 
 /// Сброс минимальных и максимальных значений окна новых спрайтов
 void reset_sprites_rec()
@@ -176,7 +176,7 @@ void process_new_sprites(sprite_t *sc_sprite)
     printf("sprite: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);
 #endif
     // обрабатываются спрайты только одного потока
-    if (sprite_thread_offset != sprite->thread_offset)
+    if (sprite_object_offset != sprite->object_offset)
       continue;
     if (sprite->state == SPRITE_READY)
       continue;
@@ -362,20 +362,20 @@ void render_window(window_t *window, sprite_t *sprite)
     case SPRITE_READY:
       break;
     case SPRITE_NEW:
-      sprite_thread_offset = sprite->thread_offset;
+      sprite_object_offset = sprite->object_offset;
       sprite = process_sprite(sc_sprite, prev, sprite);
       process_new_sprites(sprite);
       render_sprites(window, sc_sprite);
       break;
     case SPRITE_UPDATED:
-      sprite_thread_offset = sprite->thread_offset;
+      sprite_object_offset = sprite->object_offset;
       update_sprites_rec(sprite);// прямоугольник рассчитан на предыдущую позицию объекта
       sprite = process_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
       process_new_sprites(sprite);
       render_sprites(window, sc_sprite);
       break;
     default: 
-      sprite_thread_offset = sprite->thread_offset;
+      sprite_object_offset = sprite->object_offset;
       sprite = delete_sprite(prev, sprite);
       process_new_sprites(sprite);
       render_sprites(window, sc_sprite);
@@ -390,7 +390,7 @@ void render_window(window_t *window, sprite_t *sprite)
 }
 
 /// главный цикл рендеринга по сценам
-void render_update()
+void views_update()
 {
   window_t *s = window_list_head;
 #ifdef DEBUG

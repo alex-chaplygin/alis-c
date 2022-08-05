@@ -15,7 +15,7 @@
 #include "store.h"
 #include "math.h"
 #include "file.h"
-#include "script.h"
+#include "class.h"
 #include "objects.h"
 #include "key.h"
 #include "misc.h"
@@ -80,7 +80,7 @@ func get_op[] = {
   null_op, //6c
   get_joy, //6e 
   random_with_seed, //70
-  get_message, //72
+  object_get_message, //72
   get_keyboard_mod, //74
   get_free, //76
   get_video_port, //78
@@ -181,7 +181,7 @@ void switch_string_store()
 {
   switch_string();
 #ifdef DEBUG
-  printf("%04x:\t\t", (int)(current_ip - run_object->script));
+  printf("%04x:\t\t", (int)(current_ip - run_object->class));
 #endif
   store();
 }
@@ -203,7 +203,7 @@ void switch_string_get()
 void assign()
 {
 #ifdef DEBUG
-  printf("assign\n%04x:\t\t", (int)(current_ip - run_object->script));
+  printf("assign\n%04x:\t\t", (int)(current_ip - run_object->class));
 #endif
   new_get();
   switch_string_store();
@@ -216,14 +216,14 @@ void get_expression()
 {
   byte op;
 #ifdef DEBUG
-  printf("%04x:\t\tget expression\n", (int)(current_ip - run_object->script));
+  printf("%04x:\t\tget expression\n", (int)(current_ip - run_object->class));
 #endif
   while (1) {
     op = fetch_byte();
     if (op == 0x3a) 
       break;
 #ifdef DEBUG
-    printf("%04x:\t\t", (int)(current_ip - run_object->script));
+    printf("%04x:\t\t", (int)(current_ip - run_object->class));
 #endif
     get(op);
   };

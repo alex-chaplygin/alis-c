@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 {
   byte color;
   graphics_init();
-  object_init();
+  objects_init();
   while (1) {
     objects_run();
     if (!graphics_update())

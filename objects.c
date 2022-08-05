@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "objects.h"
-#include "script.h"
+#include "class.h"
 #include "interpret.h"
 #include "render.h"
 #include "get.h"
@@ -23,27 +23,27 @@ object_table_t *free_object;	/**< голова списка свободных �
 object_table_t *current_object;	/**< текущий объект */
 object_t *main_object;		/**< главный объект */
 int *saved_sp;			/**< сохраненный указатель стека */
-int num_run_objects;		/**< число рабочих объектов */
+int num_run_objects;		/**< число не спящих объектов */
 int main_run;		/**< 1 - во время главной программы, 0 - обработка сообщений */
 int find_all_objects = 0;		/**< если 1, то ищутся все объекты по классу */
-word objects_list[256];		/**< список номеров объектов */
-word *objects_list_pos;		/**< указатель на массив номеров объектов */
-int kill_object_flag = 1;		/**< если равен 0, то объекти не удаляются при освобождении сценария*/
+word objects_list[256];		/**< список объектов для программы, формируется при поиске по классу */
+word *objects_list_pos;		/**< указатель в списке объектов */
+int kill_object_flag = 1;		/**< если равен 0, то объекты не удаляются при освобождении класса */
 
 /** 
  * Загрузка blancpc
  * Загрузка главного сценария
  */
-void object_init()
+void objects_init()
 {
   load_blancpc();
-  script_load(0, "main.io");
+  class_load(0, "main.io");
 }
 
 /** 
  * Отладочная печать объектов
  */
-void dump_objects()
+void objects_dump()
 {
   printf("objects: ");
   object_table_t *t = objects_table;
@@ -62,11 +62,11 @@ void dump_objects()
 
 /** 
  * Инициализация таблицы объектов
- * Объекти организуются в список, в начале только один главный объект,
+ * Объекты организуются в список, в начале только один главный объект,
  * остальные - свободны
  * @param max - максимум объектов
  */
-void object_init_table(int max)
+void objects_init_table(int max)
 {
   max_objects = max;
   objects_table = xmalloc(max * sizeof(object_table_t));
@@ -82,7 +82,7 @@ void object_init_table(int max)
   free_object = objects_table + 1; // главный объект сразу запущен
   num_run_objects = 1;
 #ifdef DEBUG
-  dump_objects();
+  objects_dump();
 #endif
   get_string = get_string_buf;
   text_string = text_string_buf;
@@ -91,15 +91,16 @@ void object_init_table(int max)
 }
 
 /** 
- * Настройка объекта для запуска сценария
+ * Настройка объекта для запуска
  * Создается стек вызовов, стек параметров, сегмент данных для 
  * переменных, объект запускается.
- * @param script загруженный образ сценария
+ * @param tb запись в таблице объектов
+ * @param class загруженный образ класса
  * @param size размер образа
  */
-void object_setup(object_table_t *tb, byte *script, int size)
+void object_setup(object_table_t *tb, byte *class, int size)
 {
-  script_t *h = (script_t *)script;
+  program_t *h = (program_t *)class;
   object_t *t = xmalloc(sizeof(object_t));
   memset(t, 0, sizeof(object_t));
   tb->object = t;
@@ -110,14 +111,14 @@ void object_setup(object_table_t *tb, byte *script, int size)
   t->call_stack = stack_new(h->stack_size);
   t->msg_stack = stack_new(h->msg_size);
   t->data = memory_alloc(h->data_size);
-  t->ip = script + h->entry + 2;
-  t->script = t->script2 = script;
+  t->ip = class + h->entry + 2;
+  t->class = t->class2 = class;
   t->id = h->id;
   t->version = h->version;
   t->frames_to_skip = t->cur_frames_to_skip = 1;
   t->running = -1;
   t->form = -1;
-  t->flags = OBJECT_NOSTART3; // bit 1
+  t->flags = OBJECT_NOHANDLEMSG; // bit 1
   t->header = h;
   t->f2c = 0;
   t->sprites_object = 0;
@@ -125,9 +126,9 @@ void object_setup(object_table_t *tb, byte *script, int size)
 }
 
 /// запуск главного объекта
-void object_setup_main(byte *script, int size)
+void object_setup_main(byte *class, int size)
 {
-  object_setup(objects_table, script, size);
+  object_setup(objects_table, class, size);
   main_object = objects_table->object;
 }
 
@@ -137,13 +138,13 @@ void object_setup_main(byte *script, int size)
  * Текущий объект становится родителем нового.
  * Новый объект наследует трансформацию перемещения.
  * Новый объект начинает работу
- * @param script образ сценария
+ * @param class образ сценария
  * @param size размер сценария
  * @param translate вектор перемещения
  * 
  * @return 
  */
-object_t *object_add(byte *script, int size, vec_t *translate)
+object_t *object_add(byte *class, int size, vec_t *translate)
 {
   object_table_t *next = current_object->next;
   object_table_t *new_object = free_object;
@@ -155,7 +156,7 @@ object_t *object_add(byte *script, int size, vec_t *translate)
     printf("Max objects reached %d\n", max_objects);
     exit(1);
   }
-  object_setup(new_object, script, size);
+  object_setup(new_object, class, size);
   current_value = (int)(new_object - objects_table) * 6;
   object_t *t = new_object->object;
   memcpy(t->data->data, run_object->data->data, 6); /**< трансформация из текущего объекта копируется в новый объект */
@@ -181,10 +182,9 @@ object_t *object_add(byte *script, int size, vec_t *translate)
  * Главный цикл объектов. Для всех объектов с состоянием запуска
  * запускается интерпретатор. Учитывается параметр пропуска
  * кадров перед тем как начать интерпретацию. Всего в объекте может
- * быть 3 сценария: 1-й основной, 2-й - дополнительный (запускается
- * всегда), 3-й - запускается если установлен соответствующий флаг.
- * После того как все объекти прошли цикл происходит обновление 
- * графики.
+ * быть 3 сценария: 1-й основной, 2-й - обработка клавиш (запускается
+ * всегда), 3-й - обработка сообщений, запускается если установлен соответствующий флаг.
+ * После того как все объекты прошли цикл происходит отрисовка спрайтов.
  */
 void objects_run()
 {
@@ -192,18 +192,18 @@ void objects_run()
   for (current_object = objects_table; current_object; ) {
     t = current_object->object;
 #ifdef DEBUG
-    printf("Run object %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->script), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
+    printf("Run object %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->class), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
     find_all_objects = main_run = 0;
     if (t->flags & OBJECT_MSG) // bit 7
-      if (!(t->flags & OBJECT_NOSTART3)) // bit 1
-	if (t->header->entry3) {
+      if (!(t->flags & OBJECT_NOHANDLEMSG)) // bit 1
+	if (t->header->msg_handle_entry) {
 #ifdef DEBUG
-	  printf("starting handle message: %x\n", t->header->entry3 + 0xa);
+	  printf("starting handle message: %x\n", t->header->msg_handle_entry + 0xa);
 #endif
 	  saved_sp = t->call_stack->sp;
 	  set_translate((word *)t->data->data);
-	  interpret(t, t->script + t->header->entry3 + 0xa);
+	  interpret(t, t->class + t->header->msg_handle_entry + 0xa);
 	  t->call_stack->sp = saved_sp;
 	  sprites_translate((word *)t->data->data);
 	}
@@ -216,19 +216,19 @@ void objects_run()
 	main_run++;
 	t->ip = interpret(t, t->ip);
 #ifdef DEBUG
-	printf("ip = %x\n", (int)(t->ip - t->script));
+	printf("ip = %x\n", (int)(t->ip - t->class));
 #endif
 	if (interpreting == 2) {
 	  current_object = current_object->next;
 	  continue;
 	}
-	if (t->header->entry2) {
+	if (t->header->key_entry) {
 #ifdef DEBUG
-	  printf("starting entry2: %x\n", t->header->entry2);
+	  printf("starting key_entry: %x\n", t->header->key_entry);
 #endif
 	  main_run = 0;
 	  saved_sp = t->call_stack->sp;
-	  interpret(t, t->script + t->header->entry2 + 6);
+	  interpret(t, t->class + t->header->key_entry + 6);
 	  t->call_stack->sp = saved_sp;
 	  }
 	sprites_translate((word *)t->data->data);
@@ -237,13 +237,13 @@ void objects_run()
     }
     current_object = current_object->next;
   }
-  render_update();
+  views_update();
 }
 
 /// команда - разрешение обработки сообщений
 void object_receive_msg()
 {
-  run_object->flags &= ~OBJECT_NOSTART3;
+  run_object->flags &= ~OBJECT_NOHANDLEMSG;
 #ifdef DEBUG
   printf("object receive msg flags: %x\n", run_object->flags);
 #endif
@@ -311,8 +311,8 @@ void object_kill(int num, int remove)
     return;
   object_t *rt = run_object;
 #ifdef DEBUG
-  printf("kill object %x\n", *t->script);
-  dump_objects();
+  printf("kill object %x\n", *t->class);
+  objects_dump();
 #endif
   run_object = t;
   remove_all_sprites(t->sprite_list, remove);
@@ -337,7 +337,7 @@ void object_kill(int num, int remove)
   free_object = tab;
   if (run_object == t) {
     interpreting = 2;
-    // должен запуститься следующий объект или render
+    // должен запуститься следующий объект
     current_object = prev;
   }
 }
@@ -358,7 +358,7 @@ void op_object_kill(int remove)
   object_kill(current_value, remove);
 }
 
-/// удаление объекта с очисткой всех изображений
+/// удаление объекта с очисткой всех спрайтов
 void op_object_kill_remove_all()
 {
 #ifdef DEBUG
@@ -371,7 +371,7 @@ void op_object_kill_remove_all()
  * Читает сообщение для текущего объекта
  * Сбрасывает флаг, если больше нет сообщений
  */
-void get_message()
+void object_get_message()
 {
   stack_t *s = run_object->msg_stack;
   if (stack_empty(run_object->msg_stack)) {
@@ -390,10 +390,9 @@ void get_message()
 }
 
 /** 
- * Пристановка выполнения основного скрипта объекта
- * передача управления только если без сохранения стека вызовов
+ * Пристановка выполнения программы объекта
  */
-void object_pause_yield_no_saved()
+void object_pause()
 {
 #ifdef DEBUG
   printf("object pause no saved yield\n");
@@ -414,11 +413,11 @@ void object_clear_messages()
 }
 
 /** 
- * Останавливает все объекти сценария
+ * Удаляет все объекты класса
  * 
- * @param id номер сценария
+ * @param id номер класса
  */
-void kill_object_by_script(int id)
+void objects_kill_by_class(int id)
 {
   int i;
   for (object_table_t *t = objects_table->next; t;) {
@@ -440,7 +439,7 @@ void object_stop()
 {
 #ifdef DEBUG
   printf("object_stop\n");
-  printf("run object = %x\n", *run_object->script);
+  printf("run object = %x\n", *run_object->class);
 #endif
   if (run_object == objects_table->object)
     exit(0);
@@ -448,7 +447,7 @@ void object_stop()
 }
 
 /** 
- * Продолжает выполнение объекта
+ * Возобновляет выполнение программы объекта
  * Параметр - номер объекта
  */
 void object_resume()
@@ -463,7 +462,7 @@ void object_resume()
   }
   object_t *t = objects_table[thr / 6].object;
 #ifdef DEBUG
-  printf("resume object %x num = %x\n", *t->script, current_value);
+  printf("resume object %x num = %x\n", *t->class, current_value);
 #endif
   t->running = 1;
 }
@@ -487,30 +486,28 @@ int object_num(object_t *t)
 /** 
  * Сохраняет очередной элемент списка объектов в переменную
  */
-void store_object_num()
+void object_store_next()
 {
   current_value = *(short *)objects_list_pos;
   if (current_value >= 0)
     objects_list_pos++;
   #ifdef DEBUG
-  printf("store object num: %x\n", current_value);
+  printf("store next object num: %x\n", current_value);
   #endif
   exchange_strings_store();
 }
 
 /** 
- * Читает номер сценария и ищет все объекти, которые выполняют этот
- * сценарий. Номера объектов записываются в список
- * и затем один объект сохраняется в переменную
+ * Находит объекты заданного класса и помещает в список
  */
-void script_num_to_object_num()
+void objects_find_by_class()
 {
   int num = fetch_word();
   object_table_t *tab = objects_table;
   object_t *t;
   word *pos = objects_list;
 #ifdef DEBUG
-  printf("script num: %x to object num\n", num);
+  printf("objects find by class: %x\n", num);
 #endif
   while (tab) {
     t = tab->object;
@@ -530,13 +527,13 @@ void script_num_to_object_num()
   *pos = (short)-1;
   find_all_objects = 0;
   objects_list_pos = objects_list;
-  store_object_num();
+  object_store_next();
 }
 
-void set_object_f25()
+void object_set_f25()
 {
 #ifdef DEBUG
-  printf("set object f25 -1\n");
+  printf("object set f25 -1\n");
 #endif
   run_object->f25 = -1;
 }
@@ -557,7 +554,7 @@ void set_sprites_object()
  * Загружает список номеров всех объектов кроме главного
  * Первый элемент списка сохраняет в переменную
  */
-void get_objects_list()
+void objects_get_all()
 {
   object_table_t *tab = objects_table->next;
   object_t *t;
@@ -581,12 +578,11 @@ void get_objects_list()
   *pos = -1;
   find_all_objects = 0;
   objects_list_pos = objects_list;
-  store_object_num();
+  object_store_next();
 }
 
 /** 
  * Устанавливает номер формы для объекта
- * 
  */
 void obj_set_form()
 {
@@ -597,7 +593,10 @@ void obj_set_form()
 #endif
 }
 
-void object_find_all()
+/** 
+ * Устанавливает признак поиска по классу: поиск всех объектов
+ */
+void set_find_all_objects()
 {
   find_all_objects = 1;
 #ifdef DEBUG
@@ -609,7 +608,7 @@ void object_find_all()
  * Команда - установка слоя для новых объектов.
  * Объекты при отрисовке будут сортироваться по убыванию слоев.
  */
-void set_object_layer()
+void object_set_layer()
 {
   new_get();
 #ifdef DEBUG
@@ -618,7 +617,10 @@ void set_object_layer()
   run_object->layer = (char)current_value;
 }
 
-void op_kill_object()
+/** 
+ * Удаление объекта без удаления спрайтов из окна
+ */
+void object_kill_no_remove()
 {
 #ifdef DEBUG
   printf("kill object\n");
@@ -639,7 +641,7 @@ void object_pause_by_ref()
     return;
   object_t *t = objects_table[current_value / 6].object;
 #ifdef DEBUG
-  printf("object pause class = %x\n", *t->script);
+  printf("object pause class = %x\n", *t->class);
 #endif
   t->running = 0;
 }

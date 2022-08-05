@@ -17,7 +17,7 @@
 #include "array.h"
 #include "render.h"
 #include "math.h"
-#include "script.h"
+#include "class.h"
 #include "interpret.h"
 #include "palette.h"
 #include "append.h"
@@ -106,13 +106,13 @@ func vm_op[] = {
   nimp, // 3c
   free_script, // 3d
   object_resume, // 3e
-  object_pause_yield_no_saved, // 3f
+  object_pause, // 3f
   run_script, // 40
-  op_kill_object, // 41
+  object_kill_no_remove, // 41
   yield, // 42
   nimp, // 43
   object_stop, // 44
-  op_script_load, // 45
+  op_class_load, // 45
   window_new, // 46
   window_set, // 47
   show_sprite_0, // 48
@@ -130,7 +130,7 @@ func vm_op[] = {
   nimp, // 54
   nimp, // 55
   nimp, // 56
-  store_object_num, // 57
+  object_store_next, // 57
   nimp, // 58
   nimp, // 59
   nimp, // 5a
@@ -146,7 +146,7 @@ func vm_op[] = {
   object_receive_msg, // 64
   nimp, // 65
   object_clear_messages, // 66
-  object_find_all, // 67
+  set_find_all_objects, // 67
   set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a
@@ -191,7 +191,7 @@ func vm_op[] = {
   nimp, // 91
   nimp, // 92
   nimp, // 93
-  script_num_to_object_num, // 94
+  objects_find_by_class, // 94
   play_sound6, // 95
   play_sound1, // 96
   nimp, // 97
@@ -199,11 +199,11 @@ func vm_op[] = {
   nimp, // 99
   nimp, // 9a
   nimp, // 9b
-  get_objects_list, // 9c
+  objects_get_all, // 9c
   play_sound, // 9d
   nimp, // 9e
   nimp, // 9f
-  set_object_f25, // a0
+  object_set_f25, // a0
   play_music, // a1
   nimp, // a2
   nimp, // a3
@@ -250,7 +250,7 @@ func vm_op[] = {
   nimp, // cc
   play_sound3, // cd
   nimp, // ce
-  set_object_layer, // cf
+  object_set_layer, // cf
   nimp, // d0
   nimp, // d1
   nimp, // d2
@@ -277,7 +277,7 @@ void null_op()
 void nimp()
 {
   printf("Not implemented: %x\n", *(current_ip - 1));
-  dump_objects();
+  objects_dump();
   exit(1);
 }
 
@@ -312,7 +312,7 @@ byte *interpret(object_t *t, byte *ip)
     graphics_get_events();
     graphics_palette_update();
 #ifdef DEBUG
-    printf("%04x:\t\t", (int)(current_ip - t->script));
+    printf("%04x:\t\t", (int)(current_ip - t->class));
 #endif
     op = fetch_byte();
     if (op < sizeof(vm_op) / sizeof(vm_op[0]))
