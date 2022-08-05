@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include "interpret.h"
-#include "script.h"
+#include "class.h"
 #include "file.h"
 #include "key.h"
 
@@ -23,7 +23,7 @@ void get_free()
   case 0:  current_value = 1024; break; // свободная память в кб
   case 1:  current_value = 1024; break; // число свободной памяти потоков в кб
   case 2: // число свободных сценариев
-    current_value = total_scripts - num_scripts; break; 
+    current_value = total_classes - num_classes; break; 
   case 3: // число свободных потоков
     current_value = max_objects - num_run_objects; break; 
   case 4:

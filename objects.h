@@ -76,6 +76,7 @@ void objects_init_table();
 void object_setup_main(byte *class, int size);
 void object_setup(object_table_t *tb, byte *class, int size);
 object_t *object_add(byte *class, int size, vec_t *translate);
+void object_new();
 void objects_run();
 
 void object_receive_msg();

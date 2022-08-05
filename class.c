@@ -3,7 +3,7 @@
  * @author alex <alex@localhost>
  * @date   Mon Jan 31 09:15:01 2022
  * 
- * @brief  Загрузка сценариев
+ * @brief  Модуль работы с классами
  * 
  */
 
@@ -13,175 +13,61 @@
 #include "types.h"
 #include "file.h"
 #include "objects.h"
-#include "memory.h"
+#include "io.h"
 #include "sprite.h"
 #include "interpret.h"
 #include "get.h"
 
-#define MAIN_TYPE 0		/**< главный сценарий */
-
-#pragma pack(1)
-
-/// заголовок io файла
+/// заголовок программы главного класса
 typedef struct {
-  word uncompressed_size;	/**< распакованный размер + 1 бит из flags */
-  word flags;			/**< сжатый или нет */
-  word type;			/**< 0 - главный сценарий */
-} io_header_t;
-
-/// заголовок главного файла сценариев
-typedef struct {
-  word total_scripts;		/**< всего сценариев */
-  word total_objects;		/**< число одновременных потоков */
+  word total_classes;		/**< всего классов */
+  word total_objects;		/**< максимум объектов */
   int size;			/**< размер для теста памяти: не используется */
-  int total_memory_size;	/**< сумма всех сегментов данных сценариев */
-  int total_images;		/**< максимальное число одновременных изображений (спрайтов) */
+  int total_memory_size;	/**< сумма всех данных объектов */
+  int total_sprites;		/**< максимальное число спрайтов */
 } main_header_t;
 
-extern FILE *handle;			/**< текущий файл сценария */
-int *script_sizes;		/**< таблица размеров файлов */
-byte **script_table = 0;	/**< таблица загруженных сценариев */
-int total_scripts;		/**< всего сценариев */
-int num_scripts;		/**< число загруженных сценариев */
-static byte cur_byte;		/**< текущий прочитанный байт */
-static byte bitcount = 0;	/**< счетчик бит */
+int *class_sizes;		/**< таблица размеров файлов */
+byte **class_table = 0;	/**< таблица загруженных классов */
+int total_classes;		/**< всего классов */
+int num_classes;		/**< число загруженных классов */
 
 /** 
- * чтение бит из текущего файла
- * 
- * @param num число бит
- * 
- * @return биты из потока
- */
-word get_bits(int num)
-{
-  word bits = 0;
-  //  printf("get_bits %d", num);
-  if (feof(handle))
-    return 0;
-  while (num > 0) {
-    if (!bitcount) {
-      cur_byte = fgetc(handle);
-      bitcount = 8;
-      //printf("cur_byte = %x count = %d\n", cur_byte, count);
-    }
-    bits <<= 1;
-    bits += cur_byte >> 7;
-    //printf("cur_byte = %x bits = %x count = %d\n", cur_byte, bits, count);
-    cur_byte <<= 1;
-    bitcount--;
-    num--;
-  }
-  //  printf(" %x\n", bits);
-  return bits;
-}
-
-/** 
- * чтение количества последовательностей
- * 
- * @param num число бит
- * @param cond условие останова
- * 
- * @return количество
- */
-int read_count(int num, int cond)
-{
-  int count = 0;
-  int bits;
-  
-  while (1) {
-    bits = get_bits(num);
-    count += bits;
-    if (bits != cond)
-      break;
-  }
-  return count;
-}
-
-/** 
- * Разпаковка потока из файла
- * Вариант кодирования LZ77: часть байт - не сжатые,
- * часть упаковывается через длину и смещение к предыдущим байтам
- * @param out адрес буфера, куда распаковывается
- * @param size размер буфера
- */
-void uncompress(byte *out, int size)
-{
-  byte dict[8];
-  byte *o = out;
-  int i;
-  int count;
-  int bits;
-  int num;
-  int offset;
-
-  bitcount = 0;
-  file_read(dict, sizeof(dict));
-  while (o < out + size) {
-    i = get_bits(1);
-    if (i) {
-      count = read_count(2, 3) + 1;
-      for (i = 0; i < count; i++)
-	*o++ = get_bits(8);
-      if (o >= out + size)
-	return;
-    }
-    bits = get_bits(3);
-    num = dict[bits];
-    bits &= 3;
-    if (!bits) {
-      offset = get_bits(num);
-      count = read_count(3, 7) + 4;
-    } else {
-      count = bits;
-      offset = get_bits(num);
-    }
-    count++;
-    for (i = 0; i < count; i++) {
-      bits = *(o - offset - 1);
-      *o++ = bits;
-      if (o >= out + size)
-	return;
-    }
-  }
-}
-
-/** 
- * Загружает заголовок главного сценария
+ * Загружает главный класс
  * Инициализация памяти, потоков, спрайтов
  */
-void load_main_script()
+void load_main_class()
 {
   main_header_t mh;
 
   file_read(&mh, sizeof(mh));
 #ifdef DEBUG
-    printf("Total scripts = %d\nTotal objects = %d\ntotal file size = %d\ntotal memory = %d\ntotal images = %d\n",
-	   mh.total_scripts, mh.total_objects, mh.size, mh.total_memory_size, mh.total_images);
+    printf("Total classes = %d\nTotal objects = %d\ntotal file size = %d\ntotal memory = %d\ntotal sprites = %d\n",
+	   mh.total_classes, mh.total_objects, mh.size, mh.total_memory_size, mh.total_sprites);
 #endif
-    total_scripts = mh.total_scripts;
-    num_scripts = 0;
-    script_table = xmalloc(total_scripts * sizeof(byte *));
-    script_sizes = xmalloc(total_scripts * sizeof(int *));
-    memset(script_table, 0, total_scripts * sizeof(byte *));
-    object_init_table(mh.total_objects);
+    total_classes = mh.total_classes;
+    num_classes = 0;
+    class_table = xmalloc(total_classes * sizeof(byte *));
+    class_sizes = xmalloc(total_classes * sizeof(int *));
+    memset(class_table, 0, total_classes * sizeof(byte *));
+    objects_init_table(mh.total_objects);
     memory_init(mh.total_memory_size);
-    sprites_init(mh.total_images);
+    sprites_init(mh.total_sprites);
 }
 
 /** 
- * Проверка был ли загружен сценарий
+ * Проверка был ли загружен класс
  * 
- * @param id номер сценария
+ * @param id номер класса
  * 
- * @return позицию в таблице сценариев или -1, если не найдено
+ * @return позицию в таблице классов или -1, если не найдено
  */
 int class_loaded(word id)
 {
-  if (!script_table)
+  if (!class_table)
     return -1;
-  for (int i = 0; i < num_scripts; i++)
-    if (*(word *)script_table[i] == id)
+  for (int i = 0; i < num_classes; i++)
+    if (*(word *)class_table[i] == id)
       return i;
   return -1;
 }
@@ -194,39 +80,24 @@ int class_loaded(word id)
  */
 void class_load(int id, char *name)
 {
-  io_header_t h;
+  byte *data;
   int size;
-  byte *script;
-
   if (class_loaded(id) != -1)
     return;
-  file_open(name, FILE_RW);
-  file_read(&h, sizeof(h));
-  size = h.uncompressed_size + ((h.flags & 0xff) << 16);
-#ifdef DEBUG
-  printf("Uncompressed size = %d flags = %x type = %d\n", size, h.flags, h.type);
-#endif
-  if (id == 0 || h.type == MAIN_TYPE)  {
-    load_main_script();
-    size -= 16;
-  }
-  script = xmalloc(size);
-  num_scripts++;
-  script_table[num_scripts - 1] = script;
-  script_sizes[num_scripts - 1] = size;
-  if ((h.flags >> 8 & 0xfe) == 0xa0)
-    uncompress(script, size);
-  file_close();
+  data = io_load(id, name, &size);
+  num_classes++;
+  class_table[num_classes - 1] = data;
+  class_sizes[num_classes - 1] = size;
   if (id == 0)
-    object_setup_main(script, size);
+    object_setup_main(data, size);
 }
 
-/// команда: загрузка сценария
+/// команда: загрузка класса
 void op_class_load()
 {
   word id = fetch_word();
 #ifdef DEBUG
-  printf("load script %x %s\n", id, current_ip);
+  printf("load class %x %s\n", id, current_ip);
 #endif
   if (id) {
     class_load(id, current_ip);
@@ -237,34 +108,26 @@ void op_class_load()
   exit(1);
 }
 
-/// команда: запуск сценария
-void run_script()
+byte *class_get(int i)
 {
-  word id = fetch_word();
-  int i = class_loaded(id);
-  if (i == -1) {
-    printf("Script %x (total %d) is not loaded\n", id, total_scripts);
-    exit(1);
-  }
-#ifdef DEBUG
-  printf("run script %x size = %d\n", id, script_sizes[i]);
-#endif
-  vec_t vec;
-  vec.x = vec.y = vec.z = 0;
-  object_t *t = object_add(script_table[i], script_sizes[i], &vec);
-  switch_string_store();
+  return class_table[i];
+}
+
+int class_size(int i)
+{
+  return class_sizes[i];
 }
 
 /** 
- * Команда - завершение работы сценария
- * Освобождается память сценария, останавливаются потоки сценария
+ * Команда - удаление класса
+ * Освобождается память, удаляются все объекты этого класса
  */
-void free_script()
+void class_free()
 {
   int num = fetch_word();
 #ifdef DEBUG
-  printf("free script: %x\n", num);
-  printf("cur script id = %x\n", run_object->id);
+  printf("class free: %x\n", num);
+  printf("cur class id = %x\n", run_object->id);
 #endif
   if (num == -1 || num == run_object->id)
     return;
@@ -272,19 +135,19 @@ void free_script()
   if (num == -1)
     return;
 #ifdef DEBUG
-  printf("free script pos = %d\n", num);
+  printf("free class pos = %d\n", num);
 #endif
   // play sound
-  free(script_table[num]);
-  for (int i = num; i < num_scripts; i++)
-    if (i + 1 == total_scripts) {
-      script_table[i] = 0;
-      script_sizes[i] = 0;
+  free(class_table[num]);
+  for (int i = num; i < num_classes; i++)
+    if (i + 1 == total_classes) {
+      class_table[i] = 0;
+      class_sizes[i] = 0;
     } else {
-      script_table[i] = script_table[i + 1];
-      script_sizes[i] = script_sizes[i + 1];
+      class_table[i] = class_table[i + 1];
+      class_sizes[i] = class_sizes[i + 1];
     }
-  num_scripts--;
-  kill_object_by_script(num);
+  num_classes--;
+  objects_kill_by_class(num);
   window_free_sprites();
 }

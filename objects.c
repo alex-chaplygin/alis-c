@@ -179,6 +179,26 @@ object_t *object_add(byte *class, int size, vec_t *translate)
 }
 
 /** 
+ * Команда: создане нового объекта, заданного класса
+ */
+void object_new()
+{
+  word id = fetch_word();
+  int i = class_loaded(id);
+  if (i == -1) {
+    printf("Class %x (total %d) is not loaded\n", id, total_classes);
+    exit(1);
+  }
+#ifdef DEBUG
+  printf("new object class = %x\n", id);
+#endif
+  vec_t vec;
+  vec.x = vec.y = vec.z = 0;
+  object_t *t = object_add(class_get(i), class_size(i), &vec);
+  switch_string_store();
+}
+
+/** 
  * Главный цикл объектов. Для всех объектов с состоянием запуска
  * запускается интерпретатор. Учитывается параметр пропуска
  * кадров перед тем как начать интерпретацию. Всего в объекте может

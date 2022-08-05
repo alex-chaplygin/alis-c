@@ -104,10 +104,10 @@ func vm_op[] = {
   nimp, // 3a
   null_op, // 3b
   nimp, // 3c
-  free_script, // 3d
+  class_free, // 3d
   object_resume, // 3e
   object_pause, // 3f
-  run_script, // 40
+  object_new, // 40
   object_kill_no_remove, // 41
   yield, // 42
   nimp, // 43
