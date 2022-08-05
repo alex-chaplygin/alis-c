@@ -77,7 +77,7 @@ void store_expression()
   stack_push(&stack, current_value);
   get_expression();
 #ifdef DEBUG
-  printf("%04x:\t\t", (int)(current_ip - run_object->script));
+  printf("%04x:\t\t", (int)(current_ip - run_object->class));
 #endif
   store();
 }
@@ -120,6 +120,10 @@ void set_byte_mem_word()
 void set_word_mem_word()
 {
   word w = fetch_word();
+  if ((short)w < 0) {
+    printf("set word mem word < 0 %x\n", w);
+    exit(1);
+  }
   seg_write_word(run_object->data, w, current_value);
 #ifdef DEBUG
   printf("store_w var_%x, %x; %d\n", w, current_value, current_value);
