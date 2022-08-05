@@ -30,9 +30,22 @@ void vec_delete(vec_t *v)
   free(v);
 }
 
+/** 
+ * Сложение векторов v3 = v1 + v2
+ */
 void vec_add(vec_t *v1, vec_t *v2, vec_t *v3)
 {
   v3->x = v1->x + v2->x;
   v3->y = v1->y + v2->y;
   v3->z = v1->z + v2->z;
+}
+
+/** 
+ * Вычитание векторов v3 = v1 - v2
+ */
+void vec_sub(vec_t *v1, vec_t *v2, vec_t *v3)
+{
+  v3->x = v1->x - v2->x;
+  v3->y = v1->y - v2->y;
+  v3->z = v1->z - v2->z;
 }
