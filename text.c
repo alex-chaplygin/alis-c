@@ -11,6 +11,7 @@
 #include "interpret.h"
 #include "get.h"
 #include "vector.h"
+#include "sprite.h"
 #include "res.h"
 
 vec_t text_pos;			/**< текущая позиция вывода символа */
@@ -83,7 +84,7 @@ void print_char(char c)
     if (c >= max_char)
       break;
     load_main_res = 1;
-    add_sprite(c + font_resource, &text_pos, 0, 0, text_tag);
+    sprite_add(c + font_resource, &text_pos, 0, 0, text_tag);
     load_main_res = 0;
     text_pos.x += char_width;
   }

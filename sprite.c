@@ -4,10 +4,10 @@
  * @date   Sun Jan 30 13:07:15 2022
  * 
  * @brief  Работа со спрайтами
- * Спрайты организованы в списки: списки потоков и списки сцен.
+ * Спрайты организованы в списки: списки объектов и списки отображений.
  * Спрайты добавляются в оба списка, список потока сортируется по
  * тегам, для последующей возможности удаления по тегу.
- * Список сцены используется для отрисовки
+ * Список отображения используется для отрисовки
  */
 
 #include <stdio.h>
@@ -29,8 +29,7 @@ sprite_t *sprite2;
 sprite_t *cursor_sprite;	/**< спрайт курсора мыши */
 sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
 sprite_t *prev_sprite;		/**< предыдущий спрайт в списке текущего потока */
-int sprite_flags;
-vec_t translate;			/**< вектор перемещения для всех спрайтов */
+vec_t current_origin;		/**< начало координат текущего объекта */
 int remove_from_view = 0;	/**< нужно ли удалять из сцены */
 int image_flag = 0;
 
@@ -55,7 +54,6 @@ void sprites_init(int num)
   cursor_sprite->origin.x = 0;
   cursor_sprite->origin.y = 0;
   cursor_sprite->state = SPRITE_CURSOR; // 11111110
-  sprite_flags = 0;
   free_sprite = cursor_sprite + 1;
   sprite_t *c = free_sprite;
   for (int i = 0; i < num - 4; i++) {
@@ -83,41 +81,19 @@ int num_free_sprites()
 }
 
 /** 
- * устанавливает вектор перемещения для всех спрайтов
- * 
- * @param data адрес регистров перемещения
+ * Перемещает все спрайты текущего объекта, если было перемещение
+ * @param delta вектор перемещения
  */
-void set_translate(word *data)
+void sprites_translate(vec_t *delta)
 {
-  translate.x = *(short *)data++;
-  translate.y = *(short *)data++;
-  translate.z = *(short *)data++;
-#ifdef DEBUG
-  printf("Set translate (%d %d %d)\n", translate.x, translate.y, translate.z);
-#endif
-}
-
-/** 
- * Обновляет координаты для всех спрайтов в списке
- * текущего потока, если было перемещение
- * @param data адрес регистров перемещения
- */
-void sprites_translate(word *data)
-{
-  vec_t delta;
-  delta.x = *(short *)data++ - translate.x;
-  delta.y = *(short *)data++ - translate.y;
-  delta.z = *(short *)data++ - translate.z;
-  if (!delta.z && !delta.x && !delta.y)
+  if (!delta->z && !delta->x && !delta->y)
     return;
-  printf("sprite translation delta = (%d %d %d)\n", delta.x, delta.y, delta.z);
+  printf("sprite translation delta = (%d %d %d)\n", delta->x, delta->y, delta->z);
   sprite_t *c = run_object->sprite_list;
   while (c) {
     if (c->state == SPRITE_READY)
       c->state = SPRITE_UPDATED;
-    c->center.x += delta.x;
-    c->center.y += delta.y;
-    c->center.z += delta.z;
+    vec_add(&c->center, delta, &c->center);
 #ifdef DEBUG
     printf("Translate sprite %d (%d %d %d)\n", (int)(c - sprites), c->center.x, c->center.y, c->center.z);
 #endif
@@ -126,20 +102,45 @@ void sprites_translate(word *data)
 }
 
 /** 
- * Ищет место добавления нового спрайта с заданным тегом
+ * Установка номера объекта, которому будут принадлежать новые спрайты
+ */
+void set_sprites_object()
+{
+  new_get();
+#ifdef DEBUG
+  printf("set sprites object: %x prev: %x\n", current_value, run_object->sprites_object);
+#endif
+  run_object->sprites_object = current_value;
+}
+
+/** 
+ * Команда - установка слоя для новых спрайтов.
+ * Спрайты при отрисовке будут сортироваться по убыванию слоев.
+ */
+void set_sprites_layer()
+{
+  new_get();
+#ifdef DEBUG
+  printf("set sprites layer = %x; %d\n", (char)current_value, (char)current_value);
+#endif
+  run_object->layer = (char)current_value;
+}
+
+/** 
+ * Ищет спрайт с заданным тегом
  * Спрайты группируются по тегам, от большего к меньшему
- * сцены идут от меньшей к большей
- * 1. найден спрайт с таким же тегом в главной сцене (возвращает спрайт, prev
- * 2. спрайт в главной сцене, тег больше (возвращает 0, prev)
+ * отображения идут от меньшей к большей
+ * 1. найден спрайт с таким же тегом в текущем отображении (возвращает спрайт, prev)
+ * 2. спрайт в текущем отображении, тег больше (возвращает 0, prev)
  * 3. список пустой (возвращает 0, 0)
- * 4. спрайт большей сцены (возвращает 0, prev)
- * 5. список потока закончился, все теги  меньше заданного (возвращает 0, prev)
+ * 4. спрайт большего отображения (возвращает 0, prev)
+ * 5. список закончился, все теги  меньше заданного (возвращает 0, prev)
  * @param tag заданный тег
  * @param c указатель куда будет записан спрайт, перед которым будет
  * добавлен новый
  * @return 0, если не найден спрайт с тегом, иначе 1
  */
-int sprite_find(int tag, sprite_t **c)
+int sprite_find_by_tag(int tag, sprite_t **c)
 {
   prev_sprite = 0;
   *c = run_object->sprite_list;
@@ -190,15 +191,18 @@ void dump_sprites(view_t *sc)
  * @param x_flip отражение по горизонтали
  * @param coord координаты центра спрайта
  */
-void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
+void sprite_set_params(sprite_t *c, byte *image, int x_flip, vec_t *coord)
 {
   c->image = image;
   c->x_flip = x_flip;
-  // много полей
-  // применение трансформации перемещения
-  vec_add(&translate, coord, &c->center);
+  c->object = run_object->sprites_object;
+  c->layer = run_object->layer;
+  c->f24 = run_object->f2c;
+  c->f1c = run_object->f25;
+  // к центру спрайта добавляются координаты объекта
+  vec_add(&current_origin, coord, &c->center);
 #ifdef DEBUG
-  printf("update sprite: (%d %d %d)\n", coord->x, coord->y, coord->z);
+  printf("sprite set params: (%d %d %d)\n", coord->x, coord->y, coord->z);
 #endif  
 }
 
@@ -213,7 +217,7 @@ void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord)
  * @param x_flip если 1 - то изображение зеркально поворачивается
  * @param coord координаты центра спрайта
  */
-void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord)
+void sprite_new(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord)
 {
   sprite_t *newc = free_sprite;
   if (!newc) {
@@ -230,24 +234,19 @@ void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coo
   newc->view = run_object->current_view;
   newc->tag = tag;
   newc->state = SPRITE_NEW;
-  newc->f24 = run_object->f2c;
-  newc->f1c = run_object->f25;
-  // спрайты могут создаваться разными потоками, но принадлежать одному
-  newc->object = run_object->sprites_object;
-  // test f1c
-  newc->layer = run_object->layer;
+  // спрайты могут создаваться разными объектами, но принадлежать одному
   sprite_t *sc = sprites + run_object->current_view->view_sprite;
   newc->next_in_view = sc->next_in_view;
   sc->next_in_view = newc;
-  sprite_set(newc, image, x_flip, coord);
+  sprite_set_params(newc, image, x_flip, coord);
 }
 
 /** 
- * Удаляет спрайт из списка окна, к которому он принадлежит
+ * Удаляет спрайт из списка отображения, к которому он принадлежит
  * голова списка сцены находится в view_sprite
  * @param c удаляемый спрайт
  */
-void sprite_remove_from_view_list(sprite_t *c)
+void sprite_remove_from_view(sprite_t *c)
 {
   view_t *sc = c->view;
   sprite_t *sc_c = sprites + sc->view_sprite;
@@ -265,9 +264,9 @@ void sprite_remove_from_view_list(sprite_t *c)
 }
 
 /** 
- * Удаляет спрайт из списка потока.
+ * Удаляет спрайт из списка объекта.
  * Для спрайта устанавливается состояние - удален, он будет
- * удален из списка отрисовки при отрисовке
+ * удален из списка отображения при отрисовке
  * @param c спрайт
  * @param remove_from_view если 1 - то спрайт будет удален из списка
  * сцены и возвращен в список свободных спрайтов
@@ -290,7 +289,7 @@ sprite_t *sprite_remove(sprite_t *c, int remove_from_view)
   if (remove_from_view) {
     c->next = free_sprite;
     free_sprite = c;
-    sprite_remove_from_view_list(c);
+    sprite_remove_from_view(c);
   }
   if (!prev_sprite) {
 #ifdef DEBUG
@@ -321,10 +320,9 @@ int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2)
 }
 
 /** 
- * Удаление объекта с заданным тегом
- * Все спрайты объекта удаляются
+ * Удаление спрайтов текущего объекта с заданным тегом
  */
-void clear_sprites_tag()
+void sprites_clear_with_tag()
 {
   new_get();
   int tag = (char)current_value;
@@ -334,30 +332,30 @@ void clear_sprites_tag()
   printf("clear object tag: %d\n", tag);
 #endif
   while (1) {
-    found = sprite_find(tag, &c);
+    found = sprite_find_by_tag(tag, &c);
     if (!found) {
       break;
     }
     c = sprite_remove(c, remove_from_view);
-  };
+  }
   remove_from_view = 0;
 }
 
 /** 
- * Удаляет спрайты объекта из всех списков
- * 
+ * Удаление спрайтов текущего объекта с заданным тегом.
+ * Удаляет спрайты объекта из всех списков.
  */
-void clear_sprites_from_view()
+void sprites_clear_with_tag_view()
 {
   remove_from_view = 1;
-  clear_sprites_tag();
+  sprites_clear_with_tag();
 }
 
 /** 
- * Удаляет все спрайты из списка потока
+ * Удаляет все спрайты из текущего объекта
  * 
  * @param sp первый спрайт списка
- * @param remove если 1 - то полное удаление из всех списков
+ * @param remove если 1 - то также удаление из списка отображения
  */
 void remove_all_sprites(sprite_t *sp, int remove)
 {
@@ -370,58 +368,20 @@ void remove_all_sprites(sprite_t *sp, int remove)
 }
 
 /** 
- * Установка начала координат для текущего объекта
- */
-void set_coord_origin()
-{
-  new_get();
-  seg_write_word(run_object->data, 0, current_value);
-  new_get();
-  seg_write_word(run_object->data, 2, current_value);
-  new_get();
-  seg_write_word(run_object->data, 4, current_value);
-#ifdef DEBUG
-  short *w = (short *)run_object->data->data;
-  printf("set coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
-#endif
-}
-
-/** 
- * Перемещение начала координат для текущего объекта
- */
-void move_coord_origin()
-{
-  short d;
-  new_get();
-  d = *(short *)seg_read(run_object->data, 0);
-  seg_write_word(run_object->data, 0, current_value + d);
-  new_get();
-  d = *(short *)seg_read(run_object->data, 2);
-  seg_write_word(run_object->data, 2, current_value + d);
-  new_get();
-  d = *(short *)seg_read(run_object->data, 4);
-  seg_write_word(run_object->data, 4, current_value + d);
-#ifdef DEBUG
-  short *w = (short *)run_object->data->data;
-  printf("move coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
-#endif
-}
-
-/** 
  * Удаляет спрайты с заданным тегом, если у них состояние - готов
  * Используется для изменения отдельных спрайтов (не объектов)
  * когда новый спрайт добавляется в список, а старый - удаляется
  * @param tag 
  */
-void delete_sprites(int tag)
+void sprites_clear_ready(int tag)
 {
   sprite_t *c;
   sprite_t *c2;
-  int found = sprite_find(tag, &c);
+  int found = sprite_find_by_tag(tag, &c);
   if (found)
     while (c) {
 #ifdef DEBUG
-      printf("delete_sprites: check sprite center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
+      printf("sprites_clear_ready: check sprite center(%d %d %d)\n", c->center.x, c->center.y, c->center.z);
 #endif
       if (c->state == SPRITE_READY) {
 	c = sprite_remove(c, 0);
@@ -441,7 +401,7 @@ void delete_sprites(int tag)
 }
 
 /** 
- * Добавление нового спрайта в список спрайтов текущей сцены
+ * Добавление нового спрайта в список спрайтов объекта и отображения
  * Новый спрайт группируется по тегу с другими спрайтами одного объекта.
  * Если объект с заданным тегом уже был, то он меняется на новую позицию
  * или у него меняется изображение (в этом случае ставится состояние - 
@@ -451,7 +411,7 @@ void delete_sprites(int tag)
  * @param x_flip отражение по горизонтали
  * @param is_object 1 - для объекта, 0 - спрайт
  */
-void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
+void sprite_add(int num, vec_t *origin, int x_flip, int is_object, int tag)
 {
   sprite_t *c;
   sprite_t *c2;
@@ -463,18 +423,18 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
     printf("image flag = 1\n");
     exit(1);
   }
-  // ищем объект
-  found = sprite_find(tag, &c);
+  // ищем спрайт с тегом
+  found = sprite_find_by_tag(tag, &c);
   // если не найден, то добавляем
   if (!found)
-    sprite_new_insert(c, tag, res_get_image(num), x_flip, origin);
+    sprite_new(c, tag, res_get_image(num), x_flip, origin);
   else {
     while(c) {
       if (c->state == SPRITE_READY) {
 	printf("add sprite: update sprite\n");
 	// обновить спрайт
 	c->state = SPRITE_UPDATED;
-	sprite_set(c, res_get_image(num), x_flip, origin);
+	sprite_set_params(c, res_get_image(num), x_flip, origin);
 	goto end;
       }
       found = sprite_next_on_tag(c, tag, &c2);
@@ -482,11 +442,11 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
       if (!found)
 	break;
     }
-    sprite_new_insert(c, tag, res_get_image(num), x_flip, origin);
+    sprite_new(c, tag, res_get_image(num), x_flip, origin);
   }
  end:
   if (!is_object)
-    delete_sprites(tag);
+    sprites_clear_ready(tag);
   image_flag = 0;
 }
 
@@ -495,9 +455,9 @@ void add_sprite(int num, vec_t *origin, int x_flip, int is_object, int tag)
  * Состоит из одного или более спрайтов
  *
  * @param img данные объекта
- * @param coord координаты центра объекта
+ * @param coord координаты центра
  * @param x_flip зеркальное отражение
- * @param tag тег объекта
+ * @param tag тег спрайтов
  */
 void add_composite_sprite(byte *img, vec_t *coord, int x_flip, int tag)
 {
@@ -521,22 +481,22 @@ void add_composite_sprite(byte *img, vec_t *coord, int x_flip, int tag)
 #ifdef DEBUG
     printf("offset = (%d %d %d) res_num = %d flip = %d\n", sub->ofs_x, sub->ofs_y, sub->ofs_z, num, x_fl);
 #endif
-    add_sprite(num, &vec, x_fl, 1, tag);
+    sprite_add(num, &vec, x_fl, 1, tag);
     sub++;
   }
-  delete_sprites(tag);
+  sprites_clear_ready(tag);
   image_flag = 0;
 }
 
 /** 
- * Добавление изображения
+ * Добавление спрайтов
  * Обработка палитры и составных спрайтов
  * при загрузке палитры prev_value - скорость появления, 0 - без появления* 
  * @param coord центр изображения 
  * @param x_flip зеркальное отражение
  * @param tag тег
  */
-void add_sprite_with_flip(vec_t *coord, int x_flip, int tag)
+void sprite_add_with_flip(vec_t *coord, int x_flip, int tag)
 {
   byte *img = res_get_image(current_value);
   if (*img == RES_PALETTE) {
@@ -546,15 +506,15 @@ void add_sprite_with_flip(vec_t *coord, int x_flip, int tag)
   } else if (*img == RES_COMPOSITE_SPRITE)
     add_composite_sprite(img, coord, x_flip, tag);
   else 
-    add_sprite(current_value, coord, x_flip, 0, tag);
+    sprite_add(current_value, coord, x_flip, 0, tag);
 }
 
 /** 
- * Показать спрайт
+ * Показать спрайт с заданными координатами и тегом
  * 
  * @param x_flip - если 1, то зеркальное отражение по вертикали
  */
-void show_sprite_with_flip(int x_flip)
+void sprite_show_with_flip(int x_flip)
 {
   vec_t coord;
   new_get();
@@ -569,24 +529,24 @@ void show_sprite_with_flip(int x_flip)
 #ifdef DEBUG
   printf("show sprite (%d, %d, %d) xflip = %d res_num = %d tag = %d\n", coord.x, coord.y, coord.z, x_flip, current_value, tag); 
 #endif
-  add_sprite_with_flip(&coord, x_flip, tag);
+  sprite_add_with_flip(&coord, x_flip, tag);
 }
 
 /// показать спрайт по координатам центра.
-void show_sprite()
+void sprite_show()
 {
   load_main_res = 0;
-  show_sprite_with_flip(run_object->x_flip);
+  sprite_show_with_flip(run_object->x_flip);
 }
 
-/// показать изображение, отраженное по горизонтали
-void show_sprite_flipped()
+/// показать спрайты с отражением по горизонтали
+void sprite_show_flipped()
 {
   load_main_res = 0;
 #ifdef DEBUG
-  printf("show object flipped\n");
+  printf("sprite show flipped\n");
 #endif
-  show_sprite_with_flip(run_object->x_flip ^ 1);  
+  sprite_show_with_flip(run_object->x_flip ^ 1);  
 }
 
 /// установка тега
@@ -599,7 +559,7 @@ void set_tag()
 }
 
 /// Удаляет все спрайты текущего объекта
-void clear_all_sprites()
+void sprites_clear_all_view()
 {
   #ifdef DEBUG
   printf("clear all sprites\n");
@@ -607,8 +567,8 @@ void clear_all_sprites()
   remove_all_sprites(run_object->sprite_list, 1);
 }
 
-/// показывает спрайт со всеми координатами 0
-void show_sprite_0()
+/// показывает спрайт со всеми координатами и тегом 0
+void sprite_show_0()
 {
   vec_t coord;
   load_main_res = 0;
@@ -617,14 +577,14 @@ void show_sprite_0()
 #ifdef DEBUG
   printf("show sprite 0 (0 0 0) res = %d xflip = %d\n", current_value, run_object->x_flip); 
 #endif
-  add_sprite_with_flip(&coord, run_object->x_flip, 0);
+  sprite_add_with_flip(&coord, run_object->x_flip, 0);
 }
 
 /// Удаляет все спрайты текущего объекта, может не удалять из окна
-void clear_all_sprites2()
+void sprites_clear_all()
 {
   #ifdef DEBUG
-  printf("clear all objects2\n");
+  printf("sprites clear all\n");
   #endif
   remove_all_sprites(run_object->sprite_list, remove_from_view);
 }

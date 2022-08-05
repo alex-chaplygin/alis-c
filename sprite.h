@@ -12,7 +12,8 @@ enum sprite_state_e {
   SPRITE_REMOVED = 1,		/**< спрайт будет удален при отрисовке */
   SPRITE_UPDATED = 2,	/**< спрайт после обновления координат или изображения */
 };
-  
+
+/// структура спрайта
 typedef struct sprite_s {
   vec_t origin;			/**< координаты левого верхнего угла спрайта */
   union {
@@ -38,30 +39,24 @@ typedef struct sprite_s {
 
 void sprites_init(int num);
 int num_free_sprites();
-void set_translate(word *data);
-void sprites_translate(word *data);
-int sprite_find(int tag, sprite_t **c);
-void sprite_set(sprite_t *c, byte *image, int x_flip, vec_t *coord);
-void sprite_new_insert(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord);
-int sprite_next_on_tag(sprite_t *c, int tag, sprite_t **c2);
-sprite_t *sprite_remove(sprite_t *c, int remove);
-void dump_sprites(view_t *sc);
-void clear_sprites_tag();
-void view_translate(view_t *view, sprite_t *c);
+void sprites_translate(vec_t *delta);
+void set_sprites_object();
+void set_sprites_layer();
+void sprites_clear_with_tag();
+void sprites_clear_with_tag_view();
 void remove_all_sprites(sprite_t *sp, int remove);
-void clear_sprites_from_view();
-void set_coord_origin();
-void move_coord_origin();
-void show_sprite();
-void show_sprite_flipped();
+void sprite_add(int num, vec_t *origin, int x_flip, int is_object, int tag);
+void sprite_show();
+void sprite_show_flipped();
 void set_tag();
-void clear_all_sprites();
-void show_sprite_0();
-void clear_all_sprites2();
+void sprites_clear_all_view();
+void sprite_show_0();
+void sprites_clear_all();
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */
 extern sprite_t *cursor_sprite;	/**< спрайт курсора мыши */
+extern vec_t current_origin;
 extern int remove_from_view;	/**< нужно ли удалять из окна */
 
 #endif

@@ -26,6 +26,7 @@
 #include "file.h"
 #include "mouse.h"
 #include "graphics.h"
+#include "collision.h"
 
 byte *current_ip;		/**< указатель команд */
 object_t *run_object;		/**< текущий выполняемый поток */
@@ -115,16 +116,16 @@ func vm_op[] = {
   op_class_load, // 45
   view_new, // 46
   view_set, // 47
-  show_sprite_0, // 48
-  show_sprite, // 49
+  sprite_show_0, // 48
+  sprite_show, // 49
   nimp, // 4a
-  clear_sprites_tag, // 4b
-  set_coord_origin, // 4c
-  move_coord_origin, // 4d
+  sprites_clear_with_tag, // 4b
+  object_set_origin, // 4c
+  object_move_origin, // 4d
   view_show, // 4e
   view_hide, // 4f
-  clear_all_sprites2, // 50
-  obj_set_form, // 51
+  sprites_clear_all, // 50
+  set_form, // 51
   nimp, // 52
   nimp, // 53
   nimp, // 54
@@ -210,7 +211,7 @@ func vm_op[] = {
   nimp, // a4
   nimp, //find_collision, // a5
   nimp, // a6
-  show_sprite_flipped, // a7
+  sprite_show_flipped, // a7
   nimp, // a8
   nimp, // a9
   nimp, // aa
@@ -250,7 +251,7 @@ func vm_op[] = {
   nimp, // cc
   play_sound3, // cd
   nimp, // ce
-  object_set_layer, // cf
+  set_sprites_layer, // cf
   nimp, // d0
   nimp, // d1
   nimp, // d2
@@ -263,8 +264,8 @@ func vm_op[] = {
   nimp, // d9
   nimp, // da
   nimp, // db
-  clear_all_sprites, // dc
-  clear_sprites_from_view, // dd
+  sprites_clear_all_view, // dc
+  sprites_clear_with_tag_view, // dd
   op_object_kill_remove_all // de
 };
 

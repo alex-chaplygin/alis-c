@@ -136,15 +136,15 @@ void object_setup_main(byte *class, int size)
  * Добавление нового объекта
  * Новый объект добавляется в конец списка объектов.
  * Текущий объект становится родителем нового.
- * Новый объект наследует трансформацию перемещения.
+ * Новый объект создается по координатам относительно родителя.
  * Новый объект начинает работу
  * @param class образ сценария
  * @param size размер сценария
- * @param translate вектор перемещения
+ * @param origin координаты объекта
  * 
  * @return 
  */
-object_t *object_add(byte *class, int size, vec_t *translate)
+object_t *object_add(byte *class, int size, vec_t *origin)
 {
   object_table_t *next = current_object->next;
   object_table_t *new_object = free_object;
@@ -159,14 +159,14 @@ object_t *object_add(byte *class, int size, vec_t *translate)
   object_setup(new_object, class, size);
   current_value = (int)(new_object - objects_table) * 6;
   object_t *t = new_object->object;
-  memcpy(t->data->data, run_object->data->data, 6); /**< трансформация из текущего объекта копируется в новый объект */
+  memcpy(t->data->data, run_object->data->data, 6); /**< начало координат копируется из родительского новый объект */
   memcpy(t->data->data + 9, run_object->data->data + 9, 3); /**< копируются 3 байта начиная с 9-го */
   t->parent = run_object;
   // добавления вектора перемещения к началу координат нового объекта
   short *coord = (short *)t->data->data;
-  coord[0] += translate->x;
-  coord[1] += translate->y;
-  coord[2] += translate->z;
+  coord[0] += origin->x;
+  coord[1] += origin->y;
+  coord[2] += origin->z;
   t->current_view = run_object->current_view;
   t->f22 = run_object->f22;
   t->sprites_object = current_value;
@@ -179,7 +179,7 @@ object_t *object_add(byte *class, int size, vec_t *translate)
 }
 
 /** 
- * Команда: создане нового объекта, заданного класса
+ * Команда: создане нового объекта заданного класса
  */
 void object_new()
 {
@@ -199,6 +199,20 @@ void object_new()
 }
 
 /** 
+ * Возвращает начало координат объекта
+ * 
+ * @param obj объект
+ * @param origin куда возвращаются координаты
+ */
+void object_get_origin(object_t *obj, vec_t *origin)
+{
+  short *data = (short *)obj->data->data;
+  origin->x = *(short *)data++;
+  origin->y = *(short *)data++;
+  origin->z = *(short *)data;
+}
+
+/** 
  * Главный цикл объектов. Для всех объектов с состоянием запуска
  * запускается интерпретатор. Учитывается параметр пропуска
  * кадров перед тем как начать интерпретацию. Всего в объекте может
@@ -209,6 +223,7 @@ void object_new()
 void objects_run()
 {
   object_t *t;
+  vec_t delta;
   for (current_object = objects_table; current_object; ) {
     t = current_object->object;
 #ifdef DEBUG
@@ -222,17 +237,19 @@ void objects_run()
 	  printf("starting handle message: %x\n", t->header->msg_handle_entry + 0xa);
 #endif
 	  saved_sp = t->call_stack->sp;
-	  set_translate((word *)t->data->data);
+	  object_get_origin(t, &current_origin);
 	  interpret(t, t->class + t->header->msg_handle_entry + 0xa);
 	  t->call_stack->sp = saved_sp;
-	  sprites_translate((word *)t->data->data);
+	  object_get_origin(t, &delta);
+	  vec_sub(&delta, &current_origin, &delta); 
+	  sprites_translate(&delta);
 	}
     if (t->running != 0) {
       if (t->running < 0)
 	t->running = 1;
       t->cur_frames_to_skip--;
       if (!t->cur_frames_to_skip) {
-	set_translate((word *)t->data->data);
+	object_get_origin(t, &current_origin);
 	main_run++;
 	t->ip = interpret(t, t->ip);
 #ifdef DEBUG
@@ -250,8 +267,10 @@ void objects_run()
 	  saved_sp = t->call_stack->sp;
 	  interpret(t, t->class + t->header->key_entry + 6);
 	  t->call_stack->sp = saved_sp;
-	  }
-	sprites_translate((word *)t->data->data);
+	}
+	object_get_origin(t, &delta);
+	vec_sub(&delta, &current_origin, &delta); 
+	sprites_translate(&delta);
 	t->cur_frames_to_skip = t->frames_to_skip;
       }
     }
@@ -559,15 +578,41 @@ void object_set_f25()
 }
 
 /** 
- * Установка номера объекта, которому будут принадлежать новые спрайты
+ * Установка начала координат для текущего объекта
  */
-void set_sprites_object()
+void object_set_origin()
 {
   new_get();
+  seg_write_word(run_object->data, 0, current_value);
+  new_get();
+  seg_write_word(run_object->data, 2, current_value);
+  new_get();
+  seg_write_word(run_object->data, 4, current_value);
 #ifdef DEBUG
-  printf("set sprites object: %x prev: %x\n", current_value, run_object->sprites_object);
+  short *w = (short *)run_object->data->data;
+  printf("object set origin: (%d %d %d)\n", w[0], w[1], w[2]);
 #endif
-  run_object->sprites_object = current_value;
+}
+
+/** 
+ * Перемещение начала координат для текущего объекта
+ */
+void object_move_origin()
+{
+  short d;
+  new_get();
+  d = *(short *)seg_read(run_object->data, 0);
+  seg_write_word(run_object->data, 0, current_value + d);
+  new_get();
+  d = *(short *)seg_read(run_object->data, 2);
+  seg_write_word(run_object->data, 2, current_value + d);
+  new_get();
+  d = *(short *)seg_read(run_object->data, 4);
+  seg_write_word(run_object->data, 4, current_value + d);
+#ifdef DEBUG
+  short *w = (short *)run_object->data->data;
+  printf("move coord origin: (%d %d %d)\n", w[0], w[1], w[2]);
+#endif
 }
 
 /** 
@@ -602,18 +647,6 @@ void objects_get_all()
 }
 
 /** 
- * Устанавливает номер формы для объекта
- */
-void obj_set_form()
-{
-  new_get();
-  run_object->form = current_value;
-#ifdef DEBUG
-  printf("obj set form = %x\n", current_value);
-#endif
-}
-
-/** 
  * Устанавливает признак поиска по классу: поиск всех объектов
  */
 void set_find_all_objects()
@@ -622,19 +655,6 @@ void set_find_all_objects()
 #ifdef DEBUG
   printf("find all objects = 1\n");
 #endif
-}
-
-/** 
- * Команда - установка слоя для новых объектов.
- * Объекты при отрисовке будут сортироваться по убыванию слоев.
- */
-void object_set_layer()
-{
-  new_get();
-#ifdef DEBUG
-  printf("set object layer = %x; %d\n", (char)current_value, (char)current_value);
-#endif
-  run_object->layer = (char)current_value;
 }
 
 /** 
