@@ -35,7 +35,6 @@ long time_step = 1000 / FPS;	/**< длительность кадра */
 void graphics_init()
 {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS);
-  //atexit(graphics_close);
   window = SDL_CreateWindow("alis", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
   if (window == NULL) {
     printf("Cannot create window\n");
@@ -61,7 +60,6 @@ int graphics_get_events()
     if (e.type == SDL_QUIT)
       return 0;
     else if (e.type == SDL_KEYDOWN)
-      // key func
       set_key(e.key.keysym.scancode, e.key.keysym.sym, e.key.keysym.mod);
     else if (e.type == SDL_KEYUP)
       release_key(e.key.keysym.scancode);
