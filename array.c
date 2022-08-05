@@ -36,10 +36,6 @@ void array_new()
   for (int i = 0; i < dim; i++)
     printf(", %d", *pos2--);
   printf("]\n");
-  //  ASSERT(memory[0x7f], 1)
-  //  ASSERT(memory[0x7e], 1)
-  //  ASSERT(memory[0x7d], 0)
-  //  ASSERT(memory[0x7c], 0x5a)
 #endif
 }
 
