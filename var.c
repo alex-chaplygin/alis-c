@@ -19,6 +19,10 @@
 void get_byte_mem_word()
 {
   word w = fetch_word();
+  if ((short)w < 0) {
+    printf("get byte mem word < 0\n");
+    exit(1);
+  }
   current_value = (char)*seg_read(run_object->data, w);
 #ifdef DEBUG
   printf("get byte varw_%x: %x; %d\n", w, current_value, current_value);
@@ -31,7 +35,7 @@ void get_word_mem_word()
   word w = fetch_word();
   if ((short)w == -40) // чтение номера родительского потока
     current_value = object_num(run_object->parent);
-  else if (w < 0) {
+  else if ((short)w < 0) {
     printf("get word mem word < 0\n");
     exit(1);
   } else
@@ -53,7 +57,7 @@ void get_string_mem_word()
 #endif
   current_ip = ip;
 #ifdef DEBUG
-  printf("new ip = %x\n", (int)(current_ip - run_object->script));
+  printf("new ip = %x\n", (int)(current_ip - run_object->class));
 #endif
 }
 
