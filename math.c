@@ -210,7 +210,7 @@ void sign()
 #ifdef DEBUG
   printf("sign %d\n", current_value);
 #endif
-  if (current_value > 0)
+  if (current_value != 0)
     current_value = (current_value > 0) ? 1 : -1;
 }
 
