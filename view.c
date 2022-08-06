@@ -133,7 +133,7 @@ void view_hide()
 #endif
 }
 
-/// установка текущей окна
+/// установка текущего окна
 void view_set()
 {
   word w = fetch_word();

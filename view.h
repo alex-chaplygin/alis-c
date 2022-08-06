@@ -3,7 +3,7 @@
 #pragma pack(1)
 
 #define VIEW_HIDDEN (1 << 6)	/**< окно не рисуется */
-#define VIEW_NOTTRANSLATED (1 << 7) /**< окно не была перемещена */
+#define VIEW_NOTTRANSLATED (1 << 7) /**< окно не было перемещено */
 
 #define VIEW2_FLAG1 (1 << 1)
 #define VIEW2_NOBLIT (1 << 5)	/**< окно не отправляется в видеопамять после отрисовки */
