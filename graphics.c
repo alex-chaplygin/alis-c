@@ -19,9 +19,6 @@
 #define WINDOW_HEIGHT 400
 #define FPS 40			/**< число кадров в секунду */
 
-int mouse_x;			/**< состояние мыши */
-int mouse_y;
-int mouse_buttons;
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
 SDL_Renderer *renderer;		/**< устройство вывода */
@@ -45,6 +42,7 @@ void graphics_init()
     printf("Cannot create renderer\n");
     exit(1);
   }
+  SDL_ShowCursor(SDL_DISABLE);
   current_time = SDL_GetTicks();
   screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 8, 0, 0, 0, 0);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -151,5 +149,51 @@ void graphics_set_palette(byte *palette)
   if (SDL_SetPaletteColors(screen->format->palette, colors, 0, 256)) {
     printf("palette error\n");
     exit(1);
+  }
+}
+
+/** 
+ * Читает изображение из видео буфера
+ * 
+ * @param x координаты левого верхнего угла
+ * @param y 
+ * @param w ширина
+ * @param h высота
+ * @param buf буфер
+ * @param neww ширина после отсечения
+ * @param newh высота после отсечения
+ */
+void graphics_read_buffer(int x, int y, int w, int h, byte *buf, int *neww, int *newh)
+{
+  byte *pos = video_buffer + SCREEN_WIDTH * y + x;
+  *neww = w;
+  *newh = h;
+  if (y >= SCREEN_HEIGHT - h)
+    *newh = SCREEN_HEIGHT - y;
+  if (x >= SCREEN_WIDTH - w)
+    *neww = SCREEN_WIDTH - x;
+  for (int i = 0; i < *newh; i++) {
+    memcpy(buf, pos, *neww);
+    buf += *neww;
+    pos += SCREEN_WIDTH;
+  }
+}
+
+/** 
+ * Пишет изображение в видео буфер
+ * 
+ * @param x координаты левого верхнего угла
+ * @param y 
+ * @param w ширина
+ * @param h высота
+ * @param buf буфер
+ */
+void graphics_write_buffer(int x, int y, int w, int h, byte *buf)
+{
+  byte *pos = video_buffer + SCREEN_WIDTH * y + x;
+  for (int i = 0; i < h; i++) {
+    memcpy(pos, buf, w);
+    buf += w;
+    pos += SCREEN_WIDTH;
   }
 }
