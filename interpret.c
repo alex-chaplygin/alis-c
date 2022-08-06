@@ -312,6 +312,7 @@ byte *interpret(object_t *t, byte *ip)
   while (interpreting) {
     graphics_get_events();
     graphics_palette_update();
+    draw_mouse_cursor();
 #ifdef DEBUG
     printf("%04x:\t\t", (int)(current_ip - t->class));
 #endif

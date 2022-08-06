@@ -317,6 +317,7 @@ void render_all()
   while (frames_to_skip > frame_num) {
     graphics_sleep();
     palette_update();
+    draw_mouse_cursor();
     frame_num++;
   }
   frame_num = 0;

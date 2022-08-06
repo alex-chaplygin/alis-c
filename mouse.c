@@ -36,6 +36,7 @@ void set_mouse_cursor()
   load_main_res = 0;
   new_get();
   cursor_sprite->image = res_get_image(current_value);
+  cursor_sprite->render_image = cursor_sprite->image;
 #ifdef DEBUG
   printf("set mouse cursor resource = %x\n", current_value);
 #endif
@@ -86,8 +87,9 @@ void draw_mouse_cursor()
     return;
   // стираем старую позицию курсора, рисуем сохраненное изображение
   graphics_write_buffer(screen_mouse_x, screen_mouse_y, cursor_width, cursor_height, under_cursor_image);
-  screen_mouse_x = mouse_x;
-  screen_mouse_y = mouse_y;
+  cursor_sprite->origin.x = screen_mouse_x = mouse_x;
+  cursor_sprite->origin.y = screen_mouse_y = mouse_y;
+  cursor_sprite->origin.z = 0;
   // запоминаем новое изображение
   graphics_read_buffer(screen_mouse_x, screen_mouse_y, CURSOR_LEN, CURSOR_LEN,
 		       under_cursor_image, &cursor_width, &cursor_height);

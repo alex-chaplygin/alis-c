@@ -6,3 +6,4 @@ void draw_mouse_cursor();
 extern int mouse_x;			/**< состояние мыши */
 extern int mouse_y;
 extern int mouse_buttons;
+extern int show_cursor;	/**< флаг курсора мыши */
