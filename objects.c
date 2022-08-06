@@ -276,7 +276,7 @@ void objects_run()
     }
     current_object = current_object->next;
   }
-  views_update();
+  render_all();
 }
 
 /// команда - разрешение обработки сообщений

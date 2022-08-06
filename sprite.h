@@ -52,6 +52,8 @@ void set_tag();
 void sprites_clear_all_view();
 void sprite_show_0();
 void sprites_clear_all();
+void dump_sprites(view_t *sc);
+void view_translate(view_t *view, sprite_t *c);
 
 extern sprite_t *sprites;		/**< таблица спрайтов */
 extern sprite_t *free_sprite;		/**< последний свободный спрайт из таблицы */

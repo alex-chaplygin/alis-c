@@ -3,7 +3,7 @@
  * @author alex <alex@localhost>
  * @date   Sun Jan 30 17:27:56 2022
  * 
- * @brief  Отрисовка спрайтов: сортировка, отсечение.
+ * @brief  Визуализация списка спрайтов.
  * Вычисление областей, где нужно перерисовать спрайты.
  */
 
@@ -21,63 +21,24 @@
 #include "get.h"
 #include "graphics.h"
 #include "palette.h"
+#include "clip.h"
 
 byte frames_to_skip = 0;		/**< через сколько кадров обновляется экран */
 byte frame_num = 0;			/**< текущий счетчик кадров */
 rectangle_t sprites_rec;	/**< окно вывода новых спрайтов */
-rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну сцены */
-int sprite_object;	/**< поток, чьи спрайты обрабатываются вместе */
-
-/// Сброс минимальных и максимальных значений окна новых спрайтов
-void reset_sprites_rec()
-{
-  sprites_rec.min_x = sprites_rec.min_y = 32000;
-  sprites_rec.max_x = sprites_rec.max_y = -32000;
-}
-
-/// Отладочная печать окна
-void print_rec(rectangle_t *rec)
-{
-  printf("min = (%d %d) max = (%d %d)\n", rec->min_x, rec->min_y, rec->max_x, rec->max_y);
-}
-
-/// Добавление области вывода спрайта в координатное окно новых спрайтов
-void update_sprites_rec(sprite_t *c)
-{
-  image_t *im = (image_t *)c->render_image;
-#ifdef DEBUG
-  printf("prev sprites rec: ");
-  print_rec(&sprites_rec);
-#endif
-  if (c->origin.z < 0)
-    return;
-  if (c->origin.x < sprites_rec.min_x)
-    sprites_rec.min_x = c->origin.x;
-  int max_x = c->origin.x + im->maxx;
-  if (max_x > sprites_rec.max_x)
-    sprites_rec.max_x = max_x;
-  if (c->origin.y < sprites_rec.min_y)
-    sprites_rec.min_y = c->origin.y;
-  int max_y = c->origin.y + im->maxy;
-  if (max_y > sprites_rec.max_y)
-    sprites_rec.max_y = max_y;
-#ifdef DEBUG
-  printf("image rec: %d %d\n", im->maxx, im->maxy);
-  printf("sprites rec: ");
-  print_rec(&sprites_rec);
-#endif
-}
+rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну view */
+int sprite_object;	/**< номер объекта, чьи спрайты обрабатываются вместе */
 
 /** 
  * Новый спрайт помещается на новое место в списке отрисовки спрайтов
  * Идет сортировка по убыванию z координаты, затем по порядку (order),
  * по убыванию тегов. Состояние спрайта становится - READY - готов к 
  * отрисовке
- * @param sc спрайт сцены
+ * @param sc спрайт головы списка отображения
  * @param sprite текущий спрайт
  * @return спрайт перед которым добавляется новый, если новый спрайт в конце списка, то возвращается он
  */
-sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
+sprite_t *insert_sort_sprite(sprite_t *sc, sprite_t *sprite)
 {
   sprite_t *prev;
   sprite_t* c = sc;
@@ -119,22 +80,22 @@ sprite_t *sort_sprite(sprite_t *sc, sprite_t *sprite)
 }
 
 /** 
- * Обработка нового спрайта: проецирование, сортировка.
+ * Обработка спрайта: проецирование, сортировка.
  * 
- * @param sc спрайт сцены
+ * @param sc спрайт отображения
  * @param prev предыдущий спрайт
- * @param c текущий спрайт
+ * @param c обрабатываемый спрайт спрайт
  */
-sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
+sprite_t *project_sort_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
 {
   // устанавливаем левый верхний угол после проецирования
   project_sprite(c, &c->origin);
-  // удаление спрайта из списка сцены
+  // удаление спрайта из списка отображения
   prev->next_in_view = c->next_in_view;
   // устанавливаем изображение отрисовки
   c->render_image = c->image;
-  update_sprites_rec(c);
-  sprite_t *s = sort_sprite(sc, c);
+  clip_update_rec(c, &sprites_rec);
+  sprite_t *s = insert_sort_sprite(sc, c);
    return prev;
 }
 
@@ -148,7 +109,7 @@ sprite_t *process_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
  */
 sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
 {
-  update_sprites_rec(c);
+  clip_update_rec(c, &sprites_rec);
   prev->next_in_view = c->next_in_view;
   c->next = free_sprite;
   free_sprite = c;
@@ -156,16 +117,16 @@ sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
 }
 
 /** 
- * Обработка вновь добавленных спрайтов: проецирование, сортировка
- * 
+ * Обработка спрайтов: проецирование, сортировка, добавление в область
+ * отрисовки, удаление
  * @param sc_sprite голова списка спрайтов
  */
-void process_new_sprites(sprite_t *sc_sprite)
+void process_sprites(sprite_t *sc_sprite)
 {
   sprite_t *sprite = sc_sprite;
   sprite_t *prev;
 #ifdef DEBUG
-  printf("process new sprites\n");
+  printf("process sprites\n");
 #endif
   do {
     prev = sprite;
@@ -175,65 +136,20 @@ void process_new_sprites(sprite_t *sc_sprite)
 #ifdef DEBUG
     printf("sprite: origin(%d %d %d)center(%d %d %d)tag(%d)state(%d)\n", sprite->origin.x, sprite->origin.y, sprite->origin.z, sprite->center.x, sprite->center.y, sprite->center.z, sprite->tag, sprite->state);
 #endif
-    // обрабатываются спрайты только одного потока
+    // обрабатываются спрайты заданного объекта
     if (sprite_object != sprite->object)
       continue;
     if (sprite->state == SPRITE_READY)
       continue;
     else if (sprite->state < SPRITE_READY) {
-      process_sprite(sc_sprite, prev, sprite);
+      project_sort_sprite(sc_sprite, prev, sprite);
     } else if (sprite->state == SPRITE_UPDATED) {
-      update_sprites_rec(sprite);
-      process_sprite(sc_sprite, prev, sprite);
+      clip_update_rec(sprite, &sprites_rec);
+      project_sort_sprite(sc_sprite, prev, sprite);
     } else 
       delete_sprite(prev, sprite);
     sprite = prev;
   } while (1);
-}
-
-/** 
- * Определяет, попадает ли спрайт в заданное координатное окно и
- * вычисляет пересечение спрайта и окна
- * 
- * @param sc_sprite спрайт
- * @param rec координатное окно, по которому идет отсечение
- * @param out координатное окно, которое получилось в результате 
- * пересечения спрайта и окна
- * @param round если 1, то координаты x выравниваются по сетке 16
- * @return 0, если спрайт полностью выходят за пределы окна, иначе 1
- */
-int clip_sprite(sprite_t *sc_sprite, rectangle_t *rec, rectangle_t *out, int round)
-{
-  // проверка, что регион отрисовки полностью выходит за пределы
-  // окна вывода
-  if (rec->min_x > sc_sprite->max.x) // для спрайта сцены center - это max
-    return 0;
-  if (rec->min_y > sc_sprite->max.y)
-    return 0;
-  if (rec->max_x < sc_sprite->origin.x)
-    return 0;
-  if (rec->max_y < sc_sprite->origin.y)
-    return 0;
-  if (round)
-    out->min_x = rec->min_x & 0xfffffff0; // округление до 16 в меньшую сторону
-  else
-    out->min_x = rec->min_x;
-  // отсечение по окну сцены из спрайта сцены
-  if (out->min_x < sc_sprite->origin.x)
-    out->min_x = sc_sprite->origin.x;
-  out->min_y = rec->min_y;
-  if (out->min_y < sc_sprite->origin.y)
-    out->min_y = sc_sprite->origin.y;
-  if (round)
-    out->max_x = rec->max_x | 0xf; // округление до 16 - 1 в большую сторону
-  else
-    out->max_x = rec->max_x;
-  if (out->max_x > sc_sprite->max.x)
-    out->max_x = sc_sprite->max.x;
-  out->max_y = rec->max_y;
-  if (out->max_y > sc_sprite->max.y)
-    out->max_y = sc_sprite->max.y;
-  return 1;
 }
 
 /** 
@@ -258,7 +174,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   int cl = clip_sprite(sp, clip, &blit, 0);
 #ifdef DEBUG
   printf("Sprite blit: res = %d", cl);
-  print_rec(&blit);
+  clip_print_rec(&blit);
 #endif
   sp->max.x = mx;
   sp->max.y = my;
@@ -268,12 +184,12 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
 }
 
 /** 
- * Перерисовка всех сцен относительно вычисленного окна clip_rec
- * Вычисленное окно clip_rec пересекается с окном сцены и вычисляется
+ * Перерисовка всех отображений относительно вычисленного окна clip_rec
+ * Вычисленное окно clip_rec пересекается с окном вывода и вычисляется
  * окно отсечения blit_rec, внутри которого будет отрисовка всех новых спрайтов
  * Спрайты с отрицательным z или несортированные не рисуются.
  */
-void render_all_views()
+void render_views()
 {
   view_t *s = view_list_head;
   sprite_t *spr;
@@ -287,7 +203,7 @@ void render_all_views()
       if (clip_sprite(spr, &clip_rec, &blit_rec, 1)) {
 #ifdef DEBUG
 	printf("Blit rec: ");
-	print_rec(&blit_rec);
+	clip_print_rec(&blit_rec);
 #endif
 	if (!(s->flags2 & VIEW2_MOUSE)) {
 	  printf("Set mouse flags\n");
@@ -308,13 +224,14 @@ void render_all_views()
 }
 
 /** 
- * Проверка сцены: если скрытая, то отрисовка не происходит
- * Попытка отсчеь все спрайты относительно окна текущей сцены
+ * Визуализация спрайтов
+ * Проверка отображения: если скрытое, то отрисовка не происходит
+ * Попытка отсчеь все спрайты относительно окна текущего отображения
  * Вычисляется координатное окно пересечения всех новых спрайтов 
- * и окна текущей сцены
- * Перерисовка всех сцен в той части где были новые спрайты
- * @param view текущая сцена
- * @param spr спрайт сцены
+ * и текущего окна
+ * Перерисовка всех окон в той части где были новые спрайты
+ * @param view текущее окно
+ * @param spr голова списка окна
  */
 void render_sprites(view_t *view, sprite_t *spr)
 {
@@ -323,11 +240,11 @@ void render_sprites(view_t *view, sprite_t *spr)
   int clip = clip_sprite(spr, &sprites_rec, &clip_rec, 1);
 #ifdef DEBUG
   printf("Clip rec: ");
-  print_rec(&clip_rec);
+  clip_print_rec(&clip_rec);
 #endif
   if (!clip)
     return;
-  render_all_views();
+  render_views();
   if (view->flags2 & VIEW2_NOBLIT) {
     printf("View: no blit\n");
     exit(1);
@@ -335,12 +252,12 @@ void render_sprites(view_t *view, sprite_t *spr)
 }
 
 /** 
- * Рендеринг сцены
+ * Визуализация окна отображения
  * если нет новых спрайтов, рендеринг не происходит
  * если появились новые спрайты, то перерисовывается часть сцены
- * где появились новые спрайты или было изменения
- * @param view сцена
- * @param sprite голова списка холстов
+ * где появились новые спрайты или были изменения
+ * @param view окно
+ * @param sprite голова списка спрайтов
  */
 void render_view(view_t *view, sprite_t *sprite)
 {
@@ -356,28 +273,28 @@ void render_view(view_t *view, sprite_t *sprite)
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
   sprite = sprite->next_in_view;
-  reset_sprites_rec();
+  clip_reset_rec(&sprites_rec);
   while (sprite) {
     switch (sprite->state) {
     case SPRITE_READY:
       break;
     case SPRITE_NEW:
       sprite_object = sprite->object;
-      sprite = process_sprite(sc_sprite, prev, sprite);
-      process_new_sprites(sprite);
+      sprite = project_sort_sprite(sc_sprite, prev, sprite);
+      process_sprites(sprite);
       render_sprites(view, sc_sprite);
       break;
     case SPRITE_UPDATED:
       sprite_object = sprite->object;
-      update_sprites_rec(sprite);// прямоугольник рассчитан на предыдущую позицию объекта
-      sprite = process_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
-      process_new_sprites(sprite);
+      clip_update_rec(sprite, &sprites_rec);// прямоугольник рассчитан на предыдущую позицию объекта
+      sprite = project_sort_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
+      process_sprites(sprite);
       render_sprites(view, sc_sprite);
       break;
     default: 
       sprite_object = sprite->object;
       sprite = delete_sprite(prev, sprite);
-      process_new_sprites(sprite);
+      process_sprites(sprite);
       render_sprites(view, sc_sprite);
     }
     prev = sprite;
@@ -389,8 +306,8 @@ void render_view(view_t *view, sprite_t *sprite)
 #endif
 }
 
-/// главный цикл рендеринга по сценам
-void views_update()
+/// главный цикл визуализации
+void render_all()
 {
   view_t *s = view_list_head;
 #ifdef DEBUG
