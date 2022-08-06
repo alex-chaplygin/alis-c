@@ -12,12 +12,20 @@
 #include "interpret.h"
 #include "sprite.h"
 #include "get.h"
-#include "graphics.h"
 #include "res.h"
+#include "draw.h"
+#include "graphics.h"
 
-#define CURSOR_LEN 8		/**< размер курсора мыши */
+#define CURSOR_LEN 16		/**< размер курсора мыши */
 
+int mouse_x;			/**< координаты мыши текущие */
+int mouse_y;
+int screen_mouse_x = 0;		/**< координаты мыши для отрисовки курсора */
+int screen_mouse_y = 0;
+int mouse_buttons;
 byte under_cursor_image[CURSOR_LEN * CURSOR_LEN]; /**< изображение под курсором мыши */
+int cursor_width;		/**< ширина и высота изображения под курсором */
+int cursor_height;
 int show_cursor = -1;	/**< флаг курсора мыши */
 
 /** 
@@ -53,19 +61,39 @@ void mouse_read()
  */
 void show_mouse_cursor()
 {
+  vec_t v = {screen_mouse_x, screen_mouse_y};
 #ifdef DEBUG
   printf("show mouse cursor\n");
 #endif
+  show_cursor = 1;
+  // сохранить ихображение под курсором
+  graphics_read_buffer(screen_mouse_x, screen_mouse_y, CURSOR_LEN, CURSOR_LEN,
+		       under_cursor_image, &cursor_width, &cursor_height);
+  // нарисовать курсор
+  rectangle_t r = {screen_mouse_x, screen_mouse_y,
+		   screen_mouse_x + cursor_width - 1, screen_mouse_y + cursor_height - 1};
+  draw_image(&v, (image_t *)cursor_sprite->image, 0, &r);
 }
 
 /** 
  * Отрисовка курсора мыши
- * 
  */
 void draw_mouse_cursor()
 {
-  if (show_cursor == -1)
+  if (show_cursor < 0)
     return;
-  printf("draw mouse cursor\n");
-  exit(1);
+  if (screen_mouse_x == mouse_x && screen_mouse_y == mouse_y)
+    return;
+  // стираем старую позицию курсора, рисуем сохраненное изображение
+  graphics_write_buffer(screen_mouse_x, screen_mouse_y, cursor_width, cursor_height, under_cursor_image);
+  screen_mouse_x = mouse_x;
+  screen_mouse_y = mouse_y;
+  // запоминаем новое изображение
+  graphics_read_buffer(screen_mouse_x, screen_mouse_y, CURSOR_LEN, CURSOR_LEN,
+		       under_cursor_image, &cursor_width, &cursor_height);
+  // рисуем курсор
+  vec_t v = {screen_mouse_x, screen_mouse_y};
+  rectangle_t r = {screen_mouse_x, screen_mouse_y,
+		   screen_mouse_x + cursor_width - 1, screen_mouse_y + cursor_height - 1};
+  draw_image(&v, (image_t *)cursor_sprite->image, 0, &r);
 }

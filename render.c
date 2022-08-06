@@ -22,6 +22,7 @@
 #include "graphics.h"
 #include "palette.h"
 #include "clip.h"
+#include "mouse.h"
 
 byte frames_to_skip = 0;		/**< через сколько кадров обновляется экран */
 byte frame_num = 0;			/**< текущий счетчик кадров */
@@ -329,6 +330,7 @@ void render_all()
       break;
     s = (view_t *)(memory + s->next);
   }
+  draw_mouse_cursor();
 }
 
 /// установка числа кадров, через сколько обновляется экран
