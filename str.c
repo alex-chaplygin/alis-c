@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "interpret.h"
+#include "get.h"
 
 /*
 void str_from_stack()
