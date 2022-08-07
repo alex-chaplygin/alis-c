@@ -12,7 +12,7 @@
 #include "types.h"
 #include "vector.h"
 #include "sprite.h"
-#include "scene.h"
+#include "class.h"
 #include "res.h"
 #include "math.h"
 
@@ -24,13 +24,13 @@
  */
 void project_sprite(sprite_t *c, vec_t *origin)
 {
-  scene_t *sc = c->scene;
+  view_t *sc = c->view;
   vec_t *v = vec_new(c->center.x - sc->origin_x, c->center.y - sc->origin_y, c->center.z - sc->origin_z);
 #ifdef DEBUG
   printf("projection: vec (%d %d %d)\n", (*v).x, (*v).y, (*v).z);
 #endif
-  if (sc->flags2 & SCENE2_3D) {
-    printf("SCENE 3D\n");
+  if (sc->flags2 & VIEW2_3D) {
+    printf("VIEW 3D\n");
     exit(1);
   }
   int y = (*v).y;
