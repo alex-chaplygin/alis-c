@@ -20,7 +20,7 @@ void call(int pos)
   stack_push(run_object->call_stack, (int)current_ip);
   current_ip += pos;
 #ifdef DEBUG
-  printf("new ip = %x\n", (int)(current_ip - run_object->script));
+  printf("new ip = %x\n", (int)(current_ip - run_object->class));
 #endif
 }
 
@@ -112,11 +112,11 @@ void saved_return()
     run_object->saved_sp = 0;
 #ifdef DEBUG
     printf("sp == saved_sp\n");
-    printf("ip = %x\n", (int)(current_ip - run_object->script));
+    printf("ip = %x\n", (int)(current_ip - run_object->class));
 #endif
   }
 #ifdef DEBUG
-  printf("new ip = %x\n", (int)(current_ip - run_object->script));
+  printf("new ip = %x\n", (int)(current_ip - run_object->class));
 #endif
 }
 
@@ -131,7 +131,7 @@ void jump_byte_z()
   else
     jump_byte();
 #ifdef DEBUG
-  printf("new ip = %x\n", (int)(current_ip - run_object->script));
+  printf("new ip = %x\n", (int)(current_ip - run_object->class));
 #endif
 }
 
@@ -206,7 +206,7 @@ void compare_jump_byte_z()
   else
     jump_byte();
 #ifdef DEBUG
-  printf("new ip = %x\n", (int)(current_ip - run_object->script));
+  printf("new ip = %x\n", (int)(current_ip - run_object->class));
 #endif
   exit(1);
 }
@@ -284,11 +284,11 @@ void loop_byte()
     char ofs = (char)fetch_byte();
     current_ip = ip + 1 + ofs;
 #ifdef DEBUG
-    printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->script));
+    printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->class));
 #endif
   } else {
 #ifdef DEBUG
-    printf("loop end ip = %x\n", (int)(current_ip - run_object->script));
+    printf("loop end ip = %x\n", (int)(current_ip - run_object->class));
 #endif
   }
 }
@@ -301,7 +301,7 @@ void op_jump_table()
 {
   new_get();
   int c = fetch_byte();
-  if ((int)(current_ip - run_object->script) & 1)
+  if ((int)(current_ip - run_object->class) & 1)
     current_ip++;
   current_value += *(short *)current_ip;
   if (current_value < 0 || current_value > c)
@@ -311,7 +311,7 @@ void op_jump_table()
     current_ip += 2 + *(short *)current_ip;
   }
   #ifdef DEBUG
-  printf("jump table count = %d cur_val = %x ip = %x\n", c, current_value, (int)(current_ip - run_object->script));
+  printf("jump table count = %d cur_val = %x ip = %x\n", c, current_value, (int)(current_ip - run_object->class));
   #endif
 }
 
@@ -323,11 +323,11 @@ void op_switch_case()
 {
   new_get();
   int count = fetch_byte() + 1;
-  if ((int)(current_ip - run_object->script) & 1)
+  if ((int)(current_ip - run_object->class) & 1)
     current_ip++;
 #ifdef DEBUG
   printf("switch case (%x) ; %d\n", current_value, current_value);
-  printf("ip = %x count = %d\n", (int)(current_ip - run_object->script), count);
+  printf("ip = %x count = %d\n", (int)(current_ip - run_object->class), count);
 #endif
   for (int i = 0; i < count; i++) {
     short val = *(short *)current_ip;
@@ -345,7 +345,7 @@ void op_switch_case()
     current_ip += 4;
   }
 #ifdef DEBUG
-  printf("ip = %x\n", (int)(current_ip - run_object->script));
+  printf("ip = %x\n", (int)(current_ip - run_object->class));
 #endif
 }
 
@@ -365,14 +365,14 @@ void call_resume(int s)
       run_object->call_stack->sp = run_object->saved_sp; // устанавливаем стек в сохраненный
       current_ip += s; // вызов без сохранения адреса возврата
 #ifdef DEBUG
-      printf("call resume main saved ip = %x\n", (int)(current_ip - run_object->script));
+      printf("call resume main saved ip = %x\n", (int)(current_ip - run_object->class));
 #endif
       exit(1);
     } else {
       call(s); // вызов с сохранением
       run_object->saved_sp = run_object->call_stack->sp; // сохраняем sp
 #ifdef DEBUG
-      printf("call resume main not saved ip = %x\n", (int)(current_ip - run_object->script));
+      printf("call resume main not saved ip = %x\n", (int)(current_ip - run_object->class));
 #endif
     }
   } else { // обработка сообщений или клавиш
@@ -380,7 +380,7 @@ void call_resume(int s)
       saved_sp = run_object->saved_sp; // модифицируем sp, который будет указателем стека вызовов
 #ifdef DEBUG
       printf("call resume no main saved saved_sp - th->saved: %x\n", saved_sp - run_object->saved_sp);
-      printf("thr->ip = %x\n", (int)(run_object->ip - run_object->script));
+      printf("thr->ip = %x\n", (int)(run_object->ip - run_object->class));
 #endif
     } else {
       run_object->saved_sp = --saved_sp; // текущий стек сохраняем
@@ -394,8 +394,8 @@ void call_resume(int s)
     run_object->running = 1; // программа запускается
     run_object->cur_frames_to_skip = 1; // пропуска кадра не будет
 #ifdef DEBUG
-    printf("ip = %x\n", (int)(current_ip - run_object->script));
-    printf("thr->ip = %x\n", (int)(run_object->ip - run_object->script));
+    printf("ip = %x\n", (int)(current_ip - run_object->class));
+    printf("thr->ip = %x\n", (int)(run_object->ip - run_object->class));
 #endif
   }
 }
@@ -407,6 +407,6 @@ void call_skip_word_save()
   current_ip++;
   call_resume(s);
 #ifdef DEBUG
-  printf("call skip word save: %d ip = %x\n", s, (int)(current_ip - run_object->script));
+  printf("call skip word save: %d ip = %x\n", s, (int)(current_ip - run_object->class));
 #endif
 }
