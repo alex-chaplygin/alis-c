@@ -228,7 +228,7 @@ func vm_op[] = {
   nimp, // b5
   nimp, // b6
   nimp, // b7
-  nimp, // b8
+  print_number, // b8
   print_string, // b9
   set_text_params, // ba
   nimp, // bb

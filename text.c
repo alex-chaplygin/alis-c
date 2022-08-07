@@ -104,3 +104,19 @@ void print_string()
   while (*c)
     print_char(*c++);
 }
+
+/** 
+ * Команда - печать числа
+ */
+void print_number()
+{
+  char str[MAX_STR];
+  new_get();
+#ifdef DEBUG
+  printf("print number: %d\n", current_value);
+#endif
+  sprintf(str, "%d", current_value);
+  char *c = str;
+  while (*c)
+    print_char(*c++);
+}
