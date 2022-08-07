@@ -3,8 +3,11 @@
  * @author alex <alex@localhost>
  * @date   Wed Aug  3 16:40:52 2022
  * 
- * @brief  Модуль проверки столкновений, пересечений
- * 
+ * @brief  Модуль поиска объектов, которые пересекаются с заданным.
+ *
+ * Форма объекта задается минимальным и максимальным значением
+ * координат относительно центра объекта (параллепипед).
+ * Формы могут состоять из списка паралепипедов.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,7 +92,20 @@ void create_bbox(short *origin, int flip, form_t *f, vec_t *min, vec_t *max)
 #endif
 }
 
-int check_bbox(short *origin, short *origin2, int flip, int flip2, form_t *f1, form_t *f2, word mask)
+/** 
+ * Проверка пересечения двух объектов
+ * 
+ * @param origin позиция первого объекта
+ * @param origin2 позиция второго объекта
+ * @param flip отражение первого объекта
+ * @param flip2 отражение второго объекта
+ * @param f1 форма первого объекта
+ * @param f2 форма второго объекта
+ * @param mask маска для отбора объектов (с какими искать пересечение)
+ * 
+ * @return 1 - объекты пересекаются, 0 - не пересекаются
+ */
+int objects_intersection(short *origin, short *origin2, int flip, int flip2, form_t *f1, form_t *f2, word mask)
 {
   vec_t min;
   vec_t max;
@@ -109,19 +125,19 @@ int check_bbox(short *origin, short *origin2, int flip, int flip2, form_t *f1, f
 	max2.z < min.z || min2.z > max.z ||
 	max2.x < min.x || min2.x > max.x)
       return 0;
-    else
-      return 1;
+    return 1;
   }
   return 0;
 }
 
 /** 
- * Загрузка формы. Нахождение столкновения.
+ * Поиск объектов, которые пересекаются с заданным объектом
  * 
- * @param angle угол
- * @param form номер формы
+ * @param origin позиция заданного объекта
+ * @param mask маска, какие объекты учитывать в поиске
+ * @param form форма исходного объекта
  */
-void find_collision_list(short *origin, word mask, int form)
+void find_intersection_list(short *origin, word mask, int form)
 {
   objects_list_pos = objects_list;
   if (form < 0)
@@ -146,10 +162,12 @@ void find_collision_list(short *origin, word mask, int form)
 #ifdef DEBUG
 	printf("check bbox, form type = %d\n", f->form_type);
 #endif
-	if (check_bbox(origin, (short *)t->data->data, run_object->x_flip,
+	if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip,
 		       t->x_flip, f, f2, mask)) {
 	  printf("check_bbox = true\n");
-	  *objects_list_pos++ = object_num(t);
+	  *objects_list_pos = object_num(t);
+	  objects_list_pos[256] = f2->mask;
+	  objects_list_pos++;
 	  if (!find_all_objects)
 	    goto end;
 	} else
@@ -163,10 +181,11 @@ void find_collision_list(short *origin, word mask, int form)
 }
 
 /** 
- * Нахождение списка объектов, которые пересекаются с формой.
- * На входе: координаты объекта, угол и форма.
+ * Нахождение списка объектов, которые пересекаются с текущим 
+ * объектом. Первый найденный объект сохраняется в переменную.
+ * На входе: маска (какие объекты искать) и форма (bbox).
  */
-void find_collision()
+void find_intersection_list_cur_obj()
 {
   short *origin = (short *)run_object->data->data;
   new_get();
@@ -174,9 +193,22 @@ void find_collision()
   new_get();
   short form = current_value;
 #ifdef DEBUG
-  printf("find collision: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+  printf("find intersection list cur obj: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
 #endif
-  find_collision_list(origin, mask, form);
+  find_intersection_list(origin, mask, form);
   objects_list_pos = objects_list;
   object_store_next();
+}
+
+/** 
+ * Сохраняет в переменную маску последнего найденного объекта
+ */
+void get_last_object_mask()
+{
+  current_value = objects_list_pos[255];
+#ifdef DEBUG
+  printf("get last mask: %x\n", current_value);
+#endif
+  switch_string_store();
+  exit(1);
 }

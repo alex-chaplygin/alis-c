@@ -26,7 +26,7 @@
 #include "file.h"
 #include "mouse.h"
 #include "graphics.h"
-#include "collision.h"
+#include "intersection.h"
 
 byte *current_ip;		/**< указатель команд */
 object_t *run_object;		/**< текущий выполняемый поток */
@@ -209,7 +209,7 @@ func vm_op[] = {
   nimp, // a2
   nimp, // a3
   nimp, // a4
-  find_collision, // a5
+  find_intersection_list_cur_obj, // a5
   nimp, // a6
   sprite_show_flipped, // a7
   nimp, // a8
@@ -266,7 +266,10 @@ func vm_op[] = {
   nimp, // db
   sprites_clear_all_view, // dc
   sprites_clear_with_tag_view, // dd
-  op_object_kill_remove_all // de
+  op_object_kill_remove_all, // de
+  nimp, //df
+  nimp, //e0
+  get_last_object_mask, //e1
 };
 
 /// Пустая команда
