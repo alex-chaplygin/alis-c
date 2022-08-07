@@ -107,5 +107,6 @@ extern int num_run_objects;		/**< число рабочих потоков */
 extern object_t *main_object;		/**< главный поток */
 extern object_table_t *objects_table; /**< таблица потоков */
 extern int *saved_sp;			/**< сохраненный указатель стека */
-
+extern word objects_list[256];
+extern int find_all_objects;		/**< если 1, то ищутся все объекты по классу */
 #endif
