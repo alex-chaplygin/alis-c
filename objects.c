@@ -26,7 +26,7 @@ int *saved_sp;			/**< сохраненный указатель стека */
 int num_run_objects;		/**< число не спящих объектов */
 int main_run;		/**< 1 - во время главной программы, 0 - обработка сообщений */
 int find_all_objects = 0;		/**< если 1, то ищутся все объекты по классу */
-word objects_list[256];		/**< список объектов для программы, формируется при поиске по классу */
+word objects_list[512];		/**< список 256 объектов + 256 масок для программы, формируется при поиске по классу */
 word *objects_list_pos;		/**< указатель в списке объектов */
 int kill_object_flag = 1;		/**< если равен 0, то объекты не удаляются при освобождении класса */
 
@@ -554,10 +554,12 @@ void objects_find_by_class()
     printf("check object num: %x run_object: %x\n", t->id, run_object->id);
 #endif
     if (t->id == num && t != run_object) {
-      *pos++ = (word)object_num(t);
+      *pos = (word)object_num(t);
+      pos[256] = 0; // маска поиска
 #ifdef DEBUG
-  printf("object num: %x\n", *pos);
+      printf("object num: %x\n", *pos);
 #endif
+      pos++;
       if (!find_all_objects)
 	break;
     }
@@ -631,7 +633,9 @@ void objects_get_all()
   while (tab) {
     t = tab->object;
     num = object_num(t);
-    *pos++ = num;
+    *pos = num;
+    pos[256] = 0;
+    pos++;
 #ifdef DEBUG
     printf("%x ", num);
 #endif
