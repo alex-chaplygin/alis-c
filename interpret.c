@@ -209,7 +209,7 @@ func vm_op[] = {
   nimp, // a2
   nimp, // a3
   nimp, // a4
-  nimp, //find_collision, // a5
+  find_collision, // a5
   nimp, // a6
   sprite_show_flipped, // a7
   nimp, // a8
