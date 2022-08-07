@@ -210,5 +210,4 @@ void get_last_object_mask()
   printf("get last mask: %x\n", current_value);
 #endif
   switch_string_store();
-  exit(1);
 }
