@@ -6,6 +6,8 @@
  * @brief  Работа с ресурсами io файлов
  * 
  */
+#include <stdio.h>
+#include <stdlib.h>
 #include "interpret.h"
 
 #pragma pack(1)
@@ -31,11 +33,11 @@ int load_main_res = 0;	/**< флаг загрузки ресурса из гла
  */
 byte *res_get_image(int num)
 {
-  byte *script = run_object->script;
+  byte *class = run_object->class;
   if (load_main_res)
-    script = main_object->script;
-  script_t *h = (script_t *)script;
-  resource_table_t *r = (resource_table_t *)(script + h->resources);
+    class = main_object->class;
+  program_t *h = (program_t *)class;
+  resource_table_t *r = (resource_table_t *)(class + h->resources);
 #ifdef DEBUG
     printf("res_get_image: main %d num %d\n", load_main_res, num);
 #endif
@@ -50,21 +52,26 @@ byte *res_get_image(int num)
 /** 
  * Загрузка формы из ресурсов
  * 
- * @param script образ класса
+ * @param class образ класса
  * @param num номер формы
  * 
  * @return загруженная форма
- *//*
-byte *res_get_form(byte *script, int num)
+ */
+byte *res_get_form(byte *class, int num)
 {
-  resource_table_t *r = (resource_table_t *)(script + h->resources);
+  program_t *h = (program_t *)class;
+  resource_table_t *r = (resource_table_t *)(class + h->resources);
 #ifdef DEBUG
-    printf("load form: num %d\n", num);
+  printf("load form: num %d count %d \n", num, r->form_count);
 #endif
   if (num >= r->form_count) {
     printf("load_form: num %d > total %d\n", num, r->form_count);
     exit(1);
   }
   byte *pos = (byte *)r + r->form_table + num * sizeof(word);
-  return (form_t *)pos;
-  }*/
+  pos += *(word *)pos;
+#ifdef DEBUG
+  dump_mem(pos, 16);
+#endif
+  return pos;
+}
