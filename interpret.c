@@ -317,7 +317,7 @@ byte *interpret(object_t *t, byte *ip)
     graphics_palette_update();
     draw_mouse_cursor();
 #ifdef DEBUG
-    printf("%04x:\t\t", (int)(current_ip - t->class));
+    printf("%04x:\t%d\t", (int)(current_ip - t->class), main_run);
 #endif
     op = fetch_byte();
     if (op < sizeof(vm_op) / sizeof(vm_op[0]))
