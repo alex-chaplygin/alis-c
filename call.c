@@ -92,7 +92,7 @@ void jump_skip_word()
 void saved_return()
 {
 #ifdef DEBUG
-  printf("saved return stack pos = %d\n", (int)(run_object->call_stack->sp - run_object->saved_sp));
+  printf("saved return stack pos = %d class = %x\n", (int)(run_object->call_stack->sp - saved_sp), *run_object->class);
 #endif
   if (!main_run) {
     if (run_object->call_stack->sp >= saved_sp) {
@@ -113,6 +113,7 @@ void saved_return()
 #ifdef DEBUG
     printf("sp == saved_sp\n");
     printf("ip = %x\n", (int)(current_ip - run_object->class));
+    objects_dump();
 #endif
   }
 #ifdef DEBUG
@@ -358,7 +359,7 @@ void op_switch_case()
 void call_resume(int s)
 {
 #ifdef DEBUG
-  printf("call resume to: %x\n", s);
+  printf("call resume to: %x class = %x\n", s, *run_object->class);
 #endif
   if (main_run) { // главная программа потока
     if (run_object->saved_sp) { // если был сохраненный sp
@@ -367,7 +368,6 @@ void call_resume(int s)
 #ifdef DEBUG
       printf("call resume main saved ip = %x\n", (int)(current_ip - run_object->class));
 #endif
-      exit(1);
     } else {
       call(s); // вызов с сохранением
       run_object->saved_sp = run_object->call_stack->sp; // сохраняем sp
@@ -379,7 +379,7 @@ void call_resume(int s)
     if (run_object->saved_sp) { // если был сохраененный sp
       saved_sp = run_object->saved_sp; // модифицируем sp, который будет указателем стека вызовов
 #ifdef DEBUG
-      printf("call resume no main saved saved_sp - th->saved: %x\n", saved_sp - run_object->saved_sp);
+      printf("call resume no main saved saved_sp - th->saved: %x\n", (int)(saved_sp - run_object->saved_sp));
       printf("thr->ip = %x\n", (int)(run_object->ip - run_object->class));
 #endif
     } else {
