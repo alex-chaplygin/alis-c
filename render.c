@@ -317,7 +317,6 @@ void render_all()
   while (frames_to_skip > frame_num) {
     graphics_sleep();
     palette_update();
-    draw_mouse_cursor();
     frame_num++;
   }
   frame_num = 0;
@@ -331,7 +330,6 @@ void render_all()
       break;
     s = (view_t *)(memory + s->next);
   }
-  draw_mouse_cursor();
 }
 
 /// установка числа кадров, через сколько обновляется экран

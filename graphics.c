@@ -22,7 +22,9 @@
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
 SDL_Renderer *renderer;		/**< устройство вывода */
-SDL_Surface *screen;		/**< поверхность экрана */
+SDL_Surface *screen;		/**< поверхность экрана без курсора мыши */
+SDL_Surface *screen2;		/**< поверхность экрана */
+SDL_Surface *cursor_surface;	/**< курсор мыши */
 long current_time;		/**< текущее время */
 long time_step = 1000 / FPS;	/**< длительность кадра */
 
@@ -43,8 +45,11 @@ void graphics_init()
     exit(1);
   }
   SDL_ShowCursor(SDL_DISABLE);
+  cursor_surface = SDL_CreateRGBSurface(0, 16, 16, 8, 0, 0, 0, 0);
+  SDL_SetColorKey(cursor_surface, SDL_TRUE, 0);
   current_time = SDL_GetTicks();
   screen = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 8, 0, 0, 0, 0);
+  screen2 = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 8, 0, 0, 0, 0);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
   SDL_LockSurface(screen);
   video_buffer = screen->pixels;
@@ -104,10 +109,14 @@ int graphics_update()
     SDL_Delay(now - current_time);
   else
     current_time = now;
-  draw_mouse_cursor();
-  SDL_UnlockSurface(screen);  
-  SDL_RenderClear(renderer);
-  SDL_Texture* t = SDL_CreateTextureFromSurface(renderer, screen);
+  SDL_UnlockSurface(screen);
+  //SDL_RenderClear(renderer);
+  SDL_BlitSurface(screen, NULL, screen2, NULL);
+  if (show_cursor >= 0) {
+    SDL_Rect curs = {mouse_x, mouse_y, 16, 16};
+    SDL_BlitSurface(cursor_surface, NULL, screen2, &curs);
+  }
+  SDL_Texture* t = SDL_CreateTextureFromSurface(renderer, screen2);
   SDL_RenderCopy(renderer, t, NULL, NULL);
   SDL_DestroyTexture(t);
   SDL_RenderPresent(renderer);
@@ -150,50 +159,26 @@ void graphics_set_palette(byte *palette)
     printf("palette error\n");
     exit(1);
   }
-}
-
-/** 
- * Читает изображение из видео буфера
- * 
- * @param x координаты левого верхнего угла
- * @param y 
- * @param w ширина
- * @param h высота
- * @param buf буфер
- * @param neww ширина после отсечения
- * @param newh высота после отсечения
- */
-void graphics_read_buffer(int x, int y, int w, int h, byte *buf, int *neww, int *newh)
-{
-  byte *pos = video_buffer + SCREEN_WIDTH * y + x;
-  *neww = w;
-  *newh = h;
-  if (y >= SCREEN_HEIGHT - h)
-    *newh = SCREEN_HEIGHT - y;
-  if (x >= SCREEN_WIDTH - w)
-    *neww = SCREEN_WIDTH - x;
-  for (int i = 0; i < *newh; i++) {
-    memcpy(buf, pos, *neww);
-    buf += *neww;
-    pos += SCREEN_WIDTH;
+  if (SDL_SetPaletteColors(screen2->format->palette, colors, 0, 256)) {
+    printf("palette error\n");
+    exit(1);
+  }
+  if (SDL_SetPaletteColors(cursor_surface->format->palette, colors, 0, 256)) {
+    printf("palette error\n");
+    exit(1);
   }
 }
 
 /** 
- * Пишет изображение в видео буфер
+ * Устанавливает изображение курсора мыши
  * 
- * @param x координаты левого верхнего угла
- * @param y 
+ * @param img изображение
  * @param w ширина
  * @param h высота
- * @param buf буфер
  */
-void graphics_write_buffer(int x, int y, int w, int h, byte *buf)
+void graphics_set_cursor(byte *img, int w, int h)
 {
-  byte *pos = video_buffer + SCREEN_WIDTH * y + x;
-  for (int i = 0; i < h; i++) {
-    memcpy(pos, buf, w);
-    buf += w;
-    pos += SCREEN_WIDTH;
-  }
+  SDL_LockSurface(cursor_surface);
+  memcpy(cursor_surface->pixels, img, w * h);
+  SDL_UnlockSurface(cursor_surface);
 }
