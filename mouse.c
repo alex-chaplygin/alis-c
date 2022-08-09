@@ -68,3 +68,14 @@ void show_mouse_cursor()
 #endif
   show_cursor = 1;
 }
+
+/** 
+ * Команда - показать курсор мыши
+ */
+void hide_mouse_cursor()
+{
+#ifdef DEBUG
+  printf("hide mouse cursor\n");
+#endif
+  show_cursor = -1;
+}
