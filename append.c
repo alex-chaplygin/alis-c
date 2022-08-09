@@ -31,7 +31,7 @@ func add_op[] = {
   add_word_mem_byte, // 14 
   add_string_mem_byte, // 16
   nimp, // 18
-  nimp, // 1a
+  add_byte_array_byte, // 1a
   nimp, // 1c
   add_byte_global_word, // 1e
   add_word_global_word, // 20
@@ -231,5 +231,22 @@ void add_byte_global_array_word()
   *b += (byte)current_value;
 #ifdef DEBUG
   printf("after add = %x\n", *b);
+#endif
+}
+
+/// добавление значения в массив byte по адресу byte
+void add_byte_array_byte()
+{
+  byte w = fetch_byte();
+  int idx = current_value;
+  byte *pos = array_pos(seg_read(run_object->data, w), 0, 1);
+  current_value = (word)stack_pop(&stack);
+#ifdef DEBUG
+  printf("add_b arrb_%x[%d], %x; %d\n", w, idx, (byte)current_value, (byte)current_value);
+  printf("was value = %x\n", *pos);
+#endif
+  *pos += (byte)current_value;
+#ifdef DEBUG
+  printf("after add = %x\n", *pos);
 #endif
 }
