@@ -32,7 +32,7 @@ func add_op[] = {
   add_string_mem_byte, // 16
   nimp, // 18
   add_byte_array_byte, // 1a
-  nimp, // 1c
+  add_word_array_byte, // 1c
   add_byte_global_word, // 1e
   add_word_global_word, // 20
   nimp, // 22
@@ -246,6 +246,41 @@ void add_byte_array_byte()
   printf("was value = %x\n", *pos);
 #endif
   *pos += (byte)current_value;
+#ifdef DEBUG
+  printf("after add = %x\n", *pos);
+#endif
+}
+
+/// добавление слова в глобальный массив по адресу word
+void add_word_global_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  short *b = (short *)array_pos(seg_read(objects_table->object->data, w), 0, 2);
+  current_value = stack_pop(&stack);
+#ifdef DEBUG
+  printf("add_w main.arrw_%x[%d] %x; %d\n", w, idx, current_value, current_value);
+  printf("was value = %x\n", *b);
+#endif
+  *b += current_value;
+#ifdef DEBUG
+  printf("after add = %x\n", *b);
+#endif
+  exit(1);
+}
+
+/// добавление в массив word по адресу byte
+void add_word_array_byte()
+{
+  byte w = fetch_byte();
+  int idx = current_value;
+  word *pos = (word *)array_pos(seg_read(run_object->data, w), 0, 2);
+  current_value = (short)stack_pop(&stack);
+#ifdef DEBUG
+  printf("add_w arrb_%x[%d], %x; %d\n", w, idx, current_value, current_value);
+  printf("was value = %x\n", *pos);
+#endif
+  *pos += current_value;
 #ifdef DEBUG
   printf("after add = %x\n", *pos);
 #endif

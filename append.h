@@ -12,3 +12,5 @@ int add_word_global_word();
 int add_expression();
 void add_byte_global_array_word();
 void add_byte_array_byte();
+void add_word_global_array_word();
+void add_word_array_byte();
