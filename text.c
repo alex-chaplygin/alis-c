@@ -91,18 +91,27 @@ void print_char(char c)
 }
 
 /** 
- * Команда - печать строки
+ * Печать строки на текущей позиции
+ * 
+ * @param c строка
  */
-void print_string()
+void print_string(char *c)
+{
+  while (*c)
+    print_char(*c++);
+}
+
+/** 
+ * Команда - печать сохраненной строки
+ */
+void print_get_string()
 {
   init_stack();
   switch_string_get();
 #ifdef DEBUG
   printf("print string: %s\n", get_string);
 #endif
-  char *c = get_string;
-  while (*c)
-    print_char(*c++);
+  print_string(get_string);
 }
 
 /** 
@@ -116,7 +125,5 @@ void print_number()
   printf("print number: %d\n", current_value);
 #endif
   sprintf(str, "%d", current_value);
-  char *c = str;
-  while (*c)
-    print_char(*c++);
+  print_string(str);
 }
