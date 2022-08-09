@@ -350,7 +350,7 @@ void object_kill(int num, int remove)
     return;
   object_t *rt = run_object;
 #ifdef DEBUG
-  printf("kill object %x\n", *t->class);
+  printf("kill object num %x class %x\n", num, *t->class);
   objects_dump();
 #endif
   run_object = t;
@@ -463,9 +463,8 @@ void objects_kill_by_class(int id)
 #ifdef DEBUG
     printf("kill object check = %x\n", t->object->id);
 #endif
-    exit(1);
     if (t->object->id == id && kill_object_flag)
-      object_kill(object_num(t->object), 0);
+      object_kill(object_num(t->object), 1);
     t = t->next;
   }
 }
