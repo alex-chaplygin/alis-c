@@ -68,8 +68,8 @@ byte *res_get_form(byte *class, int num)
     printf("load_form: num %d > total %d\n", num, r->form_count);
     exit(1);
   }
-  byte *pos = (byte *)r + r->form_table + num * sizeof(word);
-  pos += *(word *)pos;
+  byte *pos = (byte *)r + r->form_table;
+  pos += *(word *)&pos[num * sizeof(word)];
 #ifdef DEBUG
   dump_mem(pos, 16);
 #endif
