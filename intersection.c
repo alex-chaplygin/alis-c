@@ -211,3 +211,29 @@ void get_last_object_mask()
 #endif
   switch_string_store();
 }
+
+/** 
+ * Нахождение списка объектов, которые пересекаются с формой
+ * в заданной точке. Первый найденный объект сохраняется в переменную.
+ * На входе: маска (какие объекты искать) и форма (bbox).
+ */
+void find_intersection_list_point()
+{
+  short origin[3];
+  new_get();
+  origin[0] = current_value;
+  new_get();
+  origin[1] = current_value;
+  new_get();
+  origin[2] = current_value;
+  new_get();
+  short mask = current_value;
+  new_get();
+  short form = current_value;
+#ifdef DEBUG
+  printf("find intersection list point: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+#endif
+  find_intersection_list(origin, mask, form);
+  objects_list_pos = objects_list;
+  object_store_next();
+}

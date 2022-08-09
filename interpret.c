@@ -130,7 +130,7 @@ func vm_op[] = {
   nimp, // 53
   nimp, // 54
   nimp, // 55
-  nimp, // 56
+  find_intersection_list_point, // 56
   object_store_next, // 57
   nimp, // 58
   nimp, // 59
