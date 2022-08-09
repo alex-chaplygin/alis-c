@@ -109,7 +109,9 @@ void object_setup(object_table_t *tb, byte *class, int size)
 	 h->id, size, h->stack_size, h->data_size, h->msg_size);
 #endif
   t->call_stack = stack_new(h->stack_size);
-  t->msg_stack = stack_new(h->msg_size);
+  t->msg_queue = xmalloc(h->msg_size);
+  t->msg_size = h->msg_size;
+  t->msg_end = t->msg_queue;
   t->data = memory_alloc(h->data_size);
   t->ip = class + h->entry + 2;
   t->class = t->class2 = class;
@@ -327,7 +329,18 @@ void object_send_message()
 #ifdef DEBUG
     printf("param = %x; %d\n", current_value, current_value);
 #endif
-    stack_push(t->msg_stack, current_value);
+    int *q = t->msg_end;
+    if (q + 1 == t->msg_queue + t->msg_size) {
+      q -= t->msg_size;
+      t->msg_end = q;
+    }
+    if (t->msg_end == t->msg_begin) {
+      printf("Message queue full\n");
+      exit(1);
+    }
+    if (!t->msg_begin)
+      t->msg_begin = t->msg_end;
+    *t->msg_end++ = current_value;
   }
   t->flags |= OBJECT_MSG;
 #ifdef DEBUG
@@ -358,7 +371,7 @@ void object_kill(int num, int remove)
   run_object = rt;
   // освобождение ресурсов
   stack_free(t->call_stack);
-  stack_free(t->msg_stack);
+  free(t->msg_queue);
   memory_free(t->data);
   object_table_t *tab = objects_table->next;
   object_table_t *prev = objects_table;
@@ -412,14 +425,15 @@ void op_object_kill_remove_all()
  */
 void object_get_message()
 {
-  stack_t *s = run_object->msg_stack;
-  if (stack_empty(run_object->msg_stack)) {
-    printf("get message stack is empty\n");
+  if (run_object->msg_begin == run_object->msg_end) {
+    printf("get message queue is empty\n");
     exit(1); 
     current_value = -1;
   } else {
-    current_value = stack_pop(run_object->msg_stack);
-    if (stack_empty(run_object->msg_stack))
+    if (run_object->msg_begin + 1 == run_object->msg_queue + run_object->msg_size)
+      run_object->msg_begin = run_object->msg_queue;
+    current_value = *(short *)run_object->msg_begin++;
+    if (run_object->msg_begin == run_object->msg_end)
       run_object->flags &= ~OBJECT_MSG;
   }
   #ifdef DEBUG
@@ -444,7 +458,8 @@ void object_pause()
 /// Очищает стек сообщений объекта
 void object_clear_messages()
 {
-  stack_clear(run_object->msg_stack);
+  run_object->msg_begin = 0;
+  run_object->msg_end = run_object->msg_queue;
   run_object->flags &= ~OBJECT_MSG;
 #ifdef DEBUG
   printf("clear messages flags = %x\n", run_object->flags);
