@@ -132,7 +132,6 @@ void get_word_from_object()
 #ifdef DEBUG
   printf("get word object: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
 #endif
-  exit(1);
 }
 
 /// чтение глобальной переменной типа byte по адресу word
