@@ -14,6 +14,7 @@
 #include "get.h"
 #include "append.h"
 #include "objects.h"
+#include "array.h"
 
 /// таблица подфункций для добавления
 func add_op[] = {
@@ -36,7 +37,7 @@ func add_op[] = {
   add_word_global_word, // 20
   nimp, // 22
   nimp, // 24
-  nimp, // 26
+  add_byte_global_array_word, // 26
   nimp, // 28
   nimp, // 2a
   nimp, // 2c
@@ -210,4 +211,25 @@ int add_expression()
 #endif
   get_expression();
   return op_append();
+}
+
+/** 
+ * Добавление байта в глобальный массив
+ * current_value - первый индекс в массиве
+ * остальные индексы - в стеке
+ */
+void add_byte_global_array_word()
+{
+  word w = fetch_word();
+  int idx = current_value;
+  byte *b = array_pos(seg_read(objects_table->object->data, w), 0, 1);
+  current_value = stack_pop(&stack);
+#ifdef DEBUG
+  printf("add_b main.arrw_%x[%d] %x; %d\n", w, idx, (char)current_value, (char)current_value);
+  printf("was value = %x\n", *b);
+#endif
+  *b += (byte)current_value;
+#ifdef DEBUG
+  printf("after add = %x\n", *b);
+#endif
 }
