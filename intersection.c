@@ -215,7 +215,7 @@ void get_last_object_mask()
 /** 
  * Нахождение списка объектов, которые пересекаются с формой
  * в заданной точке. Первый найденный объект сохраняется в переменную.
- * На входе: маска (какие объекты искать) и форма (bbox).
+ * На входе: точка, маска (какие объекты искать) и форма (bbox).
  */
 void find_intersection_list_point()
 {
@@ -226,6 +226,34 @@ void find_intersection_list_point()
   origin[1] = current_value;
   new_get();
   origin[2] = current_value;
+  new_get();
+  short mask = current_value;
+  new_get();
+  short form = current_value;
+#ifdef DEBUG
+  printf("find intersection list point: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+#endif
+  find_intersection_list(origin, mask, form);
+  objects_list_pos = objects_list;
+  object_store_next();
+}
+
+/** 
+ * Нахождение списка объектов, которые пересекаются с формой
+ * на заданном векторе относительно текущего объекта. 
+ * Первый найденный объект сохраняется в переменную.
+ * На входе: вектор, маска (какие объекты искать) и форма (bbox).
+ */
+void find_intersection_list_vector()
+{
+  short origin[3];
+  short *org = (short *)run_object->data->data;
+  new_get();
+  origin[0] = current_value + org[0];
+  new_get();
+  origin[1] = current_value + org[1];
+  new_get();
+  origin[2] = current_value + org[2];
   new_get();
   short mask = current_value;
   new_get();
