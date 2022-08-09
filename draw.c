@@ -240,3 +240,30 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
     exit(1);
   }
 }
+
+/** 
+ * Отрисовка изображения курсора мыши
+ * 
+ * @param im исходное изображение курсора
+ * @param buf изображение на выходе
+ * @param w ширина
+ * @param h высота
+ */
+void draw_cursor(image_t *im, byte *buf, int w, int h)
+{
+  image_add = 0;
+  video_add = 0;
+  num_cols = w;
+  num_rows = h;
+  odd_data = 0;
+  blit_src = (byte *)(im + 1);
+  blit_dst = buf;
+  switch (im->type) {
+  case IMAGE_4_A_PAL:
+    draw_image4(0, im->palette_offset, 1);
+    break;
+  default:
+    printf("Unknown cursor image type: %x\n", im->type);
+    exit(1);
+  }
+}
