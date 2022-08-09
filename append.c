@@ -38,7 +38,7 @@ func add_op[] = {
   nimp, // 22
   nimp, // 24
   add_byte_global_array_word, // 26
-  nimp, // 28
+  add_word_global_array_word, // 28
   nimp, // 2a
   nimp, // 2c
   nimp, // 2e
@@ -266,7 +266,6 @@ void add_word_global_array_word()
 #ifdef DEBUG
   printf("after add = %x\n", *b);
 #endif
-  exit(1);
 }
 
 /// добавление в массив word по адресу byte
