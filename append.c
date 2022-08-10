@@ -35,7 +35,7 @@ func add_op[] = {
   add_word_array_byte, // 1c
   add_byte_global_word, // 1e
   add_word_global_word, // 20
-  nimp, // 22
+  add_string_global_word, // 22
   nimp, // 24
   add_byte_global_array_word, // 26
   add_word_global_array_word, // 28
@@ -283,4 +283,19 @@ void add_word_array_byte()
 #ifdef DEBUG
   printf("after add = %x\n", *pos);
 #endif
+}
+
+/// добавляет строку сохранения к глобальной строковой переменной адрес word
+int add_string_global_word()
+{
+  word w = fetch_word();
+  char *dst = (char *)seg_read(objects_table->object->data, w);
+  char *src = store_string;
+  while (*dst++);
+  dst--;
+  while (*dst++ = *src++);
+#ifdef DEBUG
+  printf("addw main.strw_%x; \"%s\"\n", w, (char *)seg_read(objects_table->object->data, w));
+#endif
+  return 1;
 }
