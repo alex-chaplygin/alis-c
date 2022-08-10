@@ -18,6 +18,7 @@
 enum image_type_e {		/**< типы изображений */
   IMAGE_4_A = 0,		/**< 4 бита с прозрачностью */
   IMAGE_FILL = 1,		/**< заполнение постоянным цветом */
+  IMAGE_4 = 2,			/**< 4 бит без прозрачности без смещения */
   IMAGE_4_A_PAL = 0x10,		/**< 4 бита с прозрачностью и смещением палитры */
   IMAGE_4_PAL = 0x12,		/**< 4 бита без прозрачности со смещением палитры */
   IMAGE_8_A = 0x14,		/**< 8 бит с прозрачностью */
@@ -221,6 +222,11 @@ void draw_image(vec_t *origin, image_t *im, int x_flip, rectangle_t *blit_rec)
   case IMAGE_8:
     draw_setup(origin, im, x_flip, blit_rec, 0);
     draw_image8(x_flip);
+    break;
+  case IMAGE_4:
+    draw_setup(origin, im, x_flip, blit_rec, 1);
+    blit_src -= 2;
+    draw_image4(x_flip, 0, 0);
     break;
   case IMAGE_4_A:
     draw_setup(origin, im, x_flip, blit_rec, 1);
