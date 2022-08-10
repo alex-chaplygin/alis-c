@@ -196,3 +196,17 @@ void file_not_exists()
   if (!current_value)
     exit(1);
 }
+
+/** 
+ * Чтение слова из файла в bigendian
+ */
+void file_read_word()
+{
+  byte w[2];
+  file_read(w, 2);
+  current_value = (w[0] << 8) + w[1];
+#ifdef DEBUG
+  printf("file read word: %x\n", current_value);
+#endif
+  switch_string_store();
+}

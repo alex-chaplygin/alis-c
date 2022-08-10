@@ -7,3 +7,4 @@ int file_exists(char *s);
 void op_open_file();
 void op_read_file();
 void op_close_file();
+void file_read_word();

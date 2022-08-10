@@ -160,7 +160,7 @@ func vm_op[] = {
   op_close_file, // 71
   nimp, // 72
   nimp, // 73
-  nimp, // 74
+  file_read_word, // 74
   nimp, // 75
   nimp, // 76
   op_read_file, // 77
