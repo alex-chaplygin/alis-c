@@ -102,7 +102,7 @@ func get_op[] = {
   nimp,//prev_from_stack, //98
   nimp,//str_to_num, //9a
   file_not_exists, //9c
-  nimp,//set_char, //9e
+  set_char, //9e
   get_drive, //a0
   nimp,//get_keyboard, //a2
   nimp,//get_cpu_speed, //a4

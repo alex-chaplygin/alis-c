@@ -87,12 +87,24 @@ void str_neq()
 
 /** 
  * Конвертация числа в строку
- * 
  */
 void num_to_str()
 {
   sprintf(get_string, "%d", current_value);
+#ifdef DEBUG
   printf("num_to_str %d '%s'\n", current_value, get_string);
+#endif
+}
+
+/** 
+ * Запись одного символа в строку
+ */
+void set_char()
+{
+  sprintf(get_string, "%c", (char)current_value);
+#ifdef DEBUG
+  printf("set  char: %s\n", get_string);
+#endif
 }
 
 /*
@@ -203,12 +215,5 @@ void str_to_num()
 {
   current_value = atoi(current_string);
   printf("str to num: %s %d\n", current_string, current_value);
-}
-
-void set_char()
-{
-  *current_string = (char)(current_value & 0xff);
-  *(current_string + 1) = 0;
-  printf("set  char %s %x\n", current_string, (current_value & 0xff));
 }
 */
