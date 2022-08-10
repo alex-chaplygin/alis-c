@@ -109,9 +109,9 @@ void object_setup(object_table_t *tb, byte *class, int size)
 	 h->id, size, h->stack_size, h->data_size, h->msg_size);
 #endif
   t->call_stack = stack_new(h->stack_size);
-  t->msg_queue = xmalloc(h->msg_size);
+  t->msg_queue = xmalloc(h->msg_size * sizeof(int));
   t->msg_size = h->msg_size;
-  t->msg_end = t->msg_queue;
+  t->msg_begin = t->msg_end = t->msg_queue;
   t->data = memory_alloc(h->data_size);
   t->ip = class + h->entry + 2;
   t->class = t->class2 = class;
@@ -312,10 +312,10 @@ void object_send_message()
     printf("object_state object == -1\n");
     exit(1);
   }
-#ifdef DEBUG
-  printf("send message object: %d count: %d\n", current_value, count);
-#endif
   object_t *t = objects_table[current_value / 6].object;
+#ifdef DEBUG
+  printf("send message object: %d class: %x count: %d\n", current_value, *t->class, count);
+#endif
   if (!t) {
     printf("object is NULL\n");
     exit(1);
@@ -328,18 +328,10 @@ void object_send_message()
     new_get();
 #ifdef DEBUG
     printf("param = %x; %d\n", current_value, current_value);
+    printf("msg_end pos = %d\n", (int)(t->msg_end - t->msg_queue));
 #endif
-    int *q = t->msg_end;
-    if (q + 1 == t->msg_queue + t->msg_size) {
-      q -= t->msg_size;
-      t->msg_end = q;
-    }
-    if (t->msg_end == t->msg_begin) {
-      printf("Message queue full\n");
-      exit(1);
-    }
-    if (!t->msg_begin)
-      t->msg_begin = t->msg_end;
+    if (t->msg_end == t->msg_queue + t->msg_size)
+      t->msg_end = t->msg_queue;
     *t->msg_end++ = current_value;
   }
   t->flags |= OBJECT_MSG;
@@ -425,12 +417,15 @@ void op_object_kill_remove_all()
  */
 void object_get_message()
 {
+#ifdef DEBUG
+  printf("msg_begin pos = %d\n", (int)(run_object->msg_begin - run_object->msg_queue));
+#endif
   if (run_object->msg_begin == run_object->msg_end) {
     printf("get message queue is empty\n");
     exit(1); 
     current_value = -1;
   } else {
-    if (run_object->msg_begin + 1 == run_object->msg_queue + run_object->msg_size)
+    if (run_object->msg_begin == run_object->msg_queue + run_object->msg_size)
       run_object->msg_begin = run_object->msg_queue;
     current_value = *(short *)run_object->msg_begin++;
     if (run_object->msg_begin == run_object->msg_end)
@@ -455,11 +450,10 @@ void object_pause()
     yield();
 }
 
-/// Очищает стек сообщений объекта
+/// Очищает очередь сообщений объекта
 void object_clear_messages()
 {
-  run_object->msg_begin = 0;
-  run_object->msg_end = run_object->msg_queue;
+  run_object->msg_begin = run_object->msg_end = run_object->msg_queue;
   run_object->flags &= ~OBJECT_MSG;
 #ifdef DEBUG
   printf("clear messages flags = %x\n", run_object->flags);
