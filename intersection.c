@@ -18,7 +18,7 @@
 #include "store.h"
 
 /** 
- * Устанавливает номер формы для объекта
+ * Устанавливает номер формы для текущего объекта
  */
 void set_form()
 {
@@ -26,6 +26,17 @@ void set_form()
   run_object->form = current_value;
 #ifdef DEBUG
   printf("obj set form = %x\n", current_value);
+#endif
+}
+
+/** 
+ * Очищает форму у текущего объекта
+ */
+void clear_form()
+{
+  run_object->form = -1;
+#ifdef DEBUG
+  printf("obj clear form\n");
 #endif
 }
 

@@ -126,7 +126,7 @@ func vm_op[] = {
   view_hide, // 4f
   sprites_clear_all, // 50
   set_form, // 51
-  nimp, // 52
+  clear_form, // 52
   nimp, // 53
   nimp, // 54
   find_intersection_list_vector, // 55
