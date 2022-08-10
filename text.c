@@ -55,7 +55,7 @@ void set_text_pos()
   new_get();
   text_pos.z = current_value;
   new_get();
-  text_tag = (byte)current_value;
+  text_tag = (char)current_value;
 #ifdef DEBUG
   printf("set text pos (%d %d %d) tag = %x\n", text_pos.x, text_pos.y, text_pos.z, text_tag);
 #endif
