@@ -268,6 +268,9 @@ void draw_cursor(image_t *im, byte *buf, int w, int h)
   case IMAGE_4_A_PAL:
     draw_image4(0, im->palette_offset, 1);
     break;
+  case IMAGE_8_A:
+    draw_image_alpha(0);
+    break;
   default:
     printf("Unknown cursor image type: %x\n", im->type);
     exit(1);
