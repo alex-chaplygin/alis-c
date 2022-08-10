@@ -119,7 +119,7 @@ int stack_pop(stack_t *s)
 void check_adr(seg_t * s, word adr)
 {
   if (adr >= s->size) {
-    printf("Segment: out of bounds adr = %x\n", adr);
+    printf("Segment: out of bounds adr = %x %d of %d\n", adr, adr, s->size);
     exit(1);
   }
 }
