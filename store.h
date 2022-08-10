@@ -15,6 +15,7 @@ void set_byte_array_byte();//1a
 void set_word_array_byte();//1c
 void set_byte_global_word();//1e
 void set_word_global_word();//20
+void set_string_global_word();//22
 void set_string_global_array_word();//24
 void set_byte_global_array_word();//26
 void set_word_global_array_word();//28

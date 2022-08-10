@@ -34,7 +34,7 @@ func set_op[] = {
   set_word_array_byte,//1c
   set_byte_global_word, //1e
   set_word_global_word, //20
-  nimp,//set_string_global, //22
+  set_string_global_word, //22
   set_string_global_array_word, //24
   set_byte_global_array_word,//26
   set_word_global_array_word,//28
@@ -349,5 +349,17 @@ void set_string_global_array_word()
   while (*p++ = *s++);
 #ifdef DEBUG
   printf("store_str main.arrw_%x[%d], \"%s\"\n", w, idx, (char *)pos);
+#endif
+}
+
+/// запись строки в глобальную переменную по адресу word
+void set_string_global_word()
+{
+  word w = fetch_word();
+  byte *pos = seg_read(objects_table->object->data, w);
+  byte *s = store_string;
+  while (*pos++ = *s++);
+#ifdef DEBUG
+  printf("store_str main.strw_%x, \"%s\"\n", w, (char *)seg_read(objects_table->object->data, w));
 #endif
 }
