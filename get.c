@@ -90,7 +90,7 @@ func get_op[] = {
   nimp,//str_pos, //80
   get_string_len, //82
   nimp,//str_char, //84
-  nimp,//num_to_str, //86
+  num_to_str, //86
   nimp,//str_cat, //88
   str_neq, //8a
   nimp,//str_eq,//8c

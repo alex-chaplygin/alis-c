@@ -85,17 +85,21 @@ void str_neq()
   printf("res: %d\n", current_value);
 }
 
+/** 
+ * Конвертация числа в строку
+ * 
+ */
+void num_to_str()
+{
+  sprintf(get_string, "%d", current_value);
+  printf("num_to_str %d '%s'\n", current_value, get_string);
+}
+
 /*
 void str_char()
 {
   current_value = (byte)*current_string;
   printf("str char: %c %d\n", (char)current_value, current_value);
-}
-
-void num_to_str()
-{
-  sprintf(current_string, "%d", current_value);
-  printf("num_to_str %d %s\n", current_value, current_string);
 }
 
 void switch_str_get()
