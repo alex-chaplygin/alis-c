@@ -40,7 +40,7 @@ func get_op[] = {
   get_word_array_byte,//1c
   get_byte_global_word,//1e
   get_word_global_word,//20
-  nimp,//get_string_global,//22
+  get_string_global_word,//22
   get_string_global_array_word,//24
   get_byte_global_array_word,//26
   get_word_global_array_word,//28

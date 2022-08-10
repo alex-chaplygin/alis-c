@@ -63,6 +63,19 @@ void get_string_mem_word()
 #endif
 }
 
+/// чтение глобальной строки по адресу word
+void get_string_global_word()
+{
+  word w = fetch_word();
+  byte *ip = current_ip;
+  current_ip = seg_read(objects_table->object->data, w);
+  read_string();
+#ifdef DEBUG
+  printf("get string main.strw_%x: %s\n", w, get_string);
+#endif
+  current_ip = ip;
+}
+
 /// чтение переменной типа byte по адресу byte
 void get_byte_mem_byte()
 {

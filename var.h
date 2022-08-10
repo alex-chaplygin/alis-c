@@ -12,7 +12,7 @@ void get_byte_array_byte();//1a
 void get_word_array_byte();//1c
 void get_byte_global_word(); //1e
 void get_word_global_word();//20
-void get_string_global();//22
+void get_string_global_word();//22
 void get_string_global_array_word();//24
 void get_byte_global_array_word();//26
 void get_word_global_array_word();//28
