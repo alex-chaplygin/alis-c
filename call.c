@@ -400,13 +400,23 @@ void call_resume(int s)
   }
 }
 
-/// вызов word + 1 с возможным возвратом к сохраненному значению
-void call_skip_word_save()
+/// вызов word + 1 с возможным возвратом к сохраненному стеку
+void call_skip_word_resume()
 {
   int s = (short)fetch_word();
   current_ip++;
   call_resume(s);
 #ifdef DEBUG
   printf("call skip word save: %d ip = %x\n", s, (int)(current_ip - run_object->class));
+#endif
+}
+
+/// вызов word с возможным возвратом к сохраненному стеку
+void call_word_resume()
+{
+  int s = (short)fetch_word();
+  call_resume(s);
+#ifdef DEBUG
+  printf("call word save: %d ip = %x\n", s, (int)(current_ip - run_object->class));
 #endif
 }

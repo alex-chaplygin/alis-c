@@ -20,4 +20,5 @@ void compare_jump_word_skip_nz();//1d
 void loop_byte();
 void op_jump_table();
 void op_switch_case();
-void call_skip_word_save();
+void call_skip_word_resume();
+void call_word_resume();

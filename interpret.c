@@ -93,8 +93,8 @@ func vm_op[] = {
   op_switch_case, // 2e
   op_jump_table, // 2f
   nimp, // 30
-  nimp, // 31
-  call_skip_word_save, // 32
+  call_word_resume, // 31
+  call_skip_word_resume, // 32
   nimp, // 33
   set_tag, // 34
   object_pause_by_ref, // 35
