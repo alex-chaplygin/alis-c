@@ -417,6 +417,29 @@ void call_word_resume()
   int s = (short)fetch_word();
   call_resume(s);
 #ifdef DEBUG
-  printf("call word save: %d ip = %x\n", s, (int)(current_ip - run_object->class));
+  printf("call word resum: %d ip = %x\n", s, (int)(current_ip - run_object->class));
 #endif
+  exit(1);
+}
+
+/** 
+ * Уменьшает значение переменной на единицу,
+ * если результат больше 0, то делает переход
+ */
+void loop_word()
+{
+  byte *ip = current_ip + 2;
+  current_value = -1;
+  if (exchange_strings_append()) {
+    current_ip = ip;
+    short ofs = (short)fetch_word();
+    current_ip = ip + 2 + ofs;
+#ifdef DEBUG
+    printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->class));
+#endif
+  } else {
+#ifdef DEBUG
+    printf("loop end ip = %x\n", (int)(current_ip - run_object->class));
+#endif
+  }
 }

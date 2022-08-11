@@ -22,3 +22,4 @@ void op_jump_table();
 void op_switch_case();
 void call_skip_word_resume();
 void call_word_resume();
+void loop_word();
