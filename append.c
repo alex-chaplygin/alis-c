@@ -40,7 +40,7 @@ func add_op[] = {
   add_byte_global_array_word, // 26
   add_word_global_array_word, // 28
   nimp, // 2a
-  nimp, // 2c
+  add_word_object_word, //2c
   nimp, // 2e
   nimp, // 30
   nimp, // 32
@@ -52,6 +52,9 @@ func add_op[] = {
 /// вызов одной подфункции добавления
 int op_append()
 {
+#ifdef DEBUG
+  printf("append\n");
+#endif
   byte op = fetch_byte();
   if (op & 1) {
     printf("invalid append op %x\n", op);
@@ -298,4 +301,27 @@ int add_string_global_word()
   printf("addw main.strw_%x; \"%s\"\n", w, (char *)seg_read(objects_table->object->data, w));
 #endif
   return 1;
+}
+
+/// добавление значения в свойство объекта по адресу word
+int add_word_object_word()
+{
+  int thr = fetch_word();
+  thr = *(word *)seg_read(run_object->data, thr);
+  if (thr % 6 != 0) {
+    printf("store word object word: invalid object\n");
+    exit(1);
+  }
+  object_t *t = objects_table[thr / 6].object;
+  word adr = fetch_word();
+  short *pos = (short *)(t->data->data + adr);
+#ifdef DEBUG
+  printf("add_word object: class = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
+  printf("was value: %x\n", *pos);
+#endif
+  *pos += current_value;
+#ifdef DEBUG
+  printf("new value: %x\n", *pos);
+#endif
+  return *pos;
 }
