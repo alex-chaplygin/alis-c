@@ -419,7 +419,6 @@ void call_word_resume()
 #ifdef DEBUG
   printf("call word resum: %d ip = %x\n", s, (int)(current_ip - run_object->class));
 #endif
-  exit(1);
 }
 
 /** 
@@ -442,4 +441,5 @@ void loop_word()
     printf("loop end ip = %x\n", (int)(current_ip - run_object->class));
 #endif
   }
+  exit(1);
 }
