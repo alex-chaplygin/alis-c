@@ -193,8 +193,6 @@ void file_not_exists()
 #ifdef DEBUG
   printf("file not exists: %s %d\n", get_string, current_value);
 #endif
-  if (!current_value)
-    exit(1);
 }
 
 /** 
