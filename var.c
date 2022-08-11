@@ -123,7 +123,13 @@ void get_byte_from_object()
   }
   object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
-  current_value =*(char *)seg_read(t->data, adr);
+  if ((short)adr == -40) {
+    current_value = (byte)object_num(t->parent);
+  } else if ((short)adr < 0) {
+    printf("get byte from object < 0\n");
+    exit(1);
+  } else
+    current_value =*(char *)seg_read(t->data, adr);
   #ifdef DEBUG
   printf("get byte object: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
   #endif
@@ -143,7 +149,13 @@ void get_word_from_object()
   }
   object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
-  current_value = *(short *)seg_read(t->data, adr);
+  if ((short)adr == -40) {
+    current_value = object_num(t->parent);
+  } else if ((short)adr < 0) {
+    printf("get word from object < 0\n");
+    exit(1);
+  } else
+      current_value = *(short *)seg_read(t->data, adr);
 #ifdef DEBUG
   printf("get word object: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
 #endif
