@@ -223,7 +223,7 @@ void get_expression()
     if (op == 0x3a) 
       break;
 #ifdef DEBUG
-    printf("%04x:\t\t", (int)(current_ip - run_object->class));
+    printf("%04x:\t%x\t", (int)(current_ip - run_object->class), op);
 #endif
     get(op);
   };
