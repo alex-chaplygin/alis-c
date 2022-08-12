@@ -189,7 +189,9 @@ void object_new()
   int i = class_loaded(id);
   if (i == -1) {
     printf("Class %x (total %d) is not loaded\n", id, total_classes);
-    exit(1);
+    //exit(1);
+    current_value = -1;
+    goto store;
   }
 #ifdef DEBUG
   printf("new object class = %x\n", id);
@@ -197,6 +199,7 @@ void object_new()
   vec_t vec;
   vec.x = vec.y = vec.z = 0;
   object_t *t = object_add(class_get(i), class_size(i), &vec);
+ store:
   switch_string_store();
 }
 
