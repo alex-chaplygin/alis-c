@@ -259,7 +259,12 @@ void store_byte_object_word()
 {
   int thr = fetch_word();
   thr = *(word *)seg_read(run_object->data, thr);
-  if (thr % 6 != 0) {
+  if (thr == 0xffff) {
+#ifdef DEBUG
+    printf("store byte object = -1\n");
+#endif
+    return;
+  } else if (thr % 6 != 0) {
     printf("store byte object word: invalid object: %x\n", thr);
     exit(1);
   }
