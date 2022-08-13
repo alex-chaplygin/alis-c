@@ -164,7 +164,7 @@ func vm_op[] = {
   file_write_word, // 75
   nimp, // 76
   op_read_file, // 77
-  nimp, // 78
+  op_write_file, // 78
   nimp, // 79
   nimp, // 7a
   nimp, // 7b

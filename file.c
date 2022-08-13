@@ -193,6 +193,30 @@ void op_read_file()
 #endif
 }
 
+/// запись в файл
+void op_write_file()
+{
+  word adr = fetch_word();
+  if (!adr) {
+    printf("write file to main mem\n");
+    exit(1);
+  }
+  word count = fetch_word();
+  word *buf = (word *)seg_read(run_object->data, adr);
+  word *b = buf;
+  // проверяем верхнюю границу буфера
+  if (*((byte *)buf - 2) == 2) { // если это массив слов
+    for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
+      *b = ((*b & 0xff) << 8) + (*b >> 8);
+      b++;
+    }
+  }
+  file_write(buf, count);
+#ifdef DEBUG
+  printf("write to file: adr = %x count = %d\n", adr, count);
+#endif
+}
+
 /// Команда - закрытие файла
 void op_close_file()
 {
