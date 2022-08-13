@@ -49,12 +49,16 @@ void lowercase(char *s)
 void file_open(char *name, int mode)
 {
   char rw[] = "r+b";
+  char w[] = "w";
   char *m;
   strcpy(file_name, name);
   lowercase(file_name);
   switch (mode) {
   case 2: // открытие на чтение и запись
     m = rw;
+    break;
+  case 0x302: // открытие на запись
+    m = w;
     break;
   default:
     printf("unknown mode: %d\n", mode);
