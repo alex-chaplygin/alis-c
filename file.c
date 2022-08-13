@@ -202,9 +202,9 @@ void op_write_file()
     exit(1);
   }
   word count = fetch_word();
-  word *buf = (word *)seg_read(run_object->data, adr);
+  word *buf = malloc(count);
+  memcpy(buf, seg_read(run_object->data, adr), count);
   word *b = buf;
-  // проверяем верхнюю границу буфера
   if (*((byte *)buf - 2) == 2) { // если это массив слов
     for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
       *b = ((*b & 0xff) << 8) + (*b >> 8);
@@ -212,6 +212,7 @@ void op_write_file()
     }
   }
   file_write(buf, count);
+  free(buf);
 #ifdef DEBUG
   printf("write to file: adr = %x count = %d\n", adr, count);
 #endif
