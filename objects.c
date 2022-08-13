@@ -293,12 +293,35 @@ void object_receive_msg()
 #endif
 }
 
+/** 
+ * Запрещение обработки сообщений для текущего объекта
+ */
+void object_disable_handle_msg()
+{
+  run_object->flags |= OBJECT_NOHANDLEMSG;
+#ifdef DEBUG
+  printf("object diable handle msg flags: %x\n", run_object->flags);
+#endif
+}
+
 /// команда - разрешение объекту принимать сообщения
 void object_ready_to_receive()
 {
   run_object->flags &= ~OBJECT_NOMSG;
 #ifdef DEBUG
   printf("object ready to receive msg flags: %x\n", run_object->flags);
+#endif
+}
+
+/** 
+ * Запрещение обработки сообщений
+ */
+void object_disable_msg()
+{
+  run_object->flags |= OBJECT_NOMSG;
+  object_clear_messages();
+#ifdef DEBUG
+  printf("object diable msg flags: %x\n", run_object->flags);
 #endif
 }
 
@@ -425,7 +448,6 @@ void object_get_message()
 #endif
   if (run_object->msg_begin == run_object->msg_end) {
     printf("get message queue is empty\n");
-    exit(1); 
     current_value = -1;
   } else {
     if (run_object->msg_begin == run_object->msg_queue + run_object->msg_size)

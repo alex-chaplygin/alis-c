@@ -104,6 +104,8 @@ void set_find_all_objects();
 void object_kill_no_remove();
 void object_pause_by_ref();
 void objects_dump();
+void object_disable_msg();
+void object_disable_handle_msg();
 
 extern int max_objects;		/**< максимальное количество потоков */
 extern int num_run_objects;		/**< число рабочих потоков */

@@ -143,9 +143,9 @@ func vm_op[] = {
   nimp, // 60  
   object_send_message, // 61
   object_ready_to_receive, // 62
-  nimp, // 63
+  object_disable_msg, // 63
   object_receive_msg, // 64
-  nimp, // 65
+  object_disable_handle_msg, // 65
   object_clear_messages, // 66
   set_find_all_objects, // 67
   set_palette_from_res, // 68
