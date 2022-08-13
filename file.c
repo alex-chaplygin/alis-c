@@ -97,6 +97,21 @@ void file_read(void *buf, int size)
 }
 
 /** 
+ * Запись в файл с обработкой ошибок
+ * 
+ * @param buf адрес буфера 
+ * @param size размер буфера
+ */
+void file_write(void *buf, int size)
+{
+  int c = fwrite(buf, size, 1, handle);
+  if (c < 0) {
+    fprintf(stderr, "File: read error size = %d, read bytes: %d\n", size, c);
+    exit(1);
+  }
+}
+
+/** 
  * Закрытие текущего файла
  */
 void file_close()
@@ -200,7 +215,7 @@ void file_not_exists()
 }
 
 /** 
- * Чтение слова из файла в bigendian
+ * Чтение слова из файла в little endian
  */
 void file_read_word()
 {
@@ -211,4 +226,19 @@ void file_read_word()
   printf("file read word: %x\n", current_value);
 #endif
   switch_string_store();
+}
+
+/** 
+ * Запись слова в файл в little endian
+ */
+void file_write_word()
+{
+  byte w[2];
+  new_get();
+  w[0] = current_value >> 8;
+  w[1] = current_value & 0xff;
+  file_write(w, 2);
+#ifdef DEBUG
+  printf("file write word: %x\n", current_value);
+#endif
 }
