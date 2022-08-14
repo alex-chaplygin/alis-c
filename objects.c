@@ -49,13 +49,19 @@ void objects_dump()
   object_table_t *t = objects_table;
   object_t *th;
   while (t) {
+    printf("table id: %x\n", (int)(t - objects_table) * 6);
     th = t->object;
     if (!th) break;
-    printf("table id: %x ", (int)(t - objects_table) * 6);
-    printf("id: %x\n", th->id);
-    printf("data:\n");
-    dump_mem(th->data->data, th->data->size);
-    printf("\n");
+    printf("obj class: %x\n", th->id);
+    //    printf("data:\n");
+    //    dump_mem(th->data->data, th->data->size);
+    //    printf("\n");
+    t = t->next;
+  }
+  printf("free objects: ");
+  t = free_object;
+  while (t) {
+    printf("table id: %x\n", (int)(t - objects_table) * 6);
     t = t->next;
   }
 }
@@ -189,7 +195,6 @@ void object_new()
   int i = class_loaded(id);
   if (i == -1) {
     printf("Class %x (total %d) is not loaded\n", id, total_classes);
-    //exit(1);
     current_value = -1;
     goto store;
   }
@@ -382,7 +387,6 @@ void object_kill(int num, int remove)
   object_t *rt = run_object;
 #ifdef DEBUG
   printf("kill object num %x class %x\n", num, *t->class);
-  objects_dump();
 #endif
   run_object = t;
   remove_all_sprites(t->sprite_list, remove);
@@ -495,7 +499,7 @@ void objects_kill_by_class(int id)
   int i;
   for (object_table_t *t = objects_table->next; t;) {
 #ifdef DEBUG
-    printf("kill object check = %x\n", t->object->id);
+    printf("kill object check = %x id = %x\n", t->object->id, id);
 #endif
     if (t->object->id == id && kill_object_flag)
       object_kill(object_num(t->object), 1);
