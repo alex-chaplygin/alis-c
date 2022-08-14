@@ -125,8 +125,9 @@ int class_size(int i)
 void class_free()
 {
   int num = fetch_word();
+  int class = num;
 #ifdef DEBUG
-  printf("class free: %x\n", num);
+  printf("class free: %x\n", class);
   printf("cur class id = %x\n", run_object->id);
 #endif
   if (num == -1 || num == run_object->id)
@@ -148,6 +149,6 @@ void class_free()
       class_sizes[i] = class_sizes[i + 1];
     }
   num_classes--;
-  objects_kill_by_class(num);
+  objects_kill_by_class(class);
   view_free_sprites();
 }
