@@ -166,6 +166,23 @@ void op_open_file()
   file_open(file, mode);
 }
 
+/** 
+ * Для массива слов в памяти меняет местами байты
+ * 
+ * @param buf адрес массива
+ * @param count размер массива в байтах
+ */
+void convert_array_endian(word *buf, int count)
+{
+  word *b = buf;
+  if (*((byte *)buf - 2) == 2) { // если это массив слов
+    for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
+      *b = ((*b & 0xff) << 8) + (*b >> 8);
+      b++;
+    }
+  }
+}
+
 /// чтение из файла
 void op_read_file()
 {
@@ -176,20 +193,12 @@ void op_read_file()
   }
   word count = fetch_word();
   word *buf = (word *)seg_read(run_object->data, adr);
-  word *b = buf;
   // проверяем верхнюю границу буфера
   seg_read(run_object->data, adr + count - 1);
   file_read(buf, count);
-  if (*((byte *)buf - 2) == 2) { // если это массив слов
-    for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
-      *b = ((*b & 0xff) << 8) + (*b >> 8);
-      b++;
-    }
-  }
+  convert_array_endian(buf, count);
 #ifdef DEBUG
   printf("read from file: adr = %x count = %d\n", adr, count);
-  if (adr == 0x1978 && count == 140)
-    ASSERT(*(word *)(buf + 16 * 2), 0xb)
 #endif
 }
 
@@ -202,17 +211,10 @@ void op_write_file()
     exit(1);
   }
   word count = fetch_word();
-  word *buf = malloc(count);
-  memcpy(buf, seg_read(run_object->data, adr), count);
-  word *b = buf;
-  if (*((byte *)buf - 2) == 2) { // если это массив слов
-    for (int i = 0; i < count / 2; i++) {// преобразуем в big endian
-      *b = ((*b & 0xff) << 8) + (*b >> 8);
-      b++;
-    }
-  }
+  word *buf = (word *)seg_read(run_object->data, adr);
+  convert_array_endian(buf, count); // меняем порядок байт
   file_write(buf, count);
-  free(buf);
+  convert_array_endian(buf, count); // меняем обратно
 #ifdef DEBUG
   printf("write to file: adr = %x count = %d\n", adr, count);
 #endif
