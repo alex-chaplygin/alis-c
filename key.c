@@ -11,6 +11,7 @@
 #include <SDL2/SDL_keycode.h>
 #include "types.h"
 #include "interpret.h"
+#include "graphics.h"
 
 char key_symbol;		/**< символ текущей нажатой клавиши */
 int key_mod = 0;		/**< нажатые модификаторы */
@@ -97,4 +98,20 @@ void get_keyboard_mod()
 #ifdef DEBUG
   printf("get key_flags: %x\n", current_value);
 #endif
+}
+
+/** 
+ * Ожидает нажатия клавиши
+ */
+void wait_key()
+{
+#ifdef DEBUG
+  printf("wait key\n");
+#endif
+  while (1) {
+    graphics_get_events();
+    current_value = (byte)key_symbol;
+    if (current_value != 0)
+      break;
+  }
 }

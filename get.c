@@ -84,7 +84,7 @@ func get_op[] = {
   get_keyboard_mod, //74
   get_free, //76
   get_video_port, //78
-  nimp,//wait_key, //7a
+  wait_key, //7a
   nimp,//str_trim, //7c
   nimp,//str_part, //7e
   nimp,//str_pos, //80
