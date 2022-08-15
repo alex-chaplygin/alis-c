@@ -166,7 +166,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   rectangle_t blit;
   image_t *im = (image_t *)sp->render_image;
 #ifdef DEBUG
-  printf("Rendering sprite: origin(%d %d %d)size(%d %d)type(%x)\n", sp->origin.x, sp->origin.y, sp->origin.z, im->maxx, im->maxy, im->type);
+  printf("Rendering sprite: %x %d origin(%d %d %d)size(%d %d)type(%x)\n", sp->class, sp->image_res_num, sp->origin.x, sp->origin.y, sp->origin.z, im->maxx, im->maxy, im->type);
 #endif
   int mx = sp->max.x;
   int my = sp->max.y;
@@ -182,6 +182,11 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
   if (!cl) 
     return;
   draw_image(&sp->origin, im, sp->x_flip, &blit);
+#ifdef DEBUG
+  char str[30];
+  sprintf(str, "%x %d", sp->class, sp->image_res_num);
+  //  graphics_print(sp->origin.x, sp->origin.y, str);
+#endif
 }
 
 /** 
@@ -268,9 +273,6 @@ void render_view(view_t *view, sprite_t *sprite)
     printf("view2 flag1\n");
     exit(1);
   }
-#ifdef DEBUG
-   dump_sprites(view);
-#endif
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
   sprite = sprite->next_in_view;
@@ -301,10 +303,6 @@ void render_view(view_t *view, sprite_t *sprite)
     prev = sprite;
     sprite = sprite->next_in_view;
   }
-#ifdef DEBUG
-  printf("After rendering:\n");
-  dump_sprites(view);
-#endif
 }
 
 /// главный цикл визуализации
@@ -330,6 +328,10 @@ void render_all()
       break;
     s = (view_t *)(memory + s->next);
   }
+#ifdef DEBUG
+  printf("After rendering:\n");
+  dump_sprites();
+#endif
 }
 
 /// установка числа кадров, через сколько обновляется экран

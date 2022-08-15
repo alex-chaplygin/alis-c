@@ -32,6 +32,8 @@ typedef struct sprite_s {
   int layer;			/**< слой определяет порядок отрисовки при одинаковой z координате, меньшее рисуется позднее */
   byte *image;			/**< установленное изображение спрайта */
   byte *render_image;			/**< изображение которое будет отрисовано */
+  int image_res_num;		/**< номер изображения из ресурса */
+  int class;			/**< класс объекта, который добавил спрайт */
   struct sprite_s *next;	/**< следующий в списке объекта спрайт */
   struct sprite_s *next_in_view;	/**< следующий спрайт в списке отображения */
   view_t *view;	/**< отображение, к которому принадлежит спрайт */
@@ -52,7 +54,7 @@ void set_tag();
 void sprites_clear_all_view();
 void sprite_show_0();
 void sprites_clear_all();
-void dump_sprites(view_t *sc);
+void dump_sprites();
 void view_translate(view_t *view, sprite_t *c);
 
 extern sprite_t *sprites;		/**< таблица спрайтов */

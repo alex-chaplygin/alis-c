@@ -167,19 +167,22 @@ int sprite_find_by_tag(int tag, sprite_t **c)
 }
 
 /// вывод списка спрайтов
-void dump_sprites(view_t *sc)
+void dump_sprites()
 {
-  printf("run_object list:\n");
-  sprite_t *c = run_object->sprite_list;
-  while (c) {
-    printf("->center(%d %d %d)tag(%d)", c->center.x, c->center.y, c->center.z, c->tag);
-    c = c->next;
-  }
-  printf("\ncurrent view_list:\n");
-  c = sprites + sc->view_sprite;
-  while (c) {
-    printf("->origin(%d %d %d)center(%d(%4x) %d(%4x) %d(%4x))tag(%d)state(%d) layer(%2x)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.x, c->center.y, c->center.y, c->center.z, c->center.z, c->tag, c->state, c->layer);
-    c = c->next_in_view;
+  sprite_t *c;
+  view_t *v;
+  v = view_list_head;
+  while (1) {
+    printf("View %x:\n", (int)(v - view_list_head));
+    c = sprites + v->view_sprite;
+    while (c) {
+      printf("Sprite class = %x res_num = %d\n", c->class, c->image_res_num);
+      printf("origin(%d %d %d)center(%d(%4x) %d(%4x) %d(%4x))tag(%d)state(%d) layer(%2x)\n", c->origin.x, c->origin.y, c->origin.z, c->center.x, c->center.x, c->center.y, c->center.y, c->center.z, c->center.z, c->tag, c->state, c->layer);
+      c = c->next_in_view;
+    }
+    if (!v->next)
+      break;
+    v = (view_t *)(memory + v->next);
   }
 }
 
@@ -217,7 +220,7 @@ void sprite_set_params(sprite_t *c, byte *image, int x_flip, vec_t *coord)
  * @param x_flip если 1 - то изображение зеркально поворачивается
  * @param coord координаты центра спрайта
  */
-void sprite_new(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord)
+void sprite_new(sprite_t *c, int tag, byte *image, int image_num, int x_flip, vec_t *coord)
 {
   sprite_t *newc = free_sprite;
   if (!newc) {
@@ -234,6 +237,10 @@ void sprite_new(sprite_t *c, int tag, byte *image, int x_flip, vec_t *coord)
   newc->view = run_object->current_view;
   newc->tag = tag;
   newc->state = SPRITE_NEW;
+  newc->class = run_object->id;	/**< для отладки */
+  if (load_main_res)
+    newc->class = 0;
+  newc->image_res_num = image_num;
   // спрайты могут создаваться разными объектами, но принадлежать одному
   sprite_t *sc = sprites + run_object->current_view->view_sprite;
   newc->next_in_view = sc->next_in_view;
@@ -427,7 +434,7 @@ void sprite_add(int num, vec_t *origin, int x_flip, int is_object, int tag)
   found = sprite_find_by_tag(tag, &c);
   // если не найден, то добавляем
   if (!found)
-    sprite_new(c, tag, res_get_image(num), x_flip, origin);
+    sprite_new(c, tag, res_get_image(num), num, x_flip, origin);
   else {
     while(c) {
       if (c->state == SPRITE_READY) {
@@ -435,6 +442,9 @@ void sprite_add(int num, vec_t *origin, int x_flip, int is_object, int tag)
 	// обновить спрайт
 	c->state = SPRITE_UPDATED;
 	sprite_set_params(c, res_get_image(num), x_flip, origin);
+	c->image_res_num = num;
+	if (load_main_res)
+	  c->class = 0;
 	goto end;
       }
       found = sprite_next_on_tag(c, tag, &c2);
@@ -442,7 +452,7 @@ void sprite_add(int num, vec_t *origin, int x_flip, int is_object, int tag)
       if (!found)
 	break;
     }
-    sprite_new(c, tag, res_get_image(num), x_flip, origin);
+    sprite_new(c, tag, res_get_image(num), num, x_flip, origin);
   }
  end:
   if (!is_object)
