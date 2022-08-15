@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "types.h"
 #include "key.h"
 #include "palette.h"
@@ -25,6 +26,7 @@ SDL_Renderer *renderer;		/**< устройство вывода */
 SDL_Surface *screen;		/**< поверхность экрана без курсора мыши */
 SDL_Surface *screen2;		/**< поверхность экрана */
 SDL_Surface *cursor_surface;	/**< курсор мыши */
+TTF_Font *font;			/**< шрифт для вывода */
 long current_time;		/**< текущее время */
 long time_step = 1000 / FPS;	/**< длительность кадра */
 
@@ -42,6 +44,12 @@ void graphics_init()
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if (renderer == NULL) {
     printf("Cannot create renderer\n");
+    exit(1);
+  }
+  TTF_Init();
+  font = TTF_OpenFont("/home/alex/src/jet/jet-c/img/sans.ttf", 10);
+  if (!font) {
+    printf("Cannot load font: %s\n", TTF_GetError());
     exit(1);
   }
   SDL_ShowCursor(SDL_DISABLE);
@@ -181,4 +189,26 @@ void graphics_set_cursor(byte *img, int w, int h)
   SDL_LockSurface(cursor_surface);
   memcpy(cursor_surface->pixels, img, w * h);
   SDL_UnlockSurface(cursor_surface);
+}
+
+/** 
+ * Печать отладочной строки
+ * 
+ * @param x координаты
+ * @param y 
+ * @param str строка
+ */
+void graphics_print(int x, int y, char *str)
+{
+  int w;
+  int h;
+  int color = 0xffffff;
+  SDL_Color c = {color >> 16, (color >> 8) & 0xff, color & 0xff};
+  SDL_Surface* s = TTF_RenderText_Solid(font, str, c);
+  TTF_SizeText(font, str, &w, &h);
+  SDL_Rect dest = { x, y, w, h};
+  SDL_UnlockSurface(screen);
+  SDL_BlitSurface(s, NULL, screen, &dest);
+  SDL_LockSurface(screen);
+  SDL_FreeSurface(s);
 }

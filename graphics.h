@@ -13,6 +13,7 @@ void graphics_palette_update();
 void graphics_set_cursor(byte *img, int w, int h);
 void graphics_read_buffer(int x, int y, int w, int h, byte *buf, int *neww, int *newh);
 void graphics_write_buffer(int x, int y, int w, int h, byte *buf);
+void graphics_print(int x, int y, char *str);
 
 extern byte *video_buffer;
 extern int mouse_x;			/**< состояние мыши */

@@ -2,4 +2,4 @@ OBJS=main.o graphics.o key.o objects.o blancpc.o file.o class.o io.o memory.o sp
 CFLAGS = -I/usr/include/SDL2 -DDEBUG -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast -g
 
 all: $(OBJS)
-	gcc $(OBJS) -o /tmp/alis -lSDL2
+	gcc $(OBJS) -o /tmp/alis -lSDL2 -lSDL2_ttf
