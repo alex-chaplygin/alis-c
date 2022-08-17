@@ -107,6 +107,9 @@ void set_char()
 #endif
 }
 
+/** 
+ * Запись строки в стек
+ */
 void str_push()
 {
   char *c = get_string + strlen(get_string);
@@ -118,41 +121,48 @@ void str_push()
   while (c >= get_string);
 }
 
+/** 
+ * Соединение двух строк
+ */
+void str_cat()
+{
+  char *src;
+  char *str;
+  switch_string_get();
+#ifdef DEBUG
+  printf("str_cat %s %s\n", get_string, text_string);
+#endif
+  str = text_string + strlen(text_string);
+  src = get_string;
+  strcpy(str, src);
+  str = get_string;
+  get_string = text_string;
+  text_string = str;
+#ifdef DEBUG
+  printf("res: %s\n", get_string);
+#endif
+}
+
 /*
 void str_char()
 {
-  current_value = (byte)*current_string;
+  current_value = (byte)*get_string;
   printf("str char: %c %d\n", (char)current_value, current_value);
 }
 
 void switch_str_get()
 {
-  char *str = current_string;
-  current_string = prev_string;
-  prev_string = str;
+  char *str = get_string;
+  get_string = text_string;
+  text_string = str;
   get();
-}
-
-void str_cat()
-{
-  char *src;
-  char *str;
-  switch_str_get();
-  printf("str_cat %s %s\n", current_string, prev_string);
-  str = prev_string + strlen(prev_string);
-  src = current_string;
-  strcpy(str, src);
-  str = current_string;
-  current_string = prev_string;
-  prev_string = str;
-  printf("res: %s\n", current_string);
 }
 
 void str_eq()
 {
   switch_str_get();
-  printf("str_eq %s %s\n", current_string, prev_string);
-  if (!strcmp(current_string, prev_string)) current_value = 0;
+  printf("str_eq %s %s\n", get_string, text_string);
+  if (!strcmp(get_string, text_string)) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
 }
@@ -160,8 +170,8 @@ void str_eq()
 void str_gt()
 {
   switch_str_get();
-  printf("str_gt %s %s\n", current_string, prev_string);
-  if (strcmp(current_string, prev_string) > 0) current_value = 0;
+  printf("str_gt %s %s\n", get_string, text_string);
+  if (strcmp(get_string, text_string) > 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
 }
@@ -169,8 +179,8 @@ void str_gt()
 void str_lt()
 {
   switch_str_get();
-  printf("str_lt %s %s\n", current_string, prev_string);
-  if (strcmp(current_string, prev_string) < 0) current_value = 0;
+  printf("str_lt %s %s\n", get_string, text_string);
+  if (strcmp(get_string, text_string) < 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
 }
@@ -178,8 +188,8 @@ void str_lt()
 void str_ge()
 {
   switch_str_get();
-  printf("str_ge %s %s\n", current_string, prev_string);
-  if (strcmp(current_string, prev_string) >= 0) current_value = 0;
+  printf("str_ge %s %s\n", get_string, text_string);
+  if (strcmp(get_string, text_string) >= 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
 }
@@ -187,17 +197,17 @@ void str_ge()
 void str_le()
 {
   switch_str_get();
-  printf("str_le %s %s\n", current_string, prev_string);
-  if (strcmp(current_string, prev_string) <= 0) current_value = 0;
+  printf("str_le %s %s\n", get_string, text_string);
+  if (strcmp(get_string, text_string) <= 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
 }
 
 void prev_from_stack()
 {
-  char *str = current_string;
-  current_string = prev_string;
-  prev_string = str;
+  char *str = get_string;
+  get_string = text_string;
+  text_string = str;
   do {
     if (stack_pos == MAX_STACK) {
       printf("Max stack\n");
@@ -205,12 +215,12 @@ void prev_from_stack()
     }
     *str++ = stack[stack_pos++];
   } while (*(str - 1) != 0);
-  printf("prev from stack %s %s\n", current_string, prev_string);
+  printf("prev from stack %s %s\n", get_string, text_string);
 }
 
 void str_to_num()
 {
-  current_value = atoi(current_string);
-  printf("str to num: %s %d\n", current_string, current_value);
+  current_value = atoi(get_string);
+  printf("str to num: %s %d\n", get_string, current_value);
 }
 */
