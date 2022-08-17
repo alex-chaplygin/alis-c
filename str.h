@@ -11,7 +11,7 @@ void str_gt();//8e
 void str_lt(); //90
 void str_ge(); //92
 void str_le(); //94
-void str_to_stack(); //96
+void str_push(); //96
 void prev_from_stack(); //98
 void str_to_num(); //9a
 void set_char();

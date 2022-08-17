@@ -107,6 +107,17 @@ void set_char()
 #endif
 }
 
+void str_push()
+{
+  char *c = get_string + strlen(get_string);
+#ifdef DEBUG
+  printf("str push: %s\n", get_string);
+#endif
+  do
+    stack_push(&stack, *c--);
+  while (c >= get_string);
+}
+
 /*
 void str_char()
 {
@@ -180,20 +191,6 @@ void str_le()
   if (strcmp(current_string, prev_string) <= 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
-}
-
-void str_to_stack()
-{
-  char *c = current_string + strlen(current_string);
-  printf("str to stack: %s\n", current_string);
-  do {
-    stack_pos--;
-    if (stack_pos == 0) {
-      printf("Stack is full\n");
-      exit(1);
-    }
-    stack[stack_pos] = *c--;
-  } while (c >= current_string);
 }
 
 void prev_from_stack()
