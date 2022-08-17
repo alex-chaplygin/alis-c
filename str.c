@@ -130,7 +130,7 @@ void str_cat()
   char *str;
   switch_string_get();
 #ifdef DEBUG
-  printf("str_cat %s %s\n", get_string, text_string);
+  printf("str cat %s %s\n", get_string, text_string);
 #endif
   str = text_string + strlen(text_string);
   src = get_string;
@@ -140,6 +140,22 @@ void str_cat()
   text_string = str;
 #ifdef DEBUG
   printf("res: %s\n", get_string);
+#endif
+}
+
+/** 
+ * Извлечение строки из стека
+ */
+void str_pop()
+{
+  char *str = get_string;
+  get_string = text_string;
+  text_string = str;
+  do {
+    *str++ = stack_pop(&stack);
+  } while (*(str - 1) != 0);
+#ifdef DEBUG
+  printf("str pop %s %s\n", get_string, text_string);
 #endif
 }
 
@@ -201,21 +217,6 @@ void str_le()
   if (strcmp(get_string, text_string) <= 0) current_value = 0;
   else current_value = -1;
   printf("res: %d\n", current_value);
-}
-
-void prev_from_stack()
-{
-  char *str = get_string;
-  get_string = text_string;
-  text_string = str;
-  do {
-    if (stack_pos == MAX_STACK) {
-      printf("Max stack\n");
-      exit(1);
-    }
-    *str++ = stack[stack_pos++];
-  } while (*(str - 1) != 0);
-  printf("prev from stack %s %s\n", get_string, text_string);
 }
 
 void str_to_num()

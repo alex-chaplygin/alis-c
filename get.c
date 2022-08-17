@@ -99,7 +99,7 @@ func get_op[] = {
   nimp,//str_ge, //92
   nimp,//str_le, //94
   str_push, //96
-  nimp,//prev_from_stack, //98
+  str_pop, //98
   nimp,//str_to_num, //9a
   file_not_exists, //9c
   set_char, //9e
