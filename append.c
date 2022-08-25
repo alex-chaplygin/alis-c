@@ -30,7 +30,7 @@ func add_op[] = {
   add_byte_mem_byte, // 12
   add_word_mem_byte, // 14 
   add_string_mem_byte, // 16
-  nimp, // 18
+  add_string_array_byte, // 18
   add_byte_array_byte, // 1a
   add_word_array_byte, // 1c
   add_byte_global_word, // 1e
@@ -251,6 +251,24 @@ void add_byte_array_byte()
   *pos += (byte)current_value;
 #ifdef DEBUG
   printf("after add = %x\n", *pos);
+#endif
+}
+
+/// добавление строки в массив по адресу byte
+void add_string_array_byte()
+{
+  byte w = fetch_byte();
+  byte *pos = array_pos(seg_read(run_object->data, w), 1, 1);
+  char *res = pos;
+  byte *src = store_string;
+#ifdef DEBUG
+  printf("add_str arrb_%x (%s), %s\n", w, (char *)pos, store_string);
+#endif
+  while (*pos++);
+  pos--;
+  while (*pos++ = *src++);
+#ifdef DEBUG
+  printf("res = %s\n", res);
 #endif
 }
 

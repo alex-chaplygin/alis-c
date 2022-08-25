@@ -16,3 +16,4 @@ void add_word_global_array_word();
 void add_word_array_byte();
 int add_string_global_word();
 int add_word_object_word();
+void add_string_array_byte();
