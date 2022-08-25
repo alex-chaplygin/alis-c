@@ -20,8 +20,8 @@ void get_free()
   printf("get free resources %d: ", current_value);
 #endif
   switch (current_value) {
-  case 0:  current_value = 1024; break; // свободная память в кб
-  case 1:  current_value = 1024; break; // число свободной памяти потоков в кб
+  case 0:  current_value = 720; break; // свободная память в кб
+  case 1:  current_value = 720; break; // число свободной памяти потоков в кб
   case 2: // число свободных сценариев
     current_value = total_classes - num_classes; break; 
   case 3: // число свободных потоков
