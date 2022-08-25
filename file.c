@@ -199,6 +199,7 @@ void op_read_file()
   convert_array_endian(buf, count);
 #ifdef DEBUG
   printf("read from file: adr = %x count = %d\n", adr, count);
+  dump_mem(buf, count);
 #endif
 }
 
