@@ -18,7 +18,6 @@
 #include "render.h"
 #include "math.h"
 #include "class.h"
-#include "interpret.h"
 #include "palette.h"
 #include "append.h"
 #include "sound.h"
@@ -27,6 +26,7 @@
 #include "mouse.h"
 #include "graphics.h"
 #include "intersection.h"
+#include "res.h"
 
 byte *current_ip;		/**< указатель команд */
 object_t *run_object;		/**< текущий выполняемый поток */
@@ -270,6 +270,7 @@ func vm_op[] = {
   nimp, //df
   nimp, //e0
   get_last_object_mask, //e1
+  delete_image, //e2
 };
 
 /// Пустая команда

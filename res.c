@@ -75,3 +75,16 @@ byte *res_get_form(byte *class, int num)
 #endif
   return pos;
 }
+
+/** 
+ * Удаление изображения
+ * 
+ */
+void delete_image()
+{
+  new_get();
+  switch_get();
+#ifdef DEBUG
+  printf("delete image %d %d\n", prev_value, current_value);
+#endif
+}

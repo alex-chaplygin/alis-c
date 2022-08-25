@@ -38,5 +38,6 @@ typedef struct {
 
 byte *res_get_image(int num);
 byte *res_get_form(byte *script, int num);
+void delete_image();
 
 extern int load_main_res;
