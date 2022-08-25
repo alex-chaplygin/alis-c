@@ -25,6 +25,9 @@ void clip_reset_rec(rectangle_t *r)
 {
   r->min_x = r->min_y = 32000;
   r->max_x = r->max_y = -32000;
+  r->min_x = r->min_y = 0;
+  r->max_x = 319;
+  r->max_y = 199;
 }
 
 /** 
@@ -82,9 +85,9 @@ int clip_sprite(sprite_t *sc_sprite, rectangle_t *rec, rectangle_t *out, int rou
     return 0;
   if (rec->max_y < sc_sprite->origin.y)
     return 0;
-  if (round)
+  /*  if (round)
     out->min_x = rec->min_x & 0xfffffff0; // округление до 16 в меньшую сторону
-  else
+    else*/
     out->min_x = rec->min_x;
   // отсечение по окну сцены из спрайта сцены
   if (out->min_x < sc_sprite->origin.x)
@@ -92,9 +95,9 @@ int clip_sprite(sprite_t *sc_sprite, rectangle_t *rec, rectangle_t *out, int rou
   out->min_y = rec->min_y;
   if (out->min_y < sc_sprite->origin.y)
     out->min_y = sc_sprite->origin.y;
-  if (round)
+  /*  if (round)
     out->max_x = rec->max_x | 0xf; // округление до 16 - 1 в большую сторону
-  else
+    else*/
     out->max_x = rec->max_x;
   if (out->max_x > sc_sprite->max.x)
     out->max_x = sc_sprite->max.x;

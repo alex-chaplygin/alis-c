@@ -284,25 +284,20 @@ void render_view(view_t *view, sprite_t *sprite)
     case SPRITE_NEW:
       sprite_object = sprite->object;
       sprite = project_sort_sprite(sc_sprite, prev, sprite);
-      process_sprites(sprite);
-      render_sprites(view, sc_sprite);
       break;
     case SPRITE_UPDATED:
       sprite_object = sprite->object;
       clip_update_rec(sprite, &sprites_rec);// прямоугольник рассчитан на предыдущую позицию объекта
       sprite = project_sort_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
-      process_sprites(sprite);
-      render_sprites(view, sc_sprite);
       break;
     default: 
       sprite_object = sprite->object;
       sprite = delete_sprite(prev, sprite);
-      process_sprites(sprite);
-      render_sprites(view, sc_sprite);
     }
     prev = sprite;
     sprite = sprite->next_in_view;
   }
+  render_sprites(view, sc_sprite);
 }
 
 /// главный цикл визуализации
