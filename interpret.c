@@ -187,7 +187,7 @@ func vm_op[] = {
   nimp, // 8c
   nimp, // 8d
   nimp, // 8e
-  nimp, // 8f
+  find_intersection_list_offset, // 8f
   nimp, // 90
   nimp, // 91
   nimp, // 92

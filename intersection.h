@@ -6,3 +6,4 @@ void find_intersection_list_point();
 void find_intersection_list_vector();
 void find_intersection_list_form();
 void find_intersection_list_vector_cur_form();
+void find_intersection_list_offset();

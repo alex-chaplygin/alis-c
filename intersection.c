@@ -278,6 +278,32 @@ void find_intersection_list_vector()
 }
 
 /** 
+ * Нахождение списка объектов, которые пересекаются с формой
+ * на заданном смещении (вектор 9 объекта) относительно текущего объекта. 
+ * Первый найденный объект сохраняется в переменную.
+ * На входе: маска (какие объекты искать) и форма (bbox).
+ */
+void find_intersection_list_offset()
+{
+  short origin[3];
+  short *org = (short *)run_object->data->data;
+  char *ofs = (char *)&run_object->data->data[9];
+  origin[0] = ofs[0] + org[0];
+  origin[1] = ofs[1] + org[1];
+  origin[2] = ofs[2] + org[2];
+  new_get();
+  short mask = current_value;
+  new_get();
+  short form = current_value;
+#ifdef DEBUG
+  printf("find intersection list offset: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+#endif
+  find_intersection_list(origin, mask, form);
+  objects_list_pos = objects_list;
+  object_store_next();
+}
+
+/** 
  * Нахождение списка объектов, которые пересекаются с формой объекта
  * на заданном векторе относительно текущего объекта. 
  * Первый найденный объект сохраняется в переменную.
