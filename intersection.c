@@ -276,3 +276,36 @@ void find_intersection_list_vector()
   objects_list_pos = objects_list;
   object_store_next();
 }
+
+/** 
+ * Нахождение списка объектов, которые пересекаются с формой
+ * на заданном векторе формы относительно текущего объекта. 
+ * Первый найденный объект сохраняется в переменную.
+ * На входе: форма, маска (какие объекты искать) и форма (bbox).
+ */
+void find_intersection_list_form()
+{
+  short origin[3];
+  short *org = (short *)run_object->data->data;
+  new_get();
+  form_t *f = (form_t *)res_get_form(run_object->class, current_value);
+  if (f->form_type == 0) {
+    origin[0] = f->rect0[0] + org[0];
+    origin[1] = f->rect0[1] + org[1];
+    origin[2] = f->rect0[2] + org[2];
+  } else if (f->form_type == 1) {
+    origin[0] = f->rect1[0] + org[0];
+    origin[1] = f->rect1[1] + org[1];
+    origin[2] = f->rect1[2] + org[2];
+  }
+  new_get();
+  short mask = current_value;
+  new_get();
+  short form = current_value;
+#ifdef DEBUG
+  printf("find intersection list form: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+#endif
+  find_intersection_list(origin, mask, form);
+  objects_list_pos = objects_list;
+  object_store_next();
+}
