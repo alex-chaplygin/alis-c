@@ -267,7 +267,7 @@ func vm_op[] = {
   sprites_clear_all_view, // dc
   sprites_clear_with_tag_view, // dd
   op_object_kill_remove_all, // de
-  nimp, //df
+  view_set_param, //df
   nimp, //e0
   get_last_object_mask, //e1
   delete_image, //e2

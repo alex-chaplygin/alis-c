@@ -188,3 +188,20 @@ void view_free_sprites()
     s = (view_t *)(memory + s->next);
   }
 }
+
+/** 
+ * Заглушка - установка параметров окна
+ * 
+ */
+void view_set_param()
+{
+#ifdef DEBUG
+  printf("set view param\n");
+#endif
+  new_get();
+  new_get();
+  new_get();
+  new_get();
+  new_get();
+  new_get();
+}

@@ -58,6 +58,7 @@ void view_show();
 void view_set();
 void view_free_sprites();
 void view_hide();
+void view_set_param();
 
 extern view_t *view_list_head;	/**< список окон */
 #endif
