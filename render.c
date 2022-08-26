@@ -95,7 +95,7 @@ sprite_t *project_sort_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
   prev->next_in_view = c->next_in_view;
   // устанавливаем изображение отрисовки
   c->render_image = c->image;
-  clip_update_rec(c, &sprites_rec);
+  //clip_update_rec(c, &sprites_rec);
   sprite_t *s = insert_sort_sprite(sc, c);
    return prev;
 }
@@ -110,7 +110,7 @@ sprite_t *project_sort_sprite(sprite_t *sc, sprite_t *prev, sprite_t *c)
  */
 sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
 {
-  clip_update_rec(c, &sprites_rec);
+  //clip_update_rec(c, &sprites_rec);
   prev->next_in_view = c->next_in_view;
   c->next = free_sprite;
   free_sprite = c;
@@ -122,7 +122,7 @@ sprite_t *delete_sprite(sprite_t *prev, sprite_t *c)
  * отрисовки, удаление
  * @param sc_sprite голова списка спрайтов
  */
-void process_sprites(sprite_t *sc_sprite)
+/*void process_sprites(sprite_t *sc_sprite)
 {
   sprite_t *sprite = sc_sprite;
   sprite_t *prev;
@@ -151,7 +151,7 @@ void process_sprites(sprite_t *sc_sprite)
       delete_sprite(prev, sprite);
     sprite = prev;
   } while (1);
-}
+  }*/
 
 /** 
  * Отрисовка спрайта.
@@ -195,7 +195,7 @@ void render_sprite(sprite_t *sp, rectangle_t *clip)
  * окно отсечения blit_rec, внутри которого будет отрисовка всех новых спрайтов
  * Спрайты с отрицательным z или несортированные не рисуются.
  */
-void render_views()
+/*void render_views()
 {
   view_t *s = view_list_head;
   sprite_t *spr;
@@ -227,7 +227,7 @@ void render_views()
       break;
     s = (view_t *)(memory + s->next);
   }
-}
+  }*/
 
 /** 
  * Визуализация спрайтов
@@ -241,16 +241,20 @@ void render_views()
  */
 void render_sprites(view_t *view, sprite_t *spr)
 {
+  rectangle_t view_rec;
   if (view->flags & VIEW_HIDDEN)
     return;
-  int clip = clip_sprite(spr, &sprites_rec, &clip_rec, 1);
-#ifdef DEBUG
-  printf("Clip rec: ");
-  clip_print_rec(&clip_rec);
-#endif
-  if (!clip)
-    return;
-  render_views();
+  view_rec.min_x = 0;//spr->origin.x;
+  view_rec.min_y = 0;//spr->origin.y;
+  view_rec.max_x = 319;//spr->max.x;
+  view_rec.max_y = 199;//spr->max.y;
+  spr = spr->next_in_view;
+  //  clip_reset_rec(&sprites_rec);
+  while (spr) {
+    if (spr->state >= SPRITE_READY && spr->origin.z >= 0)
+      render_sprite(spr, &view_rec);
+    spr = spr->next_in_view;
+  }
   if (view->flags2 & VIEW2_NOBLIT) {
     printf("View: no blit\n");
     exit(1);
@@ -276,7 +280,7 @@ void render_view(view_t *view, sprite_t *sprite)
   sprite_t *sc_sprite = sprite;
   sprite_t *prev = sprite;
   sprite = sprite->next_in_view;
-  clip_reset_rec(&sprites_rec);
+  //  clip_reset_rec(&sprites_rec);
   while (sprite) {
     switch (sprite->state) {
     case SPRITE_READY:
@@ -287,7 +291,7 @@ void render_view(view_t *view, sprite_t *sprite)
       break;
     case SPRITE_UPDATED:
       sprite_object = sprite->object;
-      clip_update_rec(sprite, &sprites_rec);// прямоугольник рассчитан на предыдущую позицию объекта
+      //clip_update_rec(sprite, &sprites_rec);// прямоугольник рассчитан на предыдущую позицию объекта
       sprite = project_sort_sprite(sc_sprite, prev, sprite); // к нему добавляется позиция изменившегося объекта
       break;
     default: 
