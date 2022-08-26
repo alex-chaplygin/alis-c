@@ -737,3 +737,14 @@ void object_set_flip0()
 #endif
   run_object->x_flip = 0;
 }
+
+/** 
+ * Новые спрайты текущего объекта будут отражены
+ */
+void object_set_flip1()
+{
+#ifdef DEBUG
+  printf("object set flip = 1\n");
+#endif
+  run_object->x_flip = 1;
+}

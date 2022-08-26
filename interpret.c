@@ -198,7 +198,7 @@ func vm_op[] = {
   nimp, // 97
   nimp, // 98
   nimp, // 99
-  nimp, // 9a
+  object_set_flip1, // 9a
   object_set_flip0, // 9b
   objects_get_all, // 9c
   play_sound, // 9d
