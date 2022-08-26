@@ -19,11 +19,13 @@
 void get_byte_mem_word()
 {
   word w = fetch_word();
-  if ((short)w < 0) {
-    printf("get byte mem word < 0\n");
+  if ((short)w == -3)
+    current_value = run_object->x_flip;
+  else if ((short)w < 0) {
+    printf("get byte mem word < 0 %d\n", (short)w);
     exit(1);
-  }
-  current_value = (char)*seg_read(run_object->data, w);
+  } else
+    current_value = (char)*seg_read(run_object->data, w);
 #ifdef DEBUG
   printf("get byte varw_%x: %x; %d\n", w, current_value, current_value);
 #endif
