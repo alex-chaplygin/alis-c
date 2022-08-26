@@ -127,7 +127,7 @@ func vm_op[] = {
   sprites_clear_all, // 50
   set_form, // 51
   clear_form, // 52
-  nimp, // 53
+  find_intersection_list_vector_cur_form, // 53
   nimp, // 54
   find_intersection_list_vector, // 55
   find_intersection_list_point, // 56
