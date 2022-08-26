@@ -726,3 +726,14 @@ void object_pause_by_ref()
 #endif
   t->running = 0;
 }
+
+/** 
+ * Сброс отражения для новых спрайтов текущего объекта
+ */
+void object_set_flip0()
+{
+#ifdef DEBUG
+  printf("object set flip = 0\n");
+#endif
+  run_object->x_flip = 0;
+}
