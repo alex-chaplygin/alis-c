@@ -105,7 +105,7 @@ func get_op[] = {
   set_char, //9e
   get_drive, //a0
   nimp,//get_keyboard, //a2
-  nimp,//get_cpu_speed, //a4
+  get_cpu_speed, //a4
   nimp,//set_0, //a6
   get_hardware, //a8
 };
