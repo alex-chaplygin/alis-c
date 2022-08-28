@@ -28,7 +28,8 @@ typedef struct {
 
 /// форма, каркас объекта
 typedef struct {
-  short form_type;		/**< тип формы 0, 1 или -1 */
+  char form_type;		/**< тип формы 0, 1 или -1 */
+  byte count;			/**< число форм для композитной формы */
   word mask;
   union {
     char rect0[6];		/**< тип 0 */
