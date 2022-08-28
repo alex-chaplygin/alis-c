@@ -123,10 +123,6 @@ int objects_intersection(short *origin, short *origin2, int flip, int flip2, for
   vec_t min2;
   vec_t max2;  
   create_bbox(origin, flip, f1, &min, &max);
-  if (f2->form_type < 0) {
-    printf("f2 type -1\n");
-    exit(1);
-  }
   if (f2->mask & mask) {
     create_bbox(origin2, flip2, f2, &min2, &max2);
 #ifdef DEBUG
@@ -166,16 +162,24 @@ void find_intersection_list(short *origin, word mask, int form)
 #endif
     if (current == obj && t->form >= 0 && t != run_object) {
       f2 = (form_t *)res_get_form(t->class, t->form); // форма проверяемого объекта
-      if ((char)f->form_type < 0) {
-	printf("form type ff\n");
+#ifdef DEBUG
+      printf("check bbox, cur form type = %d\n", f->form_type);
+#endif
+      if (f->form_type < 0) {
+	printf("form 1 type = -1\n");
 	exit(1);
       } else {
+	if (f2->form_type < 0) {
+	  for (int i = 0; i < f2->count; i++) {
+	    word *form = (word *)f2 + 1 + i;
+	    if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, f, (form_t *)res_get_form(t->class, *form), mask))
+	      goto found;
+	  }
+	} else if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, f, f2, mask)) {
+	found:
 #ifdef DEBUG
-	printf("check bbox, form type = %d\n", f->form_type);
-#endif
-	if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip,
-		       t->x_flip, f, f2, mask)) {
 	  printf("check_bbox = true\n");
+#endif
 	  *objects_list_pos = object_num(t);
 	  objects_list_pos[256] = f2->mask;
 	  objects_list_pos++;
@@ -279,7 +283,8 @@ void find_intersection_list_vector()
 
 /** 
  * Нахождение списка объектов, которые пересекаются с формой
- * на заданном смещении (вектор 9 объекта) относительно текущего объекта. 
+ * на заданном смещении (вектор скорости объекта) 
+ * относительно текущего объекта. 
  * Первый найденный объект сохраняется в переменную.
  * На входе: маска (какие объекты искать) и форма (bbox).
  */
@@ -287,10 +292,10 @@ void find_intersection_list_offset()
 {
   short origin[3];
   short *org = (short *)run_object->data->data;
-  char *ofs = (char *)&run_object->data->data[9];
-  origin[0] = ofs[0] + org[0];
-  origin[1] = ofs[1] + org[1];
-  origin[2] = ofs[2] + org[2];
+  char *speed = (char *)&run_object->data->data[9];
+  origin[0] = speed[0] + org[0];
+  origin[1] = speed[1] + org[1];
+  origin[2] = speed[2] + org[2];
   new_get();
   short mask = current_value;
   new_get();
@@ -361,4 +366,5 @@ void find_intersection_list_form()
   find_intersection_list(origin, mask, form);
   objects_list_pos = objects_list;
   object_store_next();
+  exit(1);
 }
