@@ -273,7 +273,7 @@ void compare_jump_word_skip_nz()
 }
 
 /** 
- * Уменьшает значение переменной на единицу,
+ * Команда цикла со счетчиком типа байт,
  * если результат больше 0, то делает переход
  */
 void loop_byte()
@@ -283,9 +283,32 @@ void loop_byte()
   if (exchange_strings_append()) {
     current_ip = ip;
     char ofs = (char)fetch_byte();
-    current_ip = ip + 1 + ofs;
+    current_ip += ofs;
 #ifdef DEBUG
     printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->class));
+#endif
+  } else {
+#ifdef DEBUG
+    printf("loop end ip = %x\n", (int)(current_ip - run_object->class));
+#endif
+  }
+}
+
+/** 
+ * Команда цикла со счетчиком типа word
+ * если результат больше 0, то делает переход
+ */
+void loop_word()
+{
+  byte *ip = current_ip;
+  current_ip += 2;
+  current_value = -1;
+  if (exchange_strings_append()) {
+    current_ip = ip;
+    short ofs = (short)fetch_word();
+    current_ip += ofs;
+#ifdef DEBUG
+    printf("loop word: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->class));
 #endif
   } else {
 #ifdef DEBUG
@@ -419,27 +442,4 @@ void call_word_resume()
 #ifdef DEBUG
   printf("call word resum: %d ip = %x\n", s, (int)(current_ip - run_object->class));
 #endif
-}
-
-/** 
- * Уменьшает значение переменной на единицу,
- * если результат больше 0, то делает переход
- */
-void loop_word()
-{
-  byte *ip = current_ip + 2;
-  current_value = -1;
-  if (exchange_strings_append()) {
-    current_ip = ip;
-    short ofs = (short)fetch_word();
-    current_ip = ip + 2 + ofs;
-#ifdef DEBUG
-    printf("loop byte: ofs = %d ip = %x\n", ofs, (int)(current_ip - run_object->class));
-#endif
-  } else {
-#ifdef DEBUG
-    printf("loop end ip = %x\n", (int)(current_ip - run_object->class));
-#endif
-  }
-  exit(1);
 }
