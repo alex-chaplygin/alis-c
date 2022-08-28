@@ -748,3 +748,18 @@ void object_set_flip1()
 #endif
   run_object->x_flip = 1;
 }
+
+/** 
+ * Движение объекта по вектору скорости
+ */
+void object_move()
+{
+#ifdef DEBUG
+  printf("apply speed\n");
+#endif
+  short *org = (short *)run_object->data->data;
+  char *speed = (char *)&run_object->data->data[9];
+  org[0] += speed[0];
+  org[1] += speed[1];
+  org[2] += speed[2];
+}

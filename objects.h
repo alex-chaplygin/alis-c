@@ -108,6 +108,7 @@ void object_disable_msg();
 void object_disable_handle_msg();
 void object_set_flip0();
 void object_set_flip1();
+void object_move();
 
 extern int max_objects;		/**< максимальное количество потоков */
 extern int num_run_objects;		/**< число рабочих потоков */
