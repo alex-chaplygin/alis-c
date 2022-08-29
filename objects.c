@@ -806,3 +806,15 @@ void object_move()
   org[1] += speed[1];
   org[2] += speed[2];
 }
+
+/** 
+ * Устанавливает таблицу маршрутов у текущего объекта
+ */
+void object_set_path_table()
+{
+  int pt = fetch_word();
+#ifdef DEBUG
+  printf("object set path table: %x\n", pt);
+#endif
+  run_object->path_table= pt;
+}

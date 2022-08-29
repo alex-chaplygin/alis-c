@@ -50,7 +50,7 @@ typedef struct object_s {
   int flags;			/**< флаги потока */
   int x_flip;			/**< если 1, то все спрайты будут повернуты по горизонтали */
   int layer;			/**< слой отрисовки для всех новых спрайтов */
-  int f20;
+  int path_table;		/**< смещение таблицы маршрутов */
   int f22;
   int f25;
   int f26;
@@ -111,6 +111,7 @@ void object_set_flip1();
 void object_switch_flip();
 void object_move();
 void object_new_at_form();
+void object_set_path_table();
 
 extern int max_objects;		/**< максимальное количество потоков */
 extern int num_run_objects;		/**< число рабочих потоков */

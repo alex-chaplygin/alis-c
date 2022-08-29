@@ -182,7 +182,7 @@ func vm_op[] = {
   set_mouse_cursor, // 87
   nimp, // 88
   jump3, // 89
-  nimp, // 8a
+  object_set_path_table, // 8a
   null_op, // 8b
   nimp, // 8c
   nimp, // 8d
