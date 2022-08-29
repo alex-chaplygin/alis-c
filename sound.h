@@ -4,3 +4,4 @@ void play_music();
 void play_sound3();
 void play_sound6();
 void play_sound1();
+void play_sound_blanpc();

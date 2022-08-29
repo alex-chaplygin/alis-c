@@ -152,7 +152,7 @@ func vm_op[] = {
   nimp, // 69
   set_frames_to_skip, // 6a
   nimp, // 6b
-  nimp, // 6c
+  play_sound_blanpc, // 6c
   play_sound_synth, // 6d
   nimp, // 6e
   nimp, // 6f

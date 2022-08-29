@@ -116,3 +116,18 @@ void play_sound6()
   printf("play_sound6 %d %d %d %d %d %d\n", num, s1, s2, s3, s4, s5);
 #endif
 }
+
+void play_sound_blanpc()
+{
+  new_get();
+  int s1 = current_value;
+  new_get();
+  int s2 = current_value;
+  new_get();
+  int s3 = current_value;
+  new_get();
+  int s4 = current_value;
+#ifdef DEBUG
+  printf("play_sound blanpc %d %d %d %d\n", s1, s2, s3, s4);
+#endif
+}
