@@ -140,6 +140,7 @@ void object_setup_main(byte *class, int size)
 {
   object_setup(objects_table, class, size);
   main_object = objects_table->object;
+  main_object->parent = main_object;
 }
 
 /** 
