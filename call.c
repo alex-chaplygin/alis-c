@@ -85,6 +85,15 @@ void jump_skip_word()
   current_ip += p + 1;
 }
 
+void jump3()
+{
+  char p = (char)fetch_byte();
+#ifdef DEBUG
+  printf("jmp3 %d\n", p * 3 + 3);
+#endif
+  current_ip += p * 3 + 3;
+}
+
 /** 
  * Для обработчиков - возврат только один раз
  * Для главной программы - обычный возврат, с обнулением сохранения

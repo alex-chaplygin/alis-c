@@ -181,7 +181,7 @@ func vm_op[] = {
   mouse_read, // 86
   set_mouse_cursor, // 87
   nimp, // 88
-  nimp, // 89
+  jump3, // 89
   nimp, // 8a
   null_op, // 8b
   nimp, // 8c
