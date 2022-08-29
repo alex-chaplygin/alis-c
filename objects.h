@@ -108,6 +108,7 @@ void object_disable_msg();
 void object_disable_handle_msg();
 void object_set_flip0();
 void object_set_flip1();
+void object_switch_flip();
 void object_move();
 void object_new_at_form();
 

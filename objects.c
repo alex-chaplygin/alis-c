@@ -782,6 +782,17 @@ void object_set_flip1()
 }
 
 /** 
+ * Меняет отражение объекта на противоположное
+ */
+void object_switch_flip()
+{
+#ifdef DEBUG
+  printf("object switch flip\n");
+#endif
+  run_object->x_flip ^= 1;
+}
+
+/** 
  * Движение объекта по вектору скорости
  */
 void object_move()
