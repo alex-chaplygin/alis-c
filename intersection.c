@@ -336,6 +336,35 @@ void find_intersection_list_vector_cur_form()
 }
 
 /** 
+ * Вычисляет центр формы
+ * 
+ * @param class класс откуда считывается форма
+ * @param form номер формы
+ * @param origin вычисленный центр
+ */
+void get_form_center(byte *class, int form, short *origin)
+{
+  form_t *f = (form_t *)res_get_form(class, form);
+  if (f->form_type == 0) {
+    origin[0] = f->rect0[0] + f->rect0[3] / 2;
+    origin[1] = f->rect0[1] + f->rect0[4] / 2;
+    origin[2] = f->rect0[2] + f->rect0[5] / 2;
+  } else if (f->form_type == 1) {
+    origin[0] = f->rect1[0] + f->rect1[3] / 2;
+    origin[1] = f->rect1[1] + f->rect1[4] / 2;
+    origin[2] = f->rect1[2] + f->rect1[5] / 2;
+  } else if (f->form_type == 3) {
+    short *pos = (short *)f + 1;
+    memcpy(origin, pos, 6);
+  } else {
+    printf("get form center type = %x\n", f->form_type);
+    exit(1);
+  }
+  if (run_object->x_flip && run_object->version >= 0x15)
+    origin[0] = -origin[0];
+}
+
+/** 
  * Нахождение списка объектов, которые пересекаются с формой
  * на заданном векторе формы относительно текущего объекта. 
  * Первый найденный объект сохраняется в переменную.
@@ -346,16 +375,7 @@ void find_intersection_list_form()
   short origin[3];
   short *org = (short *)run_object->data->data;
   new_get();
-  form_t *f = (form_t *)res_get_form(run_object->class, current_value);
-  if (f->form_type == 0) {
-    origin[0] = f->rect0[0] + org[0];
-    origin[1] = f->rect0[1] + org[1];
-    origin[2] = f->rect0[2] + org[2];
-  } else if (f->form_type == 1) {
-    origin[0] = f->rect1[0] + org[0];
-    origin[1] = f->rect1[1] + org[1];
-    origin[2] = f->rect1[2] + org[2];
-  }
+  get_form_center(run_object->class, current_value, origin);
   new_get();
   short mask = current_value;
   new_get();
