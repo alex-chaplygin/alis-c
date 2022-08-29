@@ -53,6 +53,9 @@ func set_op[] = {
 void store()
 {
   byte op = fetch_byte();
+#ifdef DEBUG
+  printf("%x\t", op);
+#endif
   if (op & 1) {
     printf("invalid store op %x\n", op);
     exit(1);
@@ -68,8 +71,6 @@ void store()
 /// присваивание выражения
 void store_expression()
 {
-  byte op;
-  
 #ifdef DEBUG
   printf("store expression\n");
 #endif
@@ -278,7 +279,13 @@ void store_byte_object_word()
   }
   object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
-  seg_write_byte(t->data, adr, (byte)current_value);
+  if ((short)adr == -2) {
+    t->frames_to_skip = (byte)current_value;
+  } else if ((short)adr < 0) {
+    printf("set byte object word adr: %x\n", adr);
+    exit(1);
+  } else
+    seg_write_byte(t->data, adr, (byte)current_value);
   #ifdef DEBUG
   printf("store_byte object: id = %x var_%x: %x; %d\n", t->id, adr, current_value, current_value);
   #endif
