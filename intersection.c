@@ -11,6 +11,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "interpret.h"
 #include "get.h"
 #include "res.h"
@@ -138,6 +139,33 @@ int objects_intersection(short *origin, short *origin2, int flip, int flip2, for
 }
 
 /** 
+ * Проверка столкновений двух объектов. Учитывает составную форму второго объекта
+ * 
+ * @param origin координаты первого объекта
+ * @param origin2 координаты второго объекта
+ * @param flip отражение первого объекта
+ * @param flip2 отражение второго объекта
+ * @param f1 форма первого объекта
+ * @param f2 форма второго объекта
+ * @param mask маска поиска
+ * @param class класс второго объекта
+ * 
+ * @return 1 - если пересекается, иначе 0
+ */
+int check_intersection(short *origin, short *origin2, int flip, int flip2, form_t *f1, form_t *f2, word mask, byte *class)
+{
+  if (f2->form_type < 0) {
+    for (int i = 0; i < f2->count; i++) {
+      word *form = (word *)f2 + 1 + i;
+      if (objects_intersection(origin, origin2, flip, flip2, f1, (form_t *)res_get_form(class, *form), mask))
+	return 1;
+    }
+    return 0;
+  }
+  return objects_intersection(origin, origin2, flip, flip2, f1, f2, mask);
+}
+
+/** 
  * Поиск объектов, которые пересекаются с заданным объектом
  * 
  * @param origin позиция заданного объекта
@@ -155,27 +183,23 @@ void find_intersection_list(short *origin, word mask, int form)
   object_t *t;
   while (tab) {
     t = tab->object;
-    int current = *(short *)seg_read(run_object->data, 6);
-    int obj = *(short *)seg_read(t->data, 6);
+    int current_z = *(short *)seg_read(run_object->data, 6); // z - текущего объекта
+    int obj_z = *(short *)seg_read(t->data, 6); // z - проверяемого объекта
 #ifdef DEBUG
     printf("checking obj %x, form: %x\n", object_num(t), t->form);
 #endif
-    if (current == obj && t->form >= 0 && t != run_object) {
+    if (current_z == obj_z && t->form >= 0 && t != run_object) {
       f2 = (form_t *)res_get_form(t->class, t->form); // форма проверяемого объекта
 #ifdef DEBUG
       printf("check bbox, cur form type = %d\n", f->form_type);
 #endif
       if (f->form_type < 0) {
-	printf("form 1 type = -1\n");
-	exit(1);
-      } else {
-	if (f2->form_type < 0) {
-	  for (int i = 0; i < f2->count; i++) {
-	    word *form = (word *)f2 + 1 + i;
-	    if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, f, (form_t *)res_get_form(t->class, *form), mask))
-	      goto found;
-	  }
-	} else if (objects_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, f, f2, mask)) {
+	for (int i = 0; i < f->count; i++) {
+	  word *form = (word *)f + 1 + i;
+	  if (check_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, (form_t *)res_get_form(run_object->class, *form), f2, mask, t->class))
+	goto found;
+	}
+      } else if (check_intersection(origin, (short *)t->data->data, run_object->x_flip, t->x_flip, f, f2, mask, t->class)) {
 	found:
 #ifdef DEBUG
 	  printf("check_bbox = true\n");
@@ -185,9 +209,8 @@ void find_intersection_list(short *origin, word mask, int form)
 	  objects_list_pos++;
 	  if (!find_all_objects)
 	    goto end;
-	} else
+      } else
 	  printf("check_bbox = false\n");	  
-      }
     }
     tab = tab->next;
   }
