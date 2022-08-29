@@ -16,6 +16,8 @@
 #include "render.h"
 #include "get.h"
 #include "store.h"
+#include "res.h"
+#include "intersection.h"
 
 object_table_t *objects_table; /**< таблица объектов */
 int max_objects;		/**< максимальное количество объектов */
@@ -203,6 +205,35 @@ void object_new()
 #endif
   vec_t vec;
   vec.x = vec.y = vec.z = 0;
+  object_t *t = object_add(class_get(i), class_size(i), &vec);
+ store:
+  switch_string_store();
+}
+
+/** 
+ * Команда: создане нового объекта заданного класса
+ * с координатами из формы
+ */
+void object_new_at_form()
+{
+  short origin[3];
+  vec_t vec;
+  new_get();
+  int form = current_value;
+  get_form_center(run_object->class, form, origin);
+  vec.x = origin[0];
+  vec.y = origin[1];
+  vec.z = origin[2];
+  word id = fetch_word();
+  int i = class_loaded(id);
+  if (i == -1) {
+    printf("Class %x (total %d) is not loaded\n", id, total_classes);
+    current_value = -1;
+    goto store;
+  }
+#ifdef DEBUG
+  printf("new object class = %x at form %x origin (%x %x %x)\n", id, form, vec.x, vec.y, vec.z);
+#endif
   object_t *t = object_add(class_get(i), class_size(i), &vec);
  store:
   switch_string_store();

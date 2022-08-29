@@ -104,7 +104,7 @@ func vm_op[] = {
   nimp, // 39
   nimp, // 3a
   null_op, // 3b
-  nimp, // 3c
+  object_new_at_form, // 3c
   class_free, // 3d
   object_resume, // 3e
   object_pause, // 3f
