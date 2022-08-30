@@ -27,6 +27,7 @@
 #include "graphics.h"
 #include "intersection.h"
 #include "res.h"
+#include "path.h"
 
 byte *current_ip;		/**< указатель команд */
 object_t *run_object;		/**< текущий выполняемый поток */
@@ -184,7 +185,7 @@ func vm_op[] = {
   jump3, // 89
   object_set_path_table, // 8a
   null_op, // 8b
-  nimp, // 8c
+  path_find_shortest, // 8c
   nimp, // 8d
   nimp, // 8e
   find_intersection_list_offset, // 8f
