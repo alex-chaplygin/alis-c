@@ -140,7 +140,7 @@ func vm_op[] = {
   nimp, // 5c
   nimp, // 5d
   nimp, // 5e
-  nimp, // 5f
+  path_set, // 5f
   nimp, // 60  
   object_send_message, // 61
   object_ready_to_receive, // 62

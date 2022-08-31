@@ -39,7 +39,7 @@ void make_vec(short *p1, short *p2, vec_t *out)
  * 
  * @return скалярное произведение
  */
-int dot_product(vec_t *v1, byte *v2)
+int dot_product(vec_t *v1, char *v2)
 {
   return v1->x * v2[0] + v1->y * v2[1] + v1->z * v2[2];
 }
@@ -55,6 +55,7 @@ void path_find_shortest()
   char *cur_path;
   new_get();
   int obj_num = current_value;
+
 #ifdef DEBUG
   printf("find shortest path to object num = %x\n", obj_num);
 #endif
@@ -86,7 +87,7 @@ void path_find_shortest()
       min_path = cur_path;
     }
 #ifdef DEBUG
-    printf("path (%x %x %x) dot (%x) max (%x)\n", cur_path[0], cur_path[1], cur_path[2], dot, max_dot);
+    printf("path (%d %d %d)(%x %x %x) dot (%d, %x) max (%d, %x)\n", cur_path[0], cur_path[1], cur_path[2], cur_path[0], cur_path[1], cur_path[2], dot, dot, max_dot, max_dot);
 #endif
     cur_path += 3;
   }
@@ -96,6 +97,25 @@ void path_find_shortest()
   run_object->data->data[11] = min_path[2];
 #ifdef DEBUG
   printf("found path num = %x\n", run_object->data->data[8]);
-  printf("min path = (%x %x %x)\n", min_path[0], min_path[1], min_path[2]);
+  printf("min path = (%d %d %d) (%x %x %x)\n", min_path[0], min_path[1], min_path[2], min_path[0], min_path[1], min_path[2]);
 #endif
+}
+
+/** 
+ * Устанавливает путь по заданному номеру
+ */
+void path_set()
+{
+  new_get();
+  if (!run_object->path_table) {
+    printf("set path path table = 0\n");
+    exit(1);
+  }
+  char *path = run_object->class + run_object->path_table + 1 + current_value * 3;
+#ifdef DEBUG
+  printf("path set (%x %x %x)\n", path[0], path[1], path[2]);
+#endif
+  run_object->data->data[9] = path[0];
+  run_object->data->data[10] = path[1];
+  run_object->data->data[11] = path[2];
 }
