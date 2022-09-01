@@ -131,3 +131,25 @@ void play_sound_blanpc()
   printf("play_sound blanpc %d %d %d %d\n", s1, s2, s3, s4);
 #endif
 }
+
+void play_synth_gain()
+{
+  new_get();
+  int s1 = current_value;
+  new_get();
+  int s2 = current_value;
+  new_get();
+  int s3 = current_value;
+  new_get();
+  int s4 = current_value;
+#ifdef DEBUG
+  printf("play synth gain %d %d %d %d ", s1, s2, s3, s4);
+#endif
+  if (!s4)
+    return;
+  new_get();
+  int s5 = current_value;  
+#ifdef DEBUG
+  printf("%d\n", s5);
+#endif
+}
