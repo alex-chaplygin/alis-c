@@ -53,17 +53,10 @@ void file_open(char *name, int mode)
   char *m;
   strcpy(file_name, name);
   lowercase(file_name);
-  switch (mode) {
-  case 2: // открытие на чтение и запись
-    m = rw;
-    break;
-  case 0x302: // открытие на запись
+  if (mode & 0x200)
     m = w;
-    break;
-  default:
-    printf("unknown mode: %d\n", mode);
-    exit(1);
-  }
+  else
+    m = rw;
 #ifdef DEBUG
   printf("file open: %s mode = %s\n", file_name, m);
 #endif
@@ -76,9 +69,6 @@ void file_open(char *name, int mode)
       exit(1);
     }
   }
-#ifdef DEBUG
-  printf("file open: %s mode = %s\n", file_name, m);
-#endif
 }
 
 /** 
@@ -199,7 +189,7 @@ void op_read_file()
   convert_array_endian(buf, count);
 #ifdef DEBUG
   printf("read from file: adr = %x count = %d\n", adr, count);
-  dump_mem(buf, count);
+  dump_mem((byte *)buf, count);
 #endif
 }
 
