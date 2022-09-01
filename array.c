@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "interpret.h"
 #include "memory.h"
 
@@ -67,4 +68,20 @@ byte *array_pos(byte *arr, int str, int size)
      pos += idx;
     } while (--dim_count);
   return pos;
+}
+
+/** 
+ * Заполняет массив константными значениями
+ * 
+ */
+void array_set()
+{
+  word arr = fetch_word();
+  word count = fetch_word() - 1;
+  memcpy(seg_read(run_object->data, arr), current_ip, count);
+  current_ip += count;
+#ifdef DEBUG
+  printf("array set %x %x\n", arr, count);
+  dump_mem(seg_read(run_object->data, arr), count);
+#endif
 }

@@ -156,7 +156,7 @@ func vm_op[] = {
   play_sound_blanpc, // 6c
   play_sound_synth, // 6d
   nimp, // 6e
-  nimp, // 6f
+  array_set, // 6f
   op_open_file, // 70
   op_close_file, // 71
   nimp, // 72
