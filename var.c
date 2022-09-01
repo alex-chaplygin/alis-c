@@ -133,13 +133,19 @@ void get_byte_from_object()
     t = objects_table[thr / 6].object;
   }
   word adr = fetch_word();
-  #ifdef DEBUG
+  if ((short)adr == -3)
+    current_value = t->x_flip;
+  else if ((short)adr < 0) {
+    printf("get byte from object adr: %x\n", adr);
+    exit(1);
+  } else
+    current_value =*(char *)seg_read(t->data, adr);
+#ifdef DEBUG
   printf("get byte object: %x var_%x: ", *t->class, adr);
-  #endif
-  current_value =*(char *)seg_read(t->data, adr);
-  #ifdef DEBUG
+#endif
+#ifdef DEBUG
   printf("%x; %d\n", current_value, current_value);
-  #endif
+#endif
 }
 
 /** 
