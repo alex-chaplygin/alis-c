@@ -98,3 +98,17 @@ void get_hardware()
   printf("get hardware: %x\n", current_value);
 #endif
 }
+
+/** 
+ * Пропуск 4-х параметров
+ */
+void skip4()
+{
+#ifdef DEBUG
+  printf("skip4\n");
+#endif
+  new_get();
+  new_get();
+  new_get();
+  new_get();
+}

@@ -28,6 +28,7 @@
 #include "intersection.h"
 #include "res.h"
 #include "path.h"
+#include "misc.h"
 
 byte *current_ip;		/**< указатель команд */
 object_t *run_object;		/**< текущий выполняемый поток */
@@ -152,10 +153,10 @@ func vm_op[] = {
   set_palette_from_res, // 68
   nimp, // 69
   set_frames_to_skip, // 6a
-  nimp, // 6b
+  play_synth_gain, // 6b
   play_sound_blanpc, // 6c
   play_sound_synth, // 6d
-  nimp, // 6e
+  skip4, // 6e
   array_set, // 6f
   op_open_file, // 70
   op_close_file, // 71
