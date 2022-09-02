@@ -157,7 +157,7 @@ int check_intersection(short *origin, short *origin2, int flip, int flip2, form_
   if (f2->form_type < 0) {
     for (int i = 0; i < f2->count; i++) {
       word *form = (word *)f2 + 1 + i;
-      if (objects_intersection(origin, origin2, flip, flip2, f1, (form_t *)res_get_form(class, *form), mask))
+      if (check_intersection(origin, origin2, flip, flip2, f1, (form_t *)res_get_form(class, *form), mask, class))
 	return 1;
     }
     return 0;
