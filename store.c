@@ -279,9 +279,11 @@ void store_byte_object_word()
   }
   object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
-  if ((short)adr == -2) {
+  if ((short)adr == -2)
     t->frames_to_skip = (byte)current_value;
-  } else if ((short)adr < 0) {
+  else if ((short)adr == -3)
+    t->x_flip = (byte)current_value;
+  else if ((short)adr < 0) {
     printf("set byte object word adr: %x\n", adr);
     exit(1);
   } else
