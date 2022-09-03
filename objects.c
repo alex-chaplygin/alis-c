@@ -171,9 +171,9 @@ object_t *object_add(byte *class, int size, vec_t *origin)
   current_value = (int)(new_object - objects_table) * 6;
   object_t *t = new_object->object;
   memcpy(t->data->data, run_object->data->data, 6); /**< начало координат копируется из родительского новый объект */
-  memcpy(t->data->data + 9, run_object->data->data + 9, 3); /**< копируются 3 байта начиная с 9-го */
+  memcpy(t->data->data + 9, run_object->data->data + 9, 3); /**< вектор направления берется из текущего объекта */
   t->parent = run_object;
-  // добавления вектора перемещения к началу координат нового объекта
+  // новый объект помещается относительно текущего
   short *coord = (short *)t->data->data;
   coord[0] += origin->x;
   coord[1] += origin->y;
@@ -429,6 +429,12 @@ void object_kill(int num, int remove)
   memory_free(t->data);
   object_table_t *tab = objects_table->next;
   object_table_t *prev = objects_table;
+  while (tab) {
+    if (tab->object->parent == t)
+      tab->object->parent = -1; // если был родителем для объектов, то очищаем
+    tab = tab->next;
+  }
+  tab = objects_table->next;
   while (tab) {
     if (tab->object == t)
       break;
