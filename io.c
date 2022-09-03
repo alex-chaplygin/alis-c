@@ -185,8 +185,9 @@ byte *io_load(int id, char *name, int *size)
     else if ((h.flags >> 8 & 0xf0) == 0x80){
       uncompress_rle(data, *size);
     } else {
-      printf("Unknown type %x\n", h.flags);
-      exit(1);
+      file_read(data, *size);      
+      //      printf("Unknown type %x\n", h.flags);
+      //exit(1);
     }
     file_close();
     return data;
