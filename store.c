@@ -127,16 +127,21 @@ void set_word_mem_word()
     else if (current_value % 6 != 0) {
       printf("store word mem word parent object num = %x\n", current_value);
       exit(1);
-    } else
+    } else {
+#ifdef DEBUG
+      printf("store_w parent, %x; %d object class = %x\n", current_value, current_value, objects_table[current_value / 6].object->id);
+#endif
       run_object->parent = objects_table[current_value / 6].object;
+    }
   } else if ((short)w < 0) {
     printf("set word mem word < 0 %x\n", w);
     exit(1);
-  } else
+  } else {
     seg_write_word(run_object->data, w, current_value);
 #ifdef DEBUG
-  printf("store_w var_%x, %x; %d\n", w, current_value, current_value);
+    printf("store_w var_%x, %x; %d\n", w, current_value, current_value);
 #endif
+  }
 }
 
 /// запись строки по адресу word
