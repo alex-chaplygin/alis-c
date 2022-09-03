@@ -7,3 +7,4 @@ void get_cpu_speed(); //a4
 void set_0(); //a6
 void get_hardware(); //a8
 void skip4();
+void skip1();

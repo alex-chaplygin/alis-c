@@ -112,3 +112,14 @@ void skip4()
   new_get();
   new_get();
 }
+
+/** 
+ * Пропуск 1-го параметра
+ */
+void skip1()
+{
+#ifdef DEBUG
+  printf("skip1\n");
+#endif
+  new_get();
+}
