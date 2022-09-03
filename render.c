@@ -29,6 +29,7 @@ byte frame_num = 0;			/**< текущий счетчик кадров */
 rectangle_t sprites_rec;	/**< окно вывода новых спрайтов */
 rectangle_t clip_rec;	/**< окно вывода новых спрайтов, отсеченное по окну view */
 int sprite_object;	/**< номер объекта, чьи спрайты обрабатываются вместе */
+byte pixel_color;
 
 /** 
  * Новый спрайт помещается на новое место в списке отрисовки спрайтов
@@ -341,4 +342,16 @@ void set_frames_to_skip()
 #ifdef DEBUG
   printf("\t\tset frame num %d\n", frames_to_skip);
 #endif
+}
+
+/** 
+ * Устанавливает цвет для отрисовки точки
+ */
+void set_color()
+{
+  new_get();
+  pixel_color = (byte)current_value;
+#ifdef DEBUG
+  printf("set color %x\n", pixel_color);
+#endif  
 }

@@ -171,7 +171,7 @@ func vm_op[] = {
   nimp, // 7a
   nimp, // 7b
   nimp, // 7c
-  nimp, // 7d
+  set_color, // 7d
   nimp, // 7e
   nimp, // 7f
   nimp, // 80
