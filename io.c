@@ -131,6 +131,32 @@ void uncompress(byte *out, int size)
 }
 
 /** 
+ * Разпаковка потока из файла
+ * Вариант кодирования RLE
+ * @param out адрес буфера, куда распаковывается
+ * @param size размер буфера
+ */
+void uncompress_rle(byte *out, int size)
+{
+  byte *o = out;
+  byte b;
+  byte d;
+  int count;
+  while (o < out + size) {
+    file_read(&b, 1);
+    if ((char)b < 0) {
+      count = b & 0x7f;
+      file_read(&d, 1);
+      memset(o, d, count);
+    } else {
+      count = b;
+      file_read(o, count);
+    }
+    o += count;
+  }
+}
+
+/** 
  * Загрузка IO файла
  * 
  * @param id номер класса
@@ -142,12 +168,12 @@ byte *io_load(int id, char *name, int *size)
 {
     io_header_t h;
     byte *data;
-
+    extern FILE *handle;
     file_open(name, FILE_RW);
     file_read(&h, sizeof(h));
     *size = h.uncompressed_size + ((h.flags & 0xff) << 16);
 #ifdef DEBUG
-    printf("IO load uncompressed size = %d flags = %x type = %d\n", size, h.flags, h.type);
+    printf("IO load uncompressed size = %d flags = %x type = %d\n", *size, h.flags, h.type);
 #endif
     if (id == 0 || h.type == MAIN_TYPE)  {
       load_main_class();
@@ -156,6 +182,12 @@ byte *io_load(int id, char *name, int *size)
     data = xmalloc(*size);
     if ((h.flags >> 8 & 0xfe) == 0xa0)
       uncompress(data, *size);
+    else if ((h.flags >> 8 & 0xf0) == 0x80){
+      uncompress_rle(data, *size);
+    } else {
+      printf("Unknown type %x\n", h.flags);
+      exit(1);
+    }
     file_close();
     return data;
 }
