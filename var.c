@@ -168,16 +168,20 @@ void get_word_from_object()
     t = objects_table[thr / 6].object;
   }
   word adr = fetch_word();
-  if ((short)adr == -40)
+  if ((short)adr == -40) {
+#ifdef DEBUG
+    printf("get word object: %x parent obj class = %x\n", thr, t->id);
+#endif
     current_value = object_num(t->parent);
-  else if ((short)adr < 0) {
+  } else if ((short)adr < 0) {
     printf("get word from object adr: %x\n", adr);
     exit(1);
-  } else 
+  } else {
     current_value = *(short *)seg_read(t->data, adr);
 #ifdef DEBUG
-  printf("get word object: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
+    printf("get word object: %x var_%x: %x; %d\n", thr, adr, current_value, current_value);
 #endif
+  }
 }
 
 /// чтение глобальной переменной типа byte по адресу word
