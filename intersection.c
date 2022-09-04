@@ -306,12 +306,11 @@ void find_intersection_list_vector()
 
 /** 
  * Нахождение списка объектов, которые пересекаются с формой
- * на заданном смещении (вектор скорости объекта) 
- * относительно текущего объекта. 
+ * на заданном векторе пути относительно текущего объекта. 
  * Первый найденный объект сохраняется в переменную.
  * На входе: маска (какие объекты искать) и форма (bbox).
  */
-void find_intersection_list_offset()
+void find_intersection_list_path()
 {
   short origin[3];
   short *org = (short *)run_object->data->data;
@@ -324,7 +323,33 @@ void find_intersection_list_offset()
   new_get();
   short form = current_value;
 #ifdef DEBUG
-  printf("find intersection list offset: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+  printf("find intersection list path: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
+#endif
+  find_intersection_list(origin, mask, form);
+  objects_list_pos = objects_list;
+  object_store_next();
+}
+
+/** 
+ * Нахождение списка объектов, которые пересекаются с формой
+ * текущего объекта
+ * на заданном векторе пути относительно текущего объекта. 
+ * Первый найденный объект сохраняется в переменную.
+ * На входе: маска (какие объекты искать).
+ */
+void find_intersection_list_path_cur_form()
+{
+  short origin[3];
+  short *org = (short *)run_object->data->data;
+  char *speed = (char *)&run_object->data->data[9];
+  origin[0] = speed[0] + org[0];
+  origin[1] = speed[1] + org[1];
+  origin[2] = speed[2] + org[2];
+  new_get();
+  short mask = current_value;
+  short form = run_object->form;
+#ifdef DEBUG
+  printf("find intersection list path cur_form: origin (%x %x %x), mask (%x), form(%x)\n", origin[0], origin[1], origin[2], mask, form);
 #endif
   find_intersection_list(origin, mask, form);
   objects_list_pos = objects_list;

@@ -188,8 +188,8 @@ func vm_op[] = {
   null_op, // 8b
   path_find_shortest, // 8c
   nimp, // 8d
-  nimp, // 8e
-  find_intersection_list_offset, // 8f
+  find_intersection_list_path_cur_form, // 8e
+  find_intersection_list_path, // 8f
   object_move, // 90
   nimp, // 91
   nimp, // 92
