@@ -18,7 +18,7 @@
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define FPS 40			/**< число кадров в секунду */
+#define FPS 60			/**< число кадров в секунду */
 
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
