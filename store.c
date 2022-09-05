@@ -271,18 +271,23 @@ void set_string_array_byte()
 /// запись переменной byte по адресу word из другого потока
 void store_byte_object_word()
 {
-  int thr = fetch_word();
-  thr = *(word *)seg_read(run_object->data, thr);
-  if (thr == 0xffff) {
+  object_t *t;
+  word thr = fetch_word();
+  if ((short)thr == -40)
+    t = run_object->parent;
+  else {
+    thr = *(word *)seg_read(run_object->data, thr);
+    if (thr == 0xffff) {
 #ifdef DEBUG
-    printf("store byte object = -1\n");
+      printf("store byte object = -1\n");
 #endif
-    return;
-  } else if (thr % 6 != 0) {
-    printf("store byte object word: invalid object: %x\n", thr);
-    exit(1);
+      return;
+    } else if (thr % 6 != 0) {
+      printf("store byte object word: invalid object: %x\n", thr);
+      exit(1);
+    }
+    t = objects_table[thr / 6].object;
   }
-  object_t *t = objects_table[thr / 6].object;
   word adr = fetch_word();
   if ((short)adr == -2)
     t->frames_to_skip = (byte)current_value;
