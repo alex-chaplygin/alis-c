@@ -122,10 +122,8 @@ void set_word_mem_word()
 {
   word w = fetch_word();
   if ((short)w == -40) {// запись номера родительского объекта
-    if (current_value == -1)
-      run_object->parent = -1;
-    else if (current_value == -2)
-      run_object->parent = -2;
+    if (current_value == -1 || current_value == -2)
+      run_object->parent = current_value;
     else if (current_value % 6 != 0) {
       printf("store word mem word parent object num = %x\n", current_value);
       exit(1);
