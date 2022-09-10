@@ -122,8 +122,10 @@ void set_word_mem_word()
 {
   word w = fetch_word();
   if ((short)w == -40) {// запись номера родительского объекта
-    if (current_value = -1)
+    if (current_value == -1)
       run_object->parent = -1;
+    else if (current_value == -2)
+      run_object->parent = -2;
     else if (current_value % 6 != 0) {
       printf("store word mem word parent object num = %x\n", current_value);
       exit(1);
@@ -162,7 +164,7 @@ void set_byte_mem_byte()
   byte w = fetch_byte();
   seg_write_byte(run_object->data, w, (byte)current_value);
 #ifdef DEBUG
-  printf("store_b var_%x, %x; %d\n", w, (byte)current_value, (byte)current_value);
+  printf("store_b var_%x, %x; %d\n", w, (char)current_value, (char)current_value);
 #endif
 }
 
