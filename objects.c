@@ -269,7 +269,9 @@ void objects_run()
   for (current_object = objects_table; current_object; ) {
     t = current_object->object;
 #ifdef DEBUG
-    printf("Run object %x ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, (int)(t->ip - t->class), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
+    short *org = (short *)t->data->data;
+    char *sp = (char *)&t->data->data[9];
+    printf("Run object %x origin (%d %d %d) speed (%d %d %d) flip %d ip = %x frames_to_skip = %d cur_frames_to_skip = %d running = %x flags = %x\n", t->id, org[0], org[1], org[2], sp[0], sp[1], sp[2], t->x_flip, (int)(t->ip - t->class), t->frames_to_skip, t->cur_frames_to_skip, t->running, t->flags);
 #endif
     find_all_objects = main_run = 0;
     if (t->flags & OBJECT_MSG) // bit 7
