@@ -36,8 +36,8 @@ void get_word_mem_word()
 {
   word w = fetch_word();
   if ((short)w == -40) { // чтение номера родительского потока
-    if (run_object->parent == -1 || run_object->parent == -2)
-      current_value = run_object->parent;
+    if ((int)run_object->parent == -1 || (int)run_object->parent == -2)
+      current_value = (int)run_object->parent;
     else
       current_value = object_num(run_object->parent);
   } else if ((short)w == -14)
@@ -175,7 +175,10 @@ void get_word_from_object()
 #ifdef DEBUG
     printf("get word object: %x parent obj class = %x\n", thr, t->id);
 #endif
-    current_value = object_num(t->parent);
+    if ((int)t->parent == -1 || (int)t->parent == -2)
+      current_value = (int)t->parent;
+    else
+      current_value = object_num(t->parent);
   } else if ((short)adr < 0) {
     printf("get word from object adr: %x\n", adr);
     exit(1);
