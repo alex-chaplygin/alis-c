@@ -214,7 +214,7 @@ func vm_op[] = {
   find_intersection_list_cur_obj, // a5
   nimp, // a6
   sprite_show_flipped, // a7
-  nimp, // a8
+  sprite_show0_main, // a8
   nimp, // a9
   nimp, // aa
   nimp, // ab

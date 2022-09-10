@@ -542,6 +542,20 @@ void sprite_show_with_flip(int x_flip)
   sprite_add_with_flip(&coord, x_flip, tag);
 }
 
+/** 
+ * Показывает спрайт из MAIN в начале координат
+ */
+void sprite_show0_main()
+{
+  load_main_res = 1;
+  vec_t coord = {0, 0, 0};
+  new_get();
+#ifdef DEBUG
+  printf("show sprite 0 main (0, 0, 0) xflip = %d res_num = %d tag = 0\n", run_object->x_flip, current_value); 
+#endif
+  sprite_add_with_flip(&coord, run_object->x_flip, 0);
+}
+
 /// показать спрайт по координатам центра.
 void sprite_show()
 {
