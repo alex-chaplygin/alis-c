@@ -35,9 +35,12 @@ void get_byte_mem_word()
 void get_word_mem_word()
 {
   word w = fetch_word();
-  if ((short)w == -40) // чтение номера родительского потока
-    current_value = object_num(run_object->parent);
-  else if ((short)w == -14)
+  if ((short)w == -40) { // чтение номера родительского потока
+    if (run_object->parent == -1 || run_object->parent == -2)
+      current_value = run_object->parent;
+    else
+      current_value = object_num(run_object->parent);
+  } else if ((short)w == -14)
     current_value = object_num(run_object);
   else if ((short)w < 0) {
     printf("get word mem word < 0 = %d\n", (short)w);
