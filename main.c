@@ -10,11 +10,13 @@
 #include <stdio.h>
 #include "objects.h"
 #include "graphics.h"
+#include "sound.h"
 
 int main(int argc, char *argv[])
 {
   byte color;
   graphics_init();
+  init_sound_channels();
   objects_init();
   while (1) {
     objects_run();
