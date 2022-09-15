@@ -1,4 +1,5 @@
 void init_sound_channels();
+void sound_channels_update();
 void play_sound_synth();
 void play_sound();
 void play_music();

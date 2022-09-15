@@ -16,6 +16,7 @@
 #include "objects.h"
 
 #define NUM_CHANNELS 4		/**< число каналов звука */
+#define MAX_VOLUME 32767	/**< порог громкости */
 #define DEFAULT_PRIORITY -128
 #define CHANNEL_OFF (1 << 7)	/**< флаг - канал выключен */
 #define CHANNEL_2 (1 << 1)
@@ -23,14 +24,13 @@
 typedef struct {
   byte flags;			/**< флаги канала */
   char priority;		/**< приоритет канала, звучит только канал с максимальным приоритетом */
-  char synth;			/**< если больше 0, то канал синтезатора */
+  char ready;			/**< если больше 0, то канал синтезатора */
   word length;		/**< число кадров - длительность звучания ноты */
   short volume;			/**< громкость звучания ноты */
   short gain;			/**< смещение громкости (усиление и затухание звука во времени) ноты */
   short frequency;		/**< частота ноты */
   short frequency_gain;		/**< смещение частоты ноты во времени */
   int object;			/**< номер объекта, который послал звук */
-  int ready;
 } sound_channel_t;
 
 sound_channel_t  sound_channels[NUM_CHANNELS];	/**< каналы звука */
@@ -128,6 +128,86 @@ void  add_sound(int pri, int obj, int ready, int freq, int fgain, int vol, int g
 }
 
 /** 
+ * Проиграть ноту на синтезаторе
+ * 
+ * @param ch в канале - параметры ноты
+ */
+void synth_play(sound_channel_t *ch)
+{
+  extern int vol;
+  vol = (ch->volume >> 8);
+  extern int freq;
+  freq = 32 * 55000 / ((ch->frequency >> 3) + 320);
+  extern int ready;
+  ready = ch->ready;
+  printf("vol = %d freq = %d ready = %d\n", vol, freq, ready);
+  // если ready == 0, то нота выключается
+}
+
+/** 
+ * Выключение канала звука
+ * 
+ * @param ch канал
+ */
+void sound_channel_off(sound_channel_t *ch)
+{
+  ch->volume = 0;
+  ch->frequency = 0;
+  ch->priority = DEFAULT_PRIORITY;
+  ch->ready = 0;
+  ch->flags = 0;
+  synth_play(ch);
+}
+
+/** 
+ * Обработка канала звука
+ * 
+ * Звук звучит с определенной длительностью
+ * Громкость может изменяться (усиление/затухание) звука
+ * @param ch текущий канал звука
+ */
+void sound_channel_update(sound_channel_t *ch)
+{
+  short vol;
+  int channel_num = ch - sound_channels;
+  if (ch->ready < 0)
+    return;
+  --ch->length;
+  if (!ch->length) {
+    sound_channel_off(ch);
+    return;
+  }
+  vol = ch->volume + ch->gain;
+  if (vol < 0) {
+    sound_channel_off(ch);
+    return;
+  }
+  if (vol > MAX_VOLUME)
+    vol = MAX_VOLUME;
+  ch->volume = vol;
+  vol = ch->frequency + ch->frequency_gain;
+  if (vol < 0)
+    sound_channel_off(ch);
+  else {
+    ch->frequency = vol;
+    synth_play(ch);
+  }
+}
+
+/** 
+ * Обновление звуков.
+ * Проверка 3-х каналов, что там появились звуки
+ */
+void sound_channels_update()
+{
+  sound_channel_t *ch = sound_channels;
+  for (int i = 0; i < NUM_CHANNELS - 1; i++, ch++)
+    if (ch->flags > 0)
+      if (!(ch->flags & CHANNEL_OFF))
+	sound_channel_update(ch);
+}
+
+/** 
  * Проигрывание звука через синтезатор (заглушка)
  */
 void play_sound_synth()
@@ -145,9 +225,10 @@ void play_sound_synth()
 #endif
   if (!slen)
     return;
-  //  int s = (s2 << 8) % slen;
-  add_sound(pri, object_num(run_object), 1, freq, 0, vol, -1, slen);
-  exit(1);
+  int gain = (vol << 8) / slen;
+  if (gain)
+    gain = 1;
+  add_sound(pri, object_num(run_object), 1, freq, 0, vol, -gain, slen);
 }
 
 /** 
@@ -246,16 +327,14 @@ void play_sound_blanpc()
 
 void play_synth_gain()
 {
-  extern int freq;
-  extern int slen;
   new_get();
   int s1 = current_value;
   new_get();
   int s2 = current_value;
   new_get();
-  int s3 = freq = current_value;
+  int s3 = current_value;
   new_get();
-  int s4 = slen = current_value;
+  int s4 = current_value;
 #ifdef DEBUG
   printf("play synth gain %d %d %d %d ", s1, s2, s3, s4);
 #endif
