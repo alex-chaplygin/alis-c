@@ -16,12 +16,13 @@ int main(int argc, char *argv[])
 {
   byte color;
   graphics_init();
-  init_sound_channels();
+  audio_init();
   objects_init();
   while (1) {
     objects_run();
     if (!graphics_update())
       break;
+    sound_channels_update();
   }
   graphics_close();
   return 0;
