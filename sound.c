@@ -45,6 +45,7 @@ int sound_length;		/**< длина в кадрах текущего звука *
 int gain;			/**< изменение громкости звука */
 int sound_type;			/**< тип текущего звука */
 int sound_pos = 0;		/**< позиция текущего звука */
+byte *sound_data;		/**< цифровые данные звука */
 
 void audio_update(void*  userdata, Uint8* stream, int len)
 {
@@ -53,9 +54,14 @@ void audio_update(void*  userdata, Uint8* stream, int len)
     sound_pos = 0;
   } else {
     SDL_memset(stream, 0, len);
-    printf("SOUND DATA\n");
+    printf("SOUND DATA %x sound_length = %d\n", sound_type, sound_length);
     for (int i = 0; i < len; i++) {
-      stream[i] = (Uint8)((128 + volume * sin((i + sound_pos) * frequency / 8000.0)));
+      if (sound_type == SOUND_SYNTH)
+	stream[i] = (Uint8)((128 + volume * sin((i + sound_pos) * frequency / 8000.0)));
+      else if (sound_type == SOUND_DIGITAL) {
+	if (i + sound_pos < sound_length)
+	  stream[i] = (Uint8)(sound_data[i + sound_pos]);
+      }
       printf("%d ", stream[i]);
     }
     sound_pos += len;
@@ -125,10 +131,7 @@ sound_channel_t * find_minpri_channel()
  * @param pri приоритет
  * @param obj номер объекта
  * @param type готовность
- * @param freq частота
- * @param fgain смещение частоты
  * @param vol громкость
- * @param gain смещение амплитуды
  * @param len длительность
  */
 void  add_sound(int pri, int vol, int obj, int type, int len)
@@ -151,14 +154,14 @@ void  add_sound(int pri, int vol, int obj, int type, int len)
     else if (ch->priority != pri)
       continue;
     else {
-      printf("add sound: obj == pri ==\n");
-      exit(1);
+      goto add;
     }
   }
   ch = find_minpri_channel();
   if (pri < 0 || !ch->priority || ch->priority == DEFAULT_PRIORITY) {
     if (ch->priority > pri)
       return;
+  add:    
     ch->flags = CHANNEL_OFF;
     ch->priority = pri;
     ch->type = type;
@@ -306,10 +309,11 @@ void play_sound()
   sound_t *s = (sound_t *)res_get_sound(num);
   if (!s2)
     s2 = s->b2;
-  //s->length - 16;  длина данных, начало = заголовок + 16
+  sound_length = s->length - 16;//  длина данных, начало = заголовок + 16
+  sound_data = (byte *)s + 16;
+  sound_type = SOUND_DIGITAL;
   s2 * 1000;
-  //add_sound(pri, object_num(run_object), 0x80, 0, 0, vol, 0, s->length - 16);
-  exit(1);
+  add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
 }
 
 void play_music()
