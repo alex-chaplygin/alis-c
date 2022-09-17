@@ -23,6 +23,7 @@
 #define CHANNEL_OFF (1 << 7)	/**< флаг - канал выключен */
 #define CHANNEL_2 (1 << 1)
 #define SOUND_SYNTH 1		/**< тип звука - синтезируемый */
+#define SOUND_3 3
 #define SOUND_DIGITAL 0x80	/**< тип звука - оцифрованный */
 
 typedef struct {
@@ -370,20 +371,39 @@ void play_sound6()
   exit(1);
 }
 
+/** 
+ * Проигрывание звука из blancpc
+ */
 void play_sound_blanpc()
 {
   new_get();
-  int s1 = current_value;
+  int pri = current_value;
   new_get();
-  int s2 = current_value;
+  int vol = volume = current_value;
   new_get();
-  int s3 = current_value;
+  frequency = current_value;
   new_get();
-  int s4 = current_value;
+  sound_length = current_value;
 #ifdef DEBUG
-  printf("play_sound blanpc %d %d %d %d\n", s1, s2, s3, s4);
+  printf("play_sound blanpc %d %d %d %d\n", pri, vol, frequency, sound_length);
 #endif
-  exit(1);
+  if (!sound_length)
+    return;
+  gain = (volume << 8) / sound_length;
+  if (gain)
+    gain = 1;
+  gain = -gain;
+  frequency_gain = 0;
+  sound_type = SOUND_3;
+  int s2 = (32767 - frequency) / 1638 + 1;
+  if (s2 > 20)
+    s2 = 20;
+  int s1 = 1;
+  extern byte *blancpc_data;
+  sound_data = blancpc_data + 16;
+  sound_type = SOUND_DIGITAL;
+  s2 * 1000;
+  add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
 }
 
 /** 
