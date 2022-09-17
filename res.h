@@ -37,8 +37,16 @@ typedef struct {
   };
 } form_t;
 
+/// звук из ресурса
+typedef struct {
+  byte type;
+  byte b2;
+  word length;
+} sound_t;
+
 byte *res_get_image(int num);
 byte *res_get_form(byte *script, int num);
+byte *res_get_sound(int num);
 void delete_image();
 
 extern int load_main_res;

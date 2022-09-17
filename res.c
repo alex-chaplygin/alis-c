@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "interpret.h"
+#include "get.h"
 
 #pragma pack(1)
 
@@ -47,6 +48,35 @@ byte *res_get_image(int num)
   }
   byte *pos = (byte *)r + r->image_table + num * sizeof(dword);
   return pos + *(dword *)pos;
+}
+
+/** 
+ * Загрузка звука из ресурсов
+ * 
+ * @param num номер звука
+ * 
+ * @return буфер звука
+ */
+byte *res_get_sound(int num)
+{
+  byte *class = run_object->class;
+  if (load_main_res)
+    class = main_object->class;
+  program_t *h = (program_t *)class;
+  resource_table_t *r = (resource_table_t *)(class + h->resources);
+#ifdef DEBUG
+    printf("res_get_sound: main %d num %d\n", load_main_res, num);
+#endif
+  if (num >= r->sound_count) {
+    printf("res_get_sound: main %d num %d > total %d\n", load_main_res, num, r->image_count);
+    exit(1);
+  }
+  byte *pos = (byte *)r + r->sound_table + num * sizeof(dword);
+  pos += *(dword *)pos;
+#ifdef DEBUG
+  dump_mem(pos, 16);
+#endif
+  return pos;
 }
 
 /** 
