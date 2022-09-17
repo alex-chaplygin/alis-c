@@ -55,7 +55,7 @@ void audio_update(void*  userdata, Uint8* stream, int len)
     sound_pos = 0;
   } else {
     SDL_memset(stream, 0, len);
-    printf("SOUND DATA %x sound_length = %d vol = %x\n", sound_type, sound_length, volume);
+    printf("SOUND DATA type=%x freq = %d sound_length = %d vol = %x\n", sound_type, frequency, sound_length, volume);
     for (int i = 0; i < len; i++) {
       if (sound_type == SOUND_SYNTH)
 	stream[i] = (Uint8)((128 + volume * sin((i + sound_pos) * frequency / 8000.0)));
@@ -168,7 +168,7 @@ void  add_sound(int pri, int vol, int obj, int type, int len)
     ch->type = type;
     ch->frequency = frequency;
     ch->frequency_gain = frequency_gain;
-    ch->volume = vol << 8;
+    ch->volume = vol;
     ch->gain = gain;
     ch->length = sound_length;
     ch->object = obj;
@@ -191,9 +191,10 @@ void  add_sound(int pri, int vol, int obj, int type, int len)
  */
 void synth_play(sound_channel_t *ch)
 {
-  volume = (ch->volume >> 8);
+  volume = ch->volume;
   frequency = 32 * 55000 / ((ch->frequency >> 3) + 320);
   sound_type = ch->type;
+  sound_pos = 0;
   printf("vol = %d freq = %d type = %d\n", volume, frequency, sound_type);
   // если type == 0, то нота выключается
 }
