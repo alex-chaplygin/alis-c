@@ -2,7 +2,7 @@ void audio_init();
 void sound_channels_update();
 void play_sound_synth();
 void play_sound();
-void play_music();
+void sound_flush();
 void play_sound3();
 void play_sound6();
 void play_sound1();

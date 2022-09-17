@@ -54,7 +54,7 @@ void audio_update(void*  userdata, Uint8* stream, int len)
     sound_pos = 0;
   } else {
     SDL_memset(stream, 0, len);
-    printf("SOUND DATA %x sound_length = %d\n", sound_type, sound_length);
+    printf("SOUND DATA %x sound_length = %d vol = %x\n", sound_type, sound_length, volume);
     for (int i = 0; i < len; i++) {
       if (sound_type == SOUND_SYNTH)
 	stream[i] = (Uint8)((128 + volume * sin((i + sound_pos) * frequency / 8000.0)));
@@ -268,23 +268,23 @@ void play_sound_synth()
   new_get();
   int pri = (char)current_value;
   new_get();
-  int vol = (char)current_value;
+  volume = (char)current_value;
   new_get();
   frequency = current_value;
   new_get();
   sound_length = current_value;
 #ifdef DEBUG
-  printf("play_sound_synth pri=%d vol=%d freq=%d len=%d\n", pri, vol, frequency, sound_length);
+  printf("play_sound_synth pri=%d vol=%d freq=%d len=%d\n", pri, volume, frequency, sound_length);
 #endif
   if (!sound_length)
     return;
-  gain = (vol << 8) / sound_length;
+  gain = (volume << 8) / sound_length;
   if (gain)
     gain = 1;
   gain = -gain;
   frequency_gain = 0;
   sound_type = SOUND_SYNTH;
-  add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
+  add_sound(pri, volume, object_num(run_object), sound_type, sound_length);
 }
 
 /** 
@@ -310,18 +310,18 @@ void play_sound()
   if (!s2)
     s2 = s->b2;
   sound_length = s->length - 16;//  длина данных, начало = заголовок + 16
+  sound_pos = 0;
   sound_data = (byte *)s + 16;
   sound_type = SOUND_DIGITAL;
   s2 * 1000;
   add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
 }
 
-void play_music()
+void sound_flush()
 {
 #ifdef DEBUG
-  printf("play music\n");
+  printf("sound flush\n");
 #endif
-  exit(1);
 }
 
 void play_sound1()
