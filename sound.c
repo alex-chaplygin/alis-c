@@ -221,7 +221,7 @@ void sound_channel_off(sound_channel_t *ch)
  */
 void sound_channel_update(sound_channel_t *ch)
 {
-  short vol;
+  int vol;
   int channel_num = ch - sound_channels;
   if (ch->type & SOUND_DIGITAL)
     return;
@@ -261,7 +261,7 @@ void sound_channels_update()
 }
 
 /** 
- * Проигрывание звука через синтезатор (заглушка)
+ * Проигрывание звука через синтезатор
  */
 void play_sound_synth()
 {
@@ -332,7 +332,6 @@ void play_sound1()
 #ifdef DEBUG
   printf("play_sound1 %d\n", s1);
 #endif
-  exit(1);
 }
 
 void play_sound3()
@@ -387,25 +386,30 @@ void play_sound_blanpc()
   exit(1);
 }
 
+/** 
+ * Проигрывание синтезированного звука с изменением частоты
+ */
 void play_synth_gain()
 {
   new_get();
-  int s1 = current_value;
+  int pri = current_value;
   new_get();
-  int s2 = current_value;
+  int vol = current_value;
   new_get();
-  int s3 = current_value;
+  frequency = current_value;
   new_get();
-  int s4 = current_value;
+  sound_length = current_value;
 #ifdef DEBUG
-  printf("play synth gain %d %d %d %d ", s1, s2, s3, s4);
+  printf("play synth gain pri=%d vol=%d freq=%d len=%d ", pri, vol, frequency, sound_length);
 #endif
-  if (!s4)
+  if (!sound_length)
     return;
   new_get();
-  int s5 = current_value;  
+  frequency_gain = current_value;
+  gain = 0;
 #ifdef DEBUG
-  printf("%d\n", s5);
+  printf(" fgain=%d\n", frequency_gain);
 #endif
-  exit(1);
+  sound_type = SOUND_SYNTH;
+  add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
 }
