@@ -18,7 +18,7 @@
 
 #define WINDOW_WIDTH 640	/**< размеры окна */
 #define WINDOW_HEIGHT 400
-#define FPS 60			/**< число кадров в секунду */
+#define FPS 50			/**< число кадров в секунду */
 
 byte *video_buffer;		/**< видео буфер экрана 320 на 200 */
 SDL_Window *window;		/**< окно SDL */
@@ -138,6 +138,7 @@ int graphics_update()
  */
 void graphics_close()
 {
+  SDL_CloseAudio();
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
