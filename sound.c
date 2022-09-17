@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <SDL.h>
 #include "interpret.h"
 #include "get.h"
 #include "res.h"
@@ -20,11 +22,13 @@
 #define DEFAULT_PRIORITY -128
 #define CHANNEL_OFF (1 << 7)	/**< флаг - канал выключен */
 #define CHANNEL_2 (1 << 1)
+#define SOUND_SYNTH 1		/**< тип звука - синтезируемый */
+#define SOUND_DIGITAL 0x80	/**< тип звука - оцифрованный */
 
 typedef struct {
   byte flags;			/**< флаги канала */
   char priority;		/**< приоритет канала, звучит только канал с максимальным приоритетом */
-  char ready;			/**< если больше 0, то канал синтезатора */
+  char type;			/**< если больше 0, то канал синтезатора */
   word length;		/**< число кадров - длительность звучания ноты */
   short volume;			/**< громкость звучания ноты */
   short gain;			/**< смещение громкости (усиление и затухание звука во времени) ноты */
@@ -34,6 +38,30 @@ typedef struct {
 } sound_channel_t;
 
 sound_channel_t  sound_channels[NUM_CHANNELS];	/**< каналы звука */
+int volume;			/**< текущая громкость */
+int frequency;			/**< текущая частота */
+int frequency_gain;		/**< изменение частоты */
+int sound_length;		/**< длина в кадрах текущего звука */
+int gain;			/**< изменение громкости звука */
+int sound_type;			/**< тип текущего звука */
+int sound_pos = 0;		/**< позиция текущего звука */
+
+void audio_update(void*  userdata, Uint8* stream, int len)
+{
+  if (sound_type == 0) {
+    SDL_memset(stream, 0, len);
+    sound_pos = 0;
+  } else {
+    SDL_memset(stream, 0, len);
+    printf("SOUND DATA\n");
+    for (int i = 0; i < len; i++) {
+      stream[i] = (Uint8)((128 + volume * sin((i + sound_pos) * frequency / 8000.0)));
+      printf("%d ", stream[i]);
+    }
+    sound_pos += len;
+    printf("\n");
+  }
+}
 
 /** 
  * Инициализация каналов звука
@@ -46,6 +74,31 @@ void init_sound_channels()
     memset(ch, 0, sizeof(sound_channel_t));
     ch->priority = DEFAULT_PRIORITY;
   }
+}
+
+/** 
+ * Инициализация звука
+ */
+void audio_init()
+{
+  SDL_AudioSpec want, have;
+
+  SDL_memset(&want, 0, sizeof(want)); /* or SDL_zero(want) */
+  want.freq = 8000;
+  want.format = AUDIO_U8;
+  want.channels = 1;
+  want.samples = 4096;
+  want.callback = audio_update; /* you wrote this function elsewhere -- see SDL_AudioSpec for details */
+  if (SDL_OpenAudio(&want, &have) < 0) {
+    SDL_Log("Failed to open audio: %s", SDL_GetError());
+    exit(1);
+  }
+  if (have.format != want.format) {
+    SDL_Log("We didn't get audio format. freq = %d format = %d\n", have.freq, have.format);
+    exit(1);
+  }
+  SDL_PauseAudio(0); /* start audio playing. */
+  init_sound_channels();
 }
 
 /** 
@@ -71,14 +124,14 @@ sound_channel_t * find_minpri_channel()
  * 
  * @param pri приоритет
  * @param obj номер объекта
- * @param ready готовность
+ * @param type готовность
  * @param freq частота
  * @param fgain смещение частоты
  * @param vol громкость
  * @param gain смещение амплитуды
  * @param len длительность
  */
-void  add_sound(int pri, int obj, int ready, int freq, int fgain, int vol, int gain, int len)
+void  add_sound(int pri, int vol, int obj, int type, int len)
 {
   sound_channel_t *ch;
 #ifdef DEBUG
@@ -108,21 +161,21 @@ void  add_sound(int pri, int obj, int ready, int freq, int fgain, int vol, int g
       return;
     ch->flags = CHANNEL_OFF;
     ch->priority = pri;
-    ch->ready = ready;
-    ch->frequency = freq;
-    ch->frequency_gain = fgain;
+    ch->type = type;
+    ch->frequency = frequency;
+    ch->frequency_gain = frequency_gain;
     ch->volume = vol << 8;
     ch->gain = gain;
-    ch->length = len;
+    ch->length = sound_length;
     ch->object = obj;
     ch->flags = CHANNEL_2;
-    if (ready & 0x80) {
-      printf("ready & 0x80\n");
+    /*    if (type & SOUND_DIGIT) {
+      printf("type & 0x80\n");
       exit(1);
-    }
+      }*/
 #ifdef DEBUG
     printf("adding sound channel num = %d\n", (int)(ch - sound_channels));
-    printf("flags=%x pri=%x ready=%x freq=%x fgain=%x, vol=%x, gain=%x len=%x obj=%x\n", ch->flags, ch->priority, ch->ready, ch->frequency, ch->frequency_gain, ch->volume, ch->gain, ch->length, ch->object);
+    printf("flags=%x pri=%x type=%x freq=%x fgain=%x, vol=%x, gain=%x len=%x obj=%x\n", ch->flags, ch->priority, ch->type, ch->frequency, ch->frequency_gain, ch->volume, ch->gain, ch->length, ch->object);
 #endif
   }
 }
@@ -134,14 +187,11 @@ void  add_sound(int pri, int obj, int ready, int freq, int fgain, int vol, int g
  */
 void synth_play(sound_channel_t *ch)
 {
-  extern int vol;
-  vol = (ch->volume >> 8);
-  extern int freq;
-  freq = 32 * 55000 / ((ch->frequency >> 3) + 320);
-  extern int ready;
-  ready = ch->ready;
-  printf("vol = %d freq = %d ready = %d\n", vol, freq, ready);
-  // если ready == 0, то нота выключается
+  volume = (ch->volume >> 8);
+  frequency = 32 * 55000 / ((ch->frequency >> 3) + 320);
+  sound_type = ch->type;
+  printf("vol = %d freq = %d type = %d\n", volume, frequency, sound_type);
+  // если type == 0, то нота выключается
 }
 
 /** 
@@ -154,7 +204,7 @@ void sound_channel_off(sound_channel_t *ch)
   ch->volume = 0;
   ch->frequency = 0;
   ch->priority = DEFAULT_PRIORITY;
-  ch->ready = 0;
+  ch->type = 0;
   ch->flags = 0;
   synth_play(ch);
 }
@@ -170,7 +220,7 @@ void sound_channel_update(sound_channel_t *ch)
 {
   short vol;
   int channel_num = ch - sound_channels;
-  if (ch->ready < 0)
+  if (ch->type & SOUND_DIGITAL)
     return;
   --ch->length;
   if (!ch->length) {
@@ -217,23 +267,25 @@ void play_sound_synth()
   new_get();
   int vol = (char)current_value;
   new_get();
-  int freq = current_value;
+  frequency = current_value;
   new_get();
-  int slen = current_value;
+  sound_length = current_value;
 #ifdef DEBUG
-  printf("play_sound_synth pri=%d vol=%d freq=%d len=%d\n", pri, vol, freq, slen);
+  printf("play_sound_synth pri=%d vol=%d freq=%d len=%d\n", pri, vol, frequency, sound_length);
 #endif
-  if (!slen)
+  if (!sound_length)
     return;
-  int gain = (vol << 8) / slen;
+  gain = (vol << 8) / sound_length;
   if (gain)
     gain = 1;
-  add_sound(pri, object_num(run_object), 1, freq, 0, vol, -gain, slen);
+  gain = -gain;
+  frequency_gain = 0;
+  sound_type = SOUND_SYNTH;
+  add_sound(pri, vol, object_num(run_object), sound_type, sound_length);
 }
 
 /** 
  * Проигрывание звука из ресурса
- * 
  */
 void play_sound()
 {
@@ -241,16 +293,22 @@ void play_sound()
   new_get();
   int num = current_value;
   new_get();
+  int pri = current_value;
+  new_get();
+  int vol = current_value;
+  new_get();
   int s1 = current_value;
   new_get();
   int s2 = current_value;
-  new_get();
-  int s3 = current_value;
-  new_get();
-  int s4 = current_value;
 #ifdef DEBUG
-  printf("play_sound_res %d %d %d %d %d\n", num, s1, s2, s3, s4);
+  printf("play_sound_res num=%d pri=%d vol=%d %d %d\n", num, pri, vol, s1, s2);
 #endif
+  sound_t *s = (sound_t *)res_get_sound(num);
+  if (!s2)
+    s2 = s->b2;
+  //s->length - 16;  длина данных, начало = заголовок + 16
+  s2 * 1000;
+  //add_sound(pri, object_num(run_object), 0x80, 0, 0, vol, 0, s->length - 16);
   exit(1);
 }
 
